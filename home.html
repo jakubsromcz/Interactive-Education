@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>INF – Rozcestník cvičení</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+
+    <style>
+      body {
+        background: radial-gradient(1200px 600px at 20% 0%, #e8f4ff 0%, rgba(232, 244, 255, 0) 60%),
+          radial-gradient(900px 500px at 90% 20%, #fff3e6 0%, rgba(255, 243, 230, 0) 55%),
+          linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      }
+      .hero {
+        border: 1px solid rgba(13, 110, 253, 0.15);
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(6px);
+      }
+      .grade-badge {
+        letter-spacing: 0.02em;
+      }
+      .exercise-card {
+        transition: transform 120ms ease, box-shadow 120ms ease;
+      }
+      .exercise-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.08);
+      }
+      .btn-lg {
+        border-radius: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container py-4 py-md-5">
+      <div class="hero rounded-4 p-4 p-md-5 shadow-sm">
+        <div class="d-flex flex-column flex-md-row align-items-md-center gap-3 gap-md-4">
+          <div class="flex-grow-1">
+            <h1 class="display-6 fw-bold mb-2">Rozcestník cvičení (informatika ZŠ Kanice)</h1>
+            <p class="lead mb-0">Vyber si svoji třídu a klikni na cvičení.</p>
+          </div>
+          <div class="text-md-end">
+            <span class="badge text-bg-primary grade-badge px-3 py-2">Základní škola</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4 mt-1 mt-md-3">
+        <div class="col-12 col-lg-6">
+          <div class="card exercise-card h-100 border-0 shadow-sm rounded-4">
+            <div class="card-body p-4 p-md-4">
+              <div class="d-flex align-items-center justify-content-between gap-3">
+                <div>
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge rounded-pill text-bg-success px-3 py-2">5. třída</span>
+                    <span class="text-body-secondary small">Začínáme a trénujeme</span>
+                  </div>
+                  <h2 class="h4 fw-bold mb-2">5. třída – cvičení</h2>
+                  <p class="mb-0 text-body-secondary">Vyber si téma a pusť se do toho.</p>
+                </div>
+              </div>
+
+              <div class="row g-2 mt-3">
+                <div class="col-12 col-sm-6">
+                  <a class="btn btn-outline-success btn-lg w-100" href="./5/typografie1.html">Typografie 1</a>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <a class="btn btn-outline-success btn-lg w-100" href="./5/typografie2.html">Typografie 2</a>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <a class="btn btn-outline-success btn-lg w-100" href="./5/klavesove-zkratky.html">Klávesové zkratky</a>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <a class="btn btn-outline-success btn-lg w-100" href="./5/internet-bezpecnost.html">Bezpečnost na internetu</a>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <a class="btn btn-outline-success btn-lg w-100" href="./5/prace-se-soubory.html">Práce se soubory</a>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <a class="btn btn-outline-success btn-lg w-100" href="./5/vyhledavani-informaci.html">Vyhledávání informací</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+          <div class="card exercise-card h-100 border-0 shadow-sm rounded-4">
+            <div class="card-body p-4 p-md-4">
+              <div class="d-flex align-items-center justify-content-between gap-3">
+                <div>
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge rounded-pill text-bg-warning px-3 py-2">7. třída</span>
+                    <span class="text-body-secondary small">Logika a postupy</span>
+                  </div>
+                  <h2 class="h4 fw-bold mb-2">Algoritmy</h2>
+                  <p class="mb-0 text-body-secondary">
+                    Trénuj přemýšlení krok za krokem. Najdeš tu úkoly na postupy a logiku.
+                  </p>
+                </div>
+              </div>
+
+              <div class="row g-2 mt-3">
+                <div class="col-12 col-sm-6">
+                  <a class="btn btn-outline-warning btn-lg w-100" href="./7/algoritmus1.html">Algoritmy</a>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <a class="btn btn-outline-warning btn-lg w-100 disabled" aria-disabled="true" tabindex="-1" href="#">Třídění (brzy)</a>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <a class="btn btn-outline-warning btn-lg w-100 disabled" aria-disabled="true" tabindex="-1" href="#">Podmínky (brzy)</a>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <a class="btn btn-outline-warning btn-lg w-100 disabled" aria-disabled="true" tabindex="-1" href="#">Cyklus (brzy)</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="mt-4 mt-md-5 pt-3 text-center text-body-secondary">
+        <div class="small">© Mgr. Jakub Šrom</div>
+      </footer>
+    </main>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

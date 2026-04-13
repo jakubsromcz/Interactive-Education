@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Algoritmy – cvičení (7. třída)</title>
+<link
+  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+  rel="stylesheet"
+  integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+  crossorigin="anonymous"
+/>
+<style>
+    body {
+        background: radial-gradient(1200px 600px at 20% 0%, #e8f4ff 0%, rgba(232, 244, 255, 0) 60%),
+          radial-gradient(900px 500px at 90% 20%, #fff3e6 0%, rgba(255, 243, 230, 0) 55%),
+          linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    }
+    .hero {
+        border: 1px solid rgba(13, 110, 253, 0.15);
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(6px);
+    }
+    .result { font-weight: 700; margin-top: 10px; }
+    .chip {
+        cursor: grab;
+        user-select: none;
+        font-size: 0.9rem;
+    }
+    .chip:active { cursor: grabbing; }
+    .dropzone {
+        min-height: 48px;
+        border: 2px dashed rgba(13, 110, 253, 0.35);
+        background: rgba(13, 110, 253, 0.04);
+        border-radius: 0.9rem;
+        padding: 0.5rem;
+    }
+    .dropzone.dragover {
+        border-color: rgba(13, 110, 253, 0.9);
+        background: rgba(13, 110, 253, 0.08);
+    }
+    .dropstack .dropzone { width: 100%; }
+    .slot-label { width: 2.25rem; }
+    .step-item { cursor: pointer; }
+    .step-item.selected {
+        background: rgba(255, 193, 7, 0.22);
+        border-color: rgba(255, 193, 7, 0.55);
+    }
+</style>
+</head>
+<body>
+
+<main class="container py-4 py-md-5">
+    <div class="hero rounded-4 p-4 p-md-5 shadow-sm mb-4">
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+            <a class="btn btn-outline-secondary" href="../home.html" aria-label="Zpět na domovskou stránku">
+                <span class="d-inline-flex align-items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 1-.5.5H3.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L3.707 7.5H14.5A.5.5 0 0 1 15 8z"/>
+                    </svg>
+                    <span>Zpět</span>
+                </span>
+            </a>
+            <span class="badge text-bg-warning px-3 py-2">7. třída</span>
+        </div>
+
+        <div class="d-flex flex-column flex-md-row align-items-md-center gap-3 gap-md-4">
+            <div class="flex-grow-1">
+                <h1 class="display-6 fw-bold mb-2">Algoritmy – pracovní list</h1>
+                <p class="lead mb-0">
+                    Algoritmus je přesný postup kroků. Zkus si poskládat kroky, najít chybu a ověřit si řešení.
+                </p>
+            </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <h2 class="h5 fw-bold mb-2">Jak na to</h2>
+        <ul class="mb-0">
+            <li>V úkolech s pořadím přetahuj „chips“ do správných pozic.</li>
+            <li>V úkolech „Najdi chybu“ klikni na špatný krok (zvýrazní se) a znovu kliknutím ho odoznač.</li>
+            <li>Pak klikni na <b>Zkontrolovat</b>.</li>
+        </ul>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 p-md-4">
+                    <h2 class="h5 fw-bold mb-2">Úkol 1: Seřaď algoritmus</h2>
+                    <p class="text-body-secondary mb-3">Přetáhni kroky do pořadí 1–5 (příprava čaje).</p>
+
+                    <div class="mb-3">
+                        <div class="fw-semibold mb-2">Kroky (přetahuj):</div>
+                        <div id="task1-pool" class="d-flex flex-wrap gap-2">
+                            <span id="t1-s1" class="badge rounded-pill text-bg-warning px-3 py-2 chip fw-semibold shadow-sm" draggable="true" data-step="Vezmi hrnek">Vezmi hrnek</span>
+                            <span id="t1-s2" class="badge rounded-pill text-bg-warning px-3 py-2 chip fw-semibold shadow-sm" draggable="true" data-step="Vlož sáček do hrnku">Vlož sáček do hrnku</span>
+                            <span id="t1-s3" class="badge rounded-pill text-bg-warning px-3 py-2 chip fw-semibold shadow-sm" draggable="true" data-step="Zalij čaj horkou vodou">Zalij čaj horkou vodou</span>
+                            <span id="t1-s4" class="badge rounded-pill text-bg-warning px-3 py-2 chip fw-semibold shadow-sm" draggable="true" data-step="Počkej 3 minuty">Počkej 3 minuty</span>
+                            <span id="t1-s5" class="badge rounded-pill text-bg-warning px-3 py-2 chip fw-semibold shadow-sm" draggable="true" data-step="Vyjmi sáček">Vyjmi sáček</span>
+                        </div>
+                    </div>
+
+                    <div class="dropstack vstack gap-2 mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="small text-body-secondary slot-label">1</div>
+                            <div class="dropzone flex-grow-1" data-task="1" data-slot="1"></div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="small text-body-secondary slot-label">2</div>
+                            <div class="dropzone flex-grow-1" data-task="1" data-slot="2"></div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="small text-body-secondary slot-label">3</div>
+                            <div class="dropzone flex-grow-1" data-task="1" data-slot="3"></div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="small text-body-secondary slot-label">4</div>
+                            <div class="dropzone flex-grow-1" data-task="1" data-slot="4"></div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="small text-body-secondary slot-label">5</div>
+                            <div class="dropzone flex-grow-1" data-task="1" data-slot="5"></div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid d-sm-flex gap-2 align-items-sm-center">
+                        <button class="btn btn-primary" type="button" onclick="checkTask1()">Zkontrolovat</button>
+                        <button class="btn btn-outline-secondary" type="button" onclick="resetTask1()">Reset</button>
+                    </div>
+                    <div class="result" id="result1"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 p-md-4">
+                    <h2 class="h5 fw-bold mb-2">Úkol 2: Seřaď algoritmus</h2>
+                    <p class="text-body-secondary mb-3">Přetáhni kroky do pořadí 1–5 (uvař těstoviny).</p>
+
+                    <div class="mb-3">
+                        <div class="fw-semibold mb-2">Kroky (přetahuj):</div>
+                        <div id="task4-pool" class="d-flex flex-wrap gap-2">
+                            <span id="t4-s1" class="badge rounded-pill text-bg-warning px-3 py-2 chip fw-semibold shadow-sm" draggable="true" data-step="Dej vařit vodu">Dej vařit vodu</span>
+                            <span id="t4-s2" class="badge rounded-pill text-bg-warning px-3 py-2 chip fw-semibold shadow-sm" draggable="true" data-step="Osol vodu">Osol vodu</span>
+                            <span id="t4-s3" class="badge rounded-pill text-bg-warning px-3 py-2 chip fw-semibold shadow-sm" draggable="true" data-step="Vlož těstoviny">Vlož těstoviny</span>
+                            <span id="t4-s4" class="badge rounded-pill text-bg-warning px-3 py-2 chip fw-semibold shadow-sm" draggable="true" data-step="Povař podle návodu">Povař podle návodu</span>
+                            <span id="t4-s5" class="badge rounded-pill text-bg-warning px-3 py-2 chip fw-semibold shadow-sm" draggable="true" data-step="Sceď těstoviny">Sceď těstoviny</span>
+                        </div>
+                    </div>
+
+                    <div class="dropstack vstack gap-2 mb-3">
+                        <div class="d-flex align-items-center gap-2"><div class="small text-body-secondary slot-label">1</div><div class="dropzone flex-grow-1" data-task="4" data-slot="1"></div></div>
+                        <div class="d-flex align-items-center gap-2"><div class="small text-body-secondary slot-label">2</div><div class="dropzone flex-grow-1" data-task="4" data-slot="2"></div></div>
+                        <div class="d-flex align-items-center gap-2"><div class="small text-body-secondary slot-label">3</div><div class="dropzone flex-grow-1" data-task="4" data-slot="3"></div></div>
+                        <div class="d-flex align-items-center gap-2"><div class="small text-body-secondary slot-label">4</div><div class="dropzone flex-grow-1" data-task="4" data-slot="4"></div></div>
+                        <div class="d-flex align-items-center gap-2"><div class="small text-body-secondary slot-label">5</div><div class="dropzone flex-grow-1" data-task="4" data-slot="5"></div></div>
+                    </div>
+
+                    <div class="d-grid d-sm-flex gap-2 align-items-sm-center">
+                        <button class="btn btn-primary" type="button" onclick="checkTask4()">Zkontrolovat</button>
+                        <button class="btn btn-outline-secondary" type="button" onclick="resetTask4()">Reset</button>
+                    </div>
+                    <div class="result" id="result4"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 p-md-4">
+                    <h2 class="h5 fw-bold mb-2">Úkol 3: Poskládej algoritmus</h2>
+                    <p class="text-body-secondary mb-3">
+                        Přetáhni správných 5 kroků do pořadí (příprava do školy). Jeden krok je navíc a nepatří tam.
+                    </p>
+
+                    <div class="mb-3">
+                        <div class="fw-semibold mb-2">Kroky (přetahuj):</div>
+                        <div id="task3-pool" class="d-flex flex-wrap gap-2">
+                            <span id="t3-s1" class="badge rounded-pill text-bg-warning px-3 py-2 chip fw-semibold shadow-sm" draggable="true" data-step="Vstanu">Vstanu</span>
+                            <span id="t3-s2" class="badge rounded-pill text-bg-warning px-3 py-2 chip fw-semibold shadow-sm" draggable="true" data-step="Obleču se">Obleču se</span>
+                            <span id="t3-s3" class="badge rounded-pill text-bg-warning px-3 py-2 chip fw-semibold shadow-sm" draggable="true" data-step="Snídám">Snídám</span>
+                            <span id="t3-s4" class="badge rounded-pill text-bg-warning px-3 py-2 chip fw-semibold shadow-sm" draggable="true" data-step="Zkontroluju aktovku">Zkontroluju aktovku</span>
+                            <span id="t3-s5" class="badge rounded-pill text-bg-warning px-3 py-2 chip fw-semibold shadow-sm" draggable="true" data-step="Vyrazím do školy">Vyrazím do školy</span>
+                            <span id="t3-s6" class="badge rounded-pill text-bg-warning px-3 py-2 chip fw-semibold shadow-sm" draggable="true" data-step="Zapnu televizi">Zapnu televizi</span>
+                        </div>
+                    </div>
+
+                    <div class="dropstack vstack gap-2 mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="small text-body-secondary slot-label">1</div>
+                            <div class="dropzone flex-grow-1" data-task="3" data-slot="1"></div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="small text-body-secondary slot-label">2</div>
+                            <div class="dropzone flex-grow-1" data-task="3" data-slot="2"></div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="small text-body-secondary slot-label">3</div>
+                            <div class="dropzone flex-grow-1" data-task="3" data-slot="3"></div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="small text-body-secondary slot-label">4</div>
+                            <div class="dropzone flex-grow-1" data-task="3" data-slot="4"></div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="small text-body-secondary slot-label">5</div>
+                            <div class="dropzone flex-grow-1" data-task="3" data-slot="5"></div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid d-sm-flex gap-2 align-items-sm-center">
+                        <button class="btn btn-primary" type="button" onclick="checkTask3()">Zkontrolovat</button>
+                        <button class="btn btn-outline-secondary" type="button" onclick="resetTask3()">Reset</button>
+                    </div>
+                    <div class="result" id="result3"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 p-md-4">
+                    <h2 class="h5 fw-bold mb-2">Úkol 4: Najdi chybu</h2>
+                    <p class="text-body-secondary mb-3">Algoritmus pro čištění zubů obsahuje chybu. Kde?</p>
+
+                    <div class="list-group mb-3" id="task2-list" role="list">
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-step="1">1. Vezmi kartáček</button>
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-step="2">2. Namoč kartáček</button>
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-step="3">3. Dej pastu na kartáček</button>
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-step="4">4. Vypláchni ústa</button>
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-step="5">5. Vyčisti zuby</button>
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-step="6">6. Vyplivni pastu</button>
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-step="7">7. Opláchni kartáček</button>
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-step="8">8. Hotovo</button>
+                    </div>
+
+                    <div class="d-grid d-sm-flex gap-2 align-items-sm-center">
+                        <button class="btn btn-primary" type="button" onclick="checkTask2()">Zkontrolovat</button>
+                        <button class="btn btn-outline-secondary" type="button" onclick="resetTask2()">Reset</button>
+                    </div>
+
+                    <div class="result" id="result2"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 p-md-4">
+                    <h2 class="h5 fw-bold mb-2">Úkol 5: Najdi chybu</h2>
+                    <p class="text-body-secondary mb-3">Algoritmus pro mytí rukou má chybu. Označ špatný krok.</p>
+
+                    <div class="list-group mb-3" id="task5-list" role="list">
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-step="1">1. Namoč si ruce</button>
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-step="2">2. Dej mýdlo</button>
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-step="3">3. Opláchni ruce</button>
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-step="4">4. Tři ruce alespoň 20 sekund</button>
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-step="5">5. Omyj palce</button>
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-step="6">6. Omyj i mezi prsty</button>
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-step="7">7. Opláchni a osušíš</button>
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-step="8">8. Zavři vodu a hotovo</button>
+                    </div>
+
+                    <div class="d-grid d-sm-flex gap-2 align-items-sm-center">
+                        <button class="btn btn-primary" type="button" onclick="checkTask5()">Zkontrolovat</button>
+                        <button class="btn btn-outline-secondary" type="button" onclick="resetTask5()">Reset</button>
+                    </div>
+
+                    <div class="result" id="result5"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 p-md-4">
+                    <h2 class="h5 fw-bold mb-2">Úkol 6: Vyber správně</h2>
+                    <p class="text-body-secondary mb-3">Vyber správnou odpověď pro každou situaci.</p>
+
+                    <div class="vstack gap-3 mb-3">
+                        <div>
+                            <div class="fw-semibold mb-1">1) Když prší, vezmu si…</div>
+                            <select class="form-select" id="t6-q1">
+                                <option value="">Vyber…</option>
+                                <option value="a">sluneční brýle</option>
+                                <option value="b">deštník</option>
+                                <option value="c">plavky</option>
+                                <option value="d">kšiltovku</option>
+                                <option value="e">rukavice</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="fw-semibold mb-1">2) Když je hlad, udělám…</div>
+                            <select class="form-select" id="t6-q2">
+                                <option value="">Vyber…</option>
+                                <option value="a">snídani / svačinu</option>
+                                <option value="b">spánek</option>
+                                <option value="c">restart počítače</option>
+                                <option value="d">vypnu světlo</option>
+                                <option value="e">pustím si film</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="fw-semibold mb-1">3) Když je telefon vybitý, připojím…</div>
+                            <select class="form-select" id="t6-q3">
+                                <option value="">Vyber…</option>
+                                <option value="a">nabíječku</option>
+                                <option value="b">lžíci</option>
+                                <option value="c">tužku</option>
+                                <option value="d">baterku</option>
+                                <option value="e">pravítko</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="fw-semibold mb-1">4) Když mám učení hotové, tak…</div>
+                            <select class="form-select" id="t6-q4">
+                                <option value="">Vyber…</option>
+                                <option value="a">zkontroluju aktovku</option>
+                                <option value="b">zahodím sešit</option>
+                                <option value="c">vypnu proud v bytě</option>
+                                <option value="d">pustím si film</option>
+                                <option value="e">zapomenu na úkol</option>
+                            </select>
+                        </div>
+                        <div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid d-sm-flex gap-2 align-items-sm-center">
+                        <button class="btn btn-primary" type="button" onclick="checkTask6()">Zkontrolovat</button>
+                        <button class="btn btn-outline-secondary" type="button" onclick="resetTask6()">Reset</button>
+                    </div>
+
+                    <div class="result" id="result6"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 p-md-4">
+                    <h2 class="h5 fw-bold mb-2">Úkol 7: Podmínky (if / else)</h2>
+                    <p class="text-body-secondary mb-3">
+                        Vyber správnou větev algoritmu. (Algoritmus = postup + rozhodování.)
+                    </p>
+
+                    <div class="vstack gap-3 mb-3">
+                        <div>
+                            <div class="fw-semibold mb-1">1) Když je venku <b>déšť</b>, tak…</div>
+                            <select class="form-select" id="t7-q1">
+                                <option value="">Vyber…</option>
+                                <option value="a">vezmu si deštník</option>
+                                <option value="b">vezmu si plavky</option>
+                                <option value="c">zapnu televizi</option>
+                                <option value="d">dám počítač do koše</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="fw-semibold mb-1">2) Když mám hotový úkol, tak…</div>
+                            <select class="form-select" id="t7-q2">
+                                <option value="">Vyber…</option>
+                                <option value="a">odevzdám ho</option>
+                                <option value="b">začnu ho psát znovu od nuly</option>
+                                <option value="c">zavřu oči a čekám</option>
+                                <option value="d">vypnu internet v celé škole</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="fw-semibold mb-1">3) Když mi nejde otevřít stránka, tak jako první…</div>
+                            <select class="form-select" id="t7-q3">
+                                <option value="">Vyber…</option>
+                                <option value="a">zkontroluju internet / Wi‑Fi</option>
+                                <option value="b">rozbiju klávesnici</option>
+                                <option value="c">smažu všechny soubory</option>
+                                <option value="d">napíšu náhodné heslo</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-grid d-sm-flex gap-2 align-items-sm-center">
+                        <button class="btn btn-primary" type="button" onclick="checkTask7()">Zkontrolovat</button>
+                        <button class="btn btn-outline-secondary" type="button" onclick="resetTask7()">Reset</button>
+                    </div>
+                    <div class="result" id="result7"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 p-md-4">
+                    <h2 class="h5 fw-bold mb-2">Úkol 8: Jaký bude výsledek?</h2>
+                    <p class="text-body-secondary mb-3">
+                        Přečti si postup (jako malý program) a spočítej, jaké číslo vyjde na konci.
+                    </p>
+
+                    <div class="bg-body-tertiary rounded-3 p-3 mb-3">
+                        <div class="fw-semibold mb-2">Algoritmus (pracujeme s číslem)</div>
+                        <div>1. Začni s číslem <b>3</b></div>
+                        <div>2. Přičti <b>5</b></div>
+                        <div>3. Výsledek vynásob <b>2</b></div>
+                        <div>4. Odečti <b>4</b></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="fw-semibold mb-2">Jaké číslo vyjde na konci?</div>
+                        <select class="form-select" id="t8-q1">
+                            <option value="">Vyber…</option>
+                            <option value="a">10</option>
+                            <option value="b">12</option>
+                            <option value="c">14</option>
+                            <option value="d">16</option>
+                        </select>
+                    </div>
+
+                    <div class="d-grid d-sm-flex gap-2 align-items-sm-center">
+                        <button class="btn btn-primary" type="button" onclick="checkTask8()">Zkontrolovat</button>
+                        <button class="btn btn-outline-secondary" type="button" onclick="resetTask8()">Reset</button>
+                    </div>
+                    <div class="result" id="result8"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 p-md-4">
+                    <h2 class="h5 fw-bold mb-2">Úkol 9: Doplň chybějící krok</h2>
+                    <p class="text-body-secondary mb-3">
+                        Algoritmus na přípravu svačiny má chybějící krok. Vyber správný krok, aby to dávalo smysl.
+                    </p>
+
+                    <div class="bg-body-tertiary rounded-3 p-3 mb-3">
+                        <div>1. Vezmi chleba</div>
+                        <div>2. Namaž ho</div>
+                        <div>
+                            3. <b>???</b>
+                        </div>
+                        <div>4. Zabal svačinu</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <select class="form-select" id="t9-q1">
+                            <option value="">Vyber chybějící krok…</option>
+                            <option value="a">Dej na chleba šunku nebo sýr</option>
+                            <option value="b">Vypni světlo</option>
+                            <option value="c">Vymaž historii prohlížeče</option>
+                            <option value="d">Otevři okno</option>
+                        </select>
+                    </div>
+
+                    <div class="d-grid d-sm-flex gap-2 align-items-sm-center">
+                        <button class="btn btn-primary" type="button" onclick="checkTask9()">Zkontrolovat</button>
+                        <button class="btn btn-outline-secondary" type="button" onclick="resetTask9()">Reset</button>
+                    </div>
+                    <div class="result" id="result9"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+const setupDragAndDrop = () => {
+    document.querySelectorAll('.chip[draggable="true"]').forEach((chip) => {
+        chip.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', chip.id);
+            e.dataTransfer.effectAllowed = 'move';
+        });
+    });
+
+    document.querySelectorAll('.dropzone').forEach((zone) => {
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            zone.classList.add('dragover');
+            e.dataTransfer.dropEffect = 'move';
+        });
+        zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zone.classList.remove('dragover');
+            const chipId = e.dataTransfer.getData('text/plain');
+            const chip = document.getElementById(chipId);
+            if (!chip) return;
+
+            const existing = zone.querySelector('.chip');
+            if (existing && existing !== chip) {
+                const task = zone.dataset.task;
+                const pool = document.getElementById(`task${task}-pool`);
+                pool.appendChild(existing);
+            }
+            zone.appendChild(chip);
+        });
+    });
+};
+
+const setResult = (id, ok, okText = '✔ Správně!', badText = '✘ Zkus to znovu') => {
+    const el = document.getElementById(id);
+    el.innerText = ok ? okText : badText;
+    el.className = 'result ' + (ok ? 'text-success' : 'text-danger');
+};
+
+const getOrder = (task) => {
+    const steps = [];
+    for (let i = 1; i <= 5; i++) {
+        const zone = document.querySelector(`.dropzone[data-task="${task}"][data-slot="${i}"]`);
+        const chip = zone ? zone.querySelector('.chip') : null;
+        steps.push(chip ? chip.dataset.step : '');
+    }
+    return steps;
+};
+
+function checkTask1() {
+    const correct = ['Vezmi hrnek', 'Vlož sáček do hrnku', 'Zalij čaj horkou vodou', 'Počkej 3 minuty', 'Vyjmi sáček'];
+    const order = getOrder('1');
+    const ok = order.join('|') === correct.join('|');
+    setResult('result1', ok);
+}
+
+function resetTask1() {
+    const pool = document.getElementById('task1-pool');
+    document.querySelectorAll('.dropzone[data-task="1"] .chip').forEach((chip) => pool.appendChild(chip));
+    document.getElementById('result1').innerText = '';
+    document.getElementById('result1').className = 'result';
+}
+
+const task2Selected = new Set();
+
+const setupTask2 = () => {
+    const list = document.getElementById('task2-list');
+    if (!list) return;
+    list.querySelectorAll('.step-item').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const step = btn.dataset.step;
+            if (task2Selected.has(step)) {
+                task2Selected.delete(step);
+                btn.classList.remove('selected');
+            } else {
+                task2Selected.add(step);
+                btn.classList.add('selected');
+            }
+        });
+    });
+};
+
+function checkTask2() {
+    // chyba je v kroku 4: vypláchnout se má až po čištění
+    const ok = task2Selected.size === 1 && task2Selected.has('4');
+    setResult('result2', ok, '✔ Správně!', '✘ Zkus označit jen špatný krok');
+}
+
+function resetTask2() {
+    task2Selected.clear();
+    document.querySelectorAll('#task2-list .step-item').forEach((btn) => btn.classList.remove('selected'));
+    document.getElementById('result2').innerText = '';
+    document.getElementById('result2').className = 'result';
+}
+
+function checkTask3() {
+    const correct = ['Vstanu', 'Obleču se', 'Snídám', 'Zkontroluju aktovku', 'Vyrazím do školy'];
+    const order = getOrder('3');
+    const ok = order.join('|') === correct.join('|');
+    setResult('result3', ok);
+}
+
+function resetTask3() {
+    const pool = document.getElementById('task3-pool');
+    document.querySelectorAll('.dropzone[data-task="3"] .chip').forEach((chip) => pool.appendChild(chip));
+    document.getElementById('result3').innerText = '';
+    document.getElementById('result3').className = 'result';
+}
+
+function checkTask4() {
+    const correct = ['Dej vařit vodu', 'Osol vodu', 'Vlož těstoviny', 'Povař podle návodu', 'Sceď těstoviny'];
+    const order = getOrder('4');
+    const ok = order.join('|') === correct.join('|');
+    setResult('result4', ok);
+}
+
+function resetTask4() {
+    const pool = document.getElementById('task4-pool');
+    document.querySelectorAll('.dropzone[data-task="4"] .chip').forEach((chip) => pool.appendChild(chip));
+    document.getElementById('result4').innerText = '';
+    document.getElementById('result4').className = 'result';
+}
+
+const task5Selected = new Set();
+
+const setupTask5 = () => {
+    const list = document.getElementById('task5-list');
+    if (!list) return;
+    list.querySelectorAll('.step-item').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const step = btn.dataset.step;
+            if (task5Selected.has(step)) {
+                task5Selected.delete(step);
+                btn.classList.remove('selected');
+            } else {
+                task5Selected.add(step);
+                btn.classList.add('selected');
+            }
+        });
+    });
+};
+
+function checkTask5() {
+    // chyba je v kroku 3: opláchnout se má až po tření
+    const ok = task5Selected.size === 1 && task5Selected.has('3');
+    setResult('result5', ok, '✔ Správně!', '✘ Označ jen špatný krok');
+}
+
+function resetTask5() {
+    task5Selected.clear();
+    document.querySelectorAll('#task5-list .step-item').forEach((btn) => btn.classList.remove('selected'));
+    document.getElementById('result5').innerText = '';
+    document.getElementById('result5').className = 'result';
+}
+
+function checkTask6() {
+    const ok =
+        document.getElementById('t6-q1').value === 'b' &&
+        document.getElementById('t6-q2').value === 'a' &&
+        document.getElementById('t6-q3').value === 'a' &&
+        document.getElementById('t6-q4').value === 'a';
+    setResult('result6', ok, '✔ Správně!', '✘ Zkus to znovu');
+}
+
+function resetTask6() {
+    document.getElementById('t6-q1').value = '';
+    document.getElementById('t6-q2').value = '';
+    document.getElementById('t6-q3').value = '';
+    document.getElementById('t6-q4').value = '';
+    document.getElementById('result6').innerText = '';
+    document.getElementById('result6').className = 'result';
+}
+
+function checkTask7() {
+    const ok =
+        document.getElementById('t7-q1').value === 'a' &&
+        document.getElementById('t7-q2').value === 'a' &&
+        document.getElementById('t7-q3').value === 'a';
+    setResult('result7', ok, '✔ Správně!', '✘ Zkus to znovu');
+}
+
+function resetTask7() {
+    document.getElementById('t7-q1').value = '';
+    document.getElementById('t7-q2').value = '';
+    document.getElementById('t7-q3').value = '';
+    document.getElementById('result7').innerText = '';
+    document.getElementById('result7').className = 'result';
+}
+
+function checkTask8() {
+    // x = 3; x = x + 5 => 8; x = x * 2 => 16; x = x - 4 => 12
+    const ok = document.getElementById('t8-q1').value === 'b';
+    setResult('result8', ok, '✔ Správně!', '✘ Zkus to znovu');
+}
+
+function resetTask8() {
+    document.getElementById('t8-q1').value = '';
+    document.getElementById('result8').innerText = '';
+    document.getElementById('result8').className = 'result';
+}
+
+function checkTask9() {
+    const ok = document.getElementById('t9-q1').value === 'a';
+    setResult('result9', ok, '✔ Správně!', '✘ Zkus to znovu');
+}
+
+function resetTask9() {
+    document.getElementById('t9-q1').value = '';
+    document.getElementById('result9').innerText = '';
+    document.getElementById('result9').className = 'result';
+}
+
+setupDragAndDrop();
+setupTask2();
+setupTask5();
+</script>
+
+</body>
+</html>

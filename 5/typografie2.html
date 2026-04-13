@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Typografie 2 – cvičení (5. třída)</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+    crossorigin="anonymous"
+  />
+  <style>
+    body {
+      background: radial-gradient(1200px 600px at 20% 0%, #e8f4ff 0%, rgba(232, 244, 255, 0) 60%),
+        radial-gradient(900px 500px at 90% 20%, #fff3e6 0%, rgba(255, 243, 230, 0) 55%),
+        linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    }
+    .hero {
+      border: 1px solid rgba(13, 110, 253, 0.15);
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(6px);
+    }
+    .error {
+      background-color: #ffd6d6;
+      outline: 2px solid rgba(220, 53, 69, 0.25);
+    }
+    .correct {
+      background-color: #d7ffe0;
+      outline: 2px solid rgba(25, 135, 84, 0.22);
+    }
+    span[contenteditable] {
+      padding: 0.1rem 0.25rem;
+      border-radius: 0.35rem;
+      display: inline-block;
+      min-width: 0.75rem;
+    }
+    span[contenteditable]:focus {
+      outline: 3px solid rgba(13, 110, 253, 0.25);
+      background-color: #fff3cd;
+    }
+  </style>
+</head>
+<body>
+
+<main class="container py-4 py-md-5">
+  <div class="hero rounded-4 p-4 p-md-5 shadow-sm mb-4">
+    <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+      <a class="btn btn-outline-secondary" href="../home.html" aria-label="Zpět na domovskou stránku">
+        <span class="d-inline-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+            <path fill-rule="evenodd" d="M15 8a.5.5 0 0 1-.5.5H3.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L3.707 7.5H14.5A.5.5 0 0 1 15 8z"/>
+          </svg>
+          <span>Zpět</span>
+        </span>
+      </a>
+      <span class="badge text-bg-success px-3 py-2">5. třída</span>
+    </div>
+
+    <div class="d-flex flex-column flex-md-row align-items-md-center gap-3 gap-md-4">
+      <div class="flex-grow-1">
+        <h1 class="display-6 fw-bold mb-2">Typografie 2 – oprav chyby</h1>
+        <p class="lead mb-0">
+          Nový text, nové nástrahy. Oprav červené části tak, aby seděly mezery a zápis podle pravidel.
+        </p>
+      </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <div class="row g-3 align-items-md-center">
+      <div class="col-12">
+        <h2 class="h5 fw-bold mb-2">Jak na to</h2>
+        <ul class="mb-0">
+          <li>Oprav červené části textu.</li>
+          <li>Zaměř se hlavně na mezery (před/za interpunkcí, u procent, u datumů, u závorek).</li>
+          <li class="mt-2">
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#rulesModal"
+            >
+              Všechna pravidla
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4 p-md-4">
+      <h2 class="h5 fw-bold mb-3">Text k opravě</h2>
+
+      <p class="fs-5 lh-lg mb-0">
+        V pátek <span contenteditable="true" class="error" data-correct="10. 4. 2026">10.4.2026</span>
+        pojedeme na školní výlet do muzea.
+        Sraz bude v <span contenteditable="true" class="error" data-correct="7.30">7. 30</span>
+        u hlavního vchodu.
+        Paní učitelka napsala<span contenteditable="true" class="error" data-correct=": „">:"</span>
+        Přineste si svačinu<span contenteditable="true" class="error" data-correct=",">&nbsp;&nbsp;,</span>
+        pití a dobrou náladu<span contenteditable="true" class="error" data-correct=".">&nbsp;.</span>
+        S sebou mějte <span contenteditable="true" class="error" data-correct="30 Kč">30Kč</span>
+        na suvenýry a <span contenteditable="true" class="error" data-correct="1,5 l">1, 5l</span>
+        vody na cestu.
+        Pojedeme z města <span contenteditable="true" class="error" data-correct="Frýdek-Místek">Frýdek - Místek</span>
+        a dorazíme kolem <span contenteditable="true" class="error" data-correct="9.00">9. 00</span>.
+      </p>
+
+      <hr class="my-4" />
+
+      <p class="fs-5 lh-lg mb-0">
+        Trasa je <span contenteditable="true" class="error" data-correct="Praha–Brno">Praha – Brno</span>
+        a pojedeme autobusem.
+        Cena je <span contenteditable="true" class="error" data-correct="50 %">50%</span>
+        z příspěvku školy, zbytek doplatí rodiče.
+        Celkem to vychází na <span contenteditable="true" class="error" data-correct="120 Kč">120Kč</span>.
+        Autobus pojede rychlostí <span contenteditable="true" class="error" data-correct="70–80 km/h">70 - 80km/h</span>
+        a cestou pojedeme po trase <span contenteditable="true" class="error" data-correct="Ostrava–Brno">Ostrava - Brno</span>.
+      </p>
+
+      <hr class="my-4" />
+
+      <p class="fs-5 lh-lg mb-0">
+        Vedoucí je <span contenteditable="true" class="error" data-correct="Mgr. Petra Svobodová">Mgr.Petra Svobodová</span>
+        <span contenteditable="true" class="error" data-correct="(vedoucí výletu)">( vedoucí výletu )</span>.
+        Pokud přijdeš pozdě<span contenteditable="true" class="error" data-correct=", zavolej">,zavolej</span>
+        na číslo <span contenteditable="true" class="error" data-correct="+420 777 111 222">+420777111222</span>.
+        Na místě bude i <span contenteditable="true" class="error" data-correct="100W">100 W</span>
+        projektor a svačina pro každého (<span contenteditable="true" class="error" data-correct="1 ks">1ks</span>).
+        V tašce měj také <span contenteditable="true" class="error" data-correct="30 kg">30kg</span>
+        věcí (žertujeme<span contenteditable="true" class="error" data-correct="…">&nbsp;&nbsp;...</span>),
+        stačí jen malý batoh.
+        Vzkaz pro rodiče zní<span contenteditable="true" class="error" data-correct=": „">:"</span>
+        Výlet je skvělý<span contenteditable="true" class="error" data-correct="…">.&nbsp;.&nbsp;.</span>
+        uvidíte!<span contenteditable="true" class="error" data-correct="“">&nbsp;&nbsp;"</span>
+        <span contenteditable="true" class="error" data-correct='Konec. "Další věta."'>Konec."Další věta."</span>
+      </p>
+
+      <hr class="my-4" />
+
+      <div class="d-grid d-sm-flex gap-2 align-items-sm-center">
+        <button class="btn btn-primary btn-lg" onclick="checkText()">Zkontrolovat</button>
+        <div id="result" class="fw-semibold"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="modal fade" id="rulesModal" tabindex="-1" aria-labelledby="rulesModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title h5 fw-bold" id="rulesModalLabel">Typografická pravidla</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+      </div>
+      <div class="modal-body">
+        <ul class="mb-0">
+          <li>Nepoužívejte více než dva druhy písma.</li>
+          <li>
+            Ke zvýraznění textu používejte spíše kurzívu, nikdy ne podtržené, přeškrtnuté, barevné nebo protlačované.
+            Zvýrazňujte střídmě, čím méně, tím lépe.
+          </li>
+          <li>
+            V celém dokumentu dodržujte stejný styl. Znamená to, že stejné formátování (druh písma, velikost,
+            zarovnání, atd.) budou mít všechny nadpisy stejné úrovně a všechny odstavce textu.
+          </li>
+          <li>
+            Interpunkční znaménka: tečka, čárka, středník atd. mají za sebou mezeru. Před nimi se mezera nedělá.
+          </li>
+          <li>
+            U závorek se mezera vkládá před otevírací a za uzavírací závorku. Vnitřní mezery se u závorek nedělají.
+            Tečka na konci věty není uvnitř, ale až za závorkou. <b>Nějaký text („Uvozovky“).</b>
+          </li>
+          <li>
+            Na místo, kde nelze dovolit rozdělení, se vkládá mezera pevná (nezlomitelná). Napíšeme jí klávesovou
+            zkratkou <b>Ctrl+Shift+mezerník</b>. Např. <b>18. 5. 2015</b>, <b>16 250 000</b>, <b>Mgr. Jan Novák</b> atd.
+          </li>
+          <li>
+            Spojovník nikdy neoddělujeme mezerami. Používá se při dělení slov a spojení dvou neoddělitelných celků.
+            Např. <b>Brno-Židenice</b>, <b>Frýdek-Místek</b>, <b>chceme-li</b> apod.
+          </li>
+          <li>
+            Pomlčkou se značí mezera v řeči, vložená věta nebo vložené slovní spojení. Pomlčka se poté odděluje z obou
+            stran mezerou (např. <b>mám rád maso – to jsem celý já</b>), z nichž ta prvá by měla být pevná, aby pomlčka nemohla
+            začínat nový řádek.
+          </li>
+          <li>
+            Pomlčka se ještě používá na spojení svou samostatných slov, mezi nimiž je nějaký vztah (např. odkud kam).
+            Pak se píše bez mezer např. <b>Brno–Praha</b>.
+          </li>
+          <li>
+            Pomlčku také vkládáme mezí čísla, aby vyznačila rozsah. Má funkci intervalu od do. Tady je píšeme bez mezer.
+            Např. <b>1990–2010</b>, <b>70–80 kg</b>.
+          </li>
+          <li>
+            Tři tečky (výpustka) nahrazují neúplný text nebo nedokončenou větu. Píšeme je bez mezery hned na konci věty.
+            <b>A další…</b>
+          </li>
+          <li>Za tři tečky se už žádná další nepíše, např. <b>ve chlévě je… silný zápach</b>.</li>
+          <li>
+            Uvozovky píšeme bez mezer. Nejdřív dole před slovem, potom na konci nahoře. V angličtině se píšou obě uvozovky
+            nahoře.
+          </li>
+          <li>
+            <b>50 %</b> (s mezerou) čteme jako „padesát procent“, <b>50%</b> (bez mezery) čteme jako „padesátiprocentní“.
+            <b>30 kg</b> (třicet kilogramů), <b>30kg</b> (třicetikilogramový), <b>100W</b> žárovka (stowattová žárovka)
+          </li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+  crossorigin="anonymous"
+></script>
+
+<script>
+function checkText() {
+  const spans = document.querySelectorAll('span[data-correct]');
+  let errors = 0;
+
+  const normalizeForCompare = (value) => {
+    let s = String(value ?? '');
+    s = s.replace(/\u00A0/g, ' ');
+    s = s.replace(/[„“"]/g, '"');
+    s = s.replace(/[\u2010\u2011\u2012\u2013\u2014\u2212]/g, '-'); // ‐‑‒–—−
+    s = s.replace(/\.{3}/g, '…');
+    return s;
+  };
+
+  spans.forEach(span => {
+    const correct = span.dataset.correct;
+    const userRaw = span.innerText;
+
+    const correctAllowsEdgeSpaces = correct.startsWith(' ') || correct.endsWith(' ');
+    const hasBadSpaces = !correctAllowsEdgeSpaces && (userRaw.startsWith(' ') || userRaw.endsWith(' '));
+
+    const userNorm = normalizeForCompare(userRaw);
+    const correctNorm = normalizeForCompare(correct);
+
+    if (userNorm === correctNorm && !hasBadSpaces) {
+      span.classList.remove('error');
+      span.classList.add('correct');
+    } else {
+      span.classList.remove('correct');
+      span.classList.add('error');
+      errors++;
+    }
+  });
+
+  const result = document.getElementById('result');
+
+  if (errors === 0) {
+    result.className = 'fw-semibold text-success';
+    result.innerText = 'Vše je správně!';
+  } else {
+    result.className = 'fw-semibold text-danger';
+    result.innerText = 'Počet chyb: ' + errors;
+  }
+}
+</script>
+
+</body>
+</html>
