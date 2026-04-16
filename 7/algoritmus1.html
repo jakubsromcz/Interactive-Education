@@ -341,42 +341,27 @@
         <div class="col-12 col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body p-4 p-md-4">
-                    <h2 class="h5 fw-bold mb-2">Úkol 7: Podmínky (if / else)</h2>
+                    <h2 class="h5 fw-bold mb-2">Úkol 7: Co je algoritmus?</h2>
                     <p class="text-body-secondary mb-3">
-                        Vyber správnou větev algoritmu. (Algoritmus = postup + rozhodování.)
+                        Kliknutím označ všechny věty, které popisují algoritmus (jasný postup kroků, případně i rozhodování).
                     </p>
 
-                    <div class="vstack gap-3 mb-3">
-                        <div>
-                            <div class="fw-semibold mb-1">1) Když je venku <b>déšť</b>, tak…</div>
-                            <select class="form-select" id="t7-q1">
-                                <option value="">Vyber…</option>
-                                <option value="a">vezmu si deštník</option>
-                                <option value="b">vezmu si plavky</option>
-                                <option value="c">zapnu televizi</option>
-                                <option value="d">dám počítač do koše</option>
-                            </select>
-                        </div>
-                        <div>
-                            <div class="fw-semibold mb-1">2) Když mám hotový úkol, tak…</div>
-                            <select class="form-select" id="t7-q2">
-                                <option value="">Vyber…</option>
-                                <option value="a">odevzdám ho</option>
-                                <option value="b">začnu ho psát znovu od nuly</option>
-                                <option value="c">zavřu oči a čekám</option>
-                                <option value="d">vypnu internet v celé škole</option>
-                            </select>
-                        </div>
-                        <div>
-                            <div class="fw-semibold mb-1">3) Když mi nejde otevřít stránka, tak jako první…</div>
-                            <select class="form-select" id="t7-q3">
-                                <option value="">Vyber…</option>
-                                <option value="a">zkontroluju internet / Wi‑Fi</option>
-                                <option value="b">rozbiju klávesnici</option>
-                                <option value="c">smažu všechny soubory</option>
-                                <option value="d">napíšu náhodné heslo</option>
-                            </select>
-                        </div>
+                    <div class="list-group mb-3" id="task7-list" role="list">
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-key="a">
+                            A) Otevři prohlížeč → napiš adresu → přihlas se → klikni na „Odeslat“.
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-key="b">
+                            B) Dnes je hezky.
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-key="c">
+                            C) Vstanu → obleču se → vyčistím zuby → odcházím do školy.
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-key="d">
+                            D) Buď hodný.
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action step-item" data-key="e">
+                            E) Když prší, vezmi si deštník, jinak si vezmi pláštěnku.
+                        </button>
                     </div>
 
                     <div class="d-grid d-sm-flex gap-2 align-items-sm-center">
@@ -463,6 +448,45 @@
 </main>
 
 <script>
+const shuffleArrayInPlace = (arr) => {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+};
+
+const shuffleChildren = (container) => {
+    if (!container) return;
+    const items = Array.from(container.children);
+    shuffleArrayInPlace(items);
+    items.forEach((el) => container.appendChild(el));
+};
+
+const shuffleSelectOptions = (select) => {
+    if (!select) return;
+    const options = Array.from(select.querySelectorAll('option'));
+    if (options.length <= 2) return;
+
+    const first = options[0]; // necháme "Vyber…" na prvním místě
+    const rest = options.slice(1);
+    shuffleArrayInPlace(rest);
+
+    select.innerHTML = '';
+    select.appendChild(first);
+    rest.forEach((opt) => select.appendChild(opt));
+};
+
+const shuffleAlgorithmTasks = () => {
+    // Úkol 1, 2, 3: zamícháme chips v "poolu"
+    shuffleChildren(document.getElementById('task1-pool'));
+    shuffleChildren(document.getElementById('task4-pool')); // Úkol 2 má v kódu task=4
+    shuffleChildren(document.getElementById('task3-pool'));
+
+    // Úkol 6 a 9: zamícháme možnosti v selectech (kromě první položky)
+    ['t6-q1', 't6-q2', 't6-q3', 't6-q4', 't9-q1'].forEach((id) => shuffleSelectOptions(document.getElementById(id)));
+};
+
 const setupDragAndDrop = () => {
     document.querySelectorAll('.chip[draggable="true"]').forEach((chip) => {
         chip.addEventListener('dragstart', (e) => {
@@ -496,9 +520,18 @@ const setupDragAndDrop = () => {
     });
 };
 
+const attemptsByResultId = {};
+
+const bumpAttempts = (resultId) => {
+    attemptsByResultId[resultId] = (attemptsByResultId[resultId] ?? 0) + 1;
+    return attemptsByResultId[resultId];
+};
+
 const setResult = (id, ok, okText = '✔ Správně!', badText = '✘ Zkus to znovu') => {
     const el = document.getElementById(id);
-    el.innerText = ok ? okText : badText;
+    const attempts = attemptsByResultId[id] ?? 0;
+    el.innerHTML =
+        (ok ? okText : badText) + `<div class="small text-body-secondary mt-1">Pokusy: ${attempts}</div>`;
     el.className = 'result ' + (ok ? 'text-success' : 'text-danger');
 };
 
@@ -513,6 +546,7 @@ const getOrder = (task) => {
 };
 
 function checkTask1() {
+    bumpAttempts('result1');
     const correct = ['Vezmi hrnek', 'Vlož sáček do hrnku', 'Zalij čaj horkou vodou', 'Počkej 3 minuty', 'Vyjmi sáček'];
     const order = getOrder('1');
     const ok = order.join('|') === correct.join('|');
@@ -546,6 +580,7 @@ const setupTask2 = () => {
 };
 
 function checkTask2() {
+    bumpAttempts('result2');
     // chyba je v kroku 4: vypláchnout se má až po čištění
     const ok = task2Selected.size === 1 && task2Selected.has('4');
     setResult('result2', ok, '✔ Správně!', '✘ Zkus označit jen špatný krok');
@@ -559,6 +594,7 @@ function resetTask2() {
 }
 
 function checkTask3() {
+    bumpAttempts('result3');
     const correct = ['Vstanu', 'Obleču se', 'Snídám', 'Zkontroluju aktovku', 'Vyrazím do školy'];
     const order = getOrder('3');
     const ok = order.join('|') === correct.join('|');
@@ -573,6 +609,7 @@ function resetTask3() {
 }
 
 function checkTask4() {
+    bumpAttempts('result4');
     const correct = ['Dej vařit vodu', 'Osol vodu', 'Vlož těstoviny', 'Povař podle návodu', 'Sceď těstoviny'];
     const order = getOrder('4');
     const ok = order.join('|') === correct.join('|');
@@ -606,6 +643,7 @@ const setupTask5 = () => {
 };
 
 function checkTask5() {
+    bumpAttempts('result5');
     // chyba je v kroku 3: opláchnout se má až po tření
     const ok = task5Selected.size === 1 && task5Selected.has('3');
     setResult('result5', ok, '✔ Správně!', '✘ Označ jen špatný krok');
@@ -619,6 +657,7 @@ function resetTask5() {
 }
 
 function checkTask6() {
+    bumpAttempts('result6');
     const ok =
         document.getElementById('t6-q1').value === 'b' &&
         document.getElementById('t6-q2').value === 'a' &&
@@ -636,23 +675,43 @@ function resetTask6() {
     document.getElementById('result6').className = 'result';
 }
 
+const task7Selected = new Set();
+
+const setupTask7 = () => {
+    const list = document.getElementById('task7-list');
+    if (!list) return;
+    list.querySelectorAll('.step-item').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const key = btn.dataset.key;
+            if (task7Selected.has(key)) {
+                task7Selected.delete(key);
+                btn.classList.remove('selected');
+            } else {
+                task7Selected.add(key);
+                btn.classList.add('selected');
+            }
+        });
+    });
+};
+
 function checkTask7() {
+    bumpAttempts('result7');
+    const correct = new Set(['a', 'c', 'e']);
     const ok =
-        document.getElementById('t7-q1').value === 'a' &&
-        document.getElementById('t7-q2').value === 'a' &&
-        document.getElementById('t7-q3').value === 'a';
-    setResult('result7', ok, '✔ Správně!', '✘ Zkus to znovu');
+        task7Selected.size === correct.size &&
+        Array.from(correct).every((k) => task7Selected.has(k));
+    setResult('result7', ok, '✔ Správně!', '✘ Označ jen věty, které jsou algoritmus');
 }
 
 function resetTask7() {
-    document.getElementById('t7-q1').value = '';
-    document.getElementById('t7-q2').value = '';
-    document.getElementById('t7-q3').value = '';
+    task7Selected.clear();
+    document.querySelectorAll('#task7-list .step-item').forEach((btn) => btn.classList.remove('selected'));
     document.getElementById('result7').innerText = '';
     document.getElementById('result7').className = 'result';
 }
 
 function checkTask8() {
+    bumpAttempts('result8');
     // x = 3; x = x + 5 => 8; x = x * 2 => 16; x = x - 4 => 12
     const ok = document.getElementById('t8-q1').value === 'b';
     setResult('result8', ok, '✔ Správně!', '✘ Zkus to znovu');
@@ -665,6 +724,7 @@ function resetTask8() {
 }
 
 function checkTask9() {
+    bumpAttempts('result9');
     const ok = document.getElementById('t9-q1').value === 'a';
     setResult('result9', ok, '✔ Správně!', '✘ Zkus to znovu');
 }
@@ -675,9 +735,11 @@ function resetTask9() {
     document.getElementById('result9').className = 'result';
 }
 
+shuffleAlgorithmTasks();
 setupDragAndDrop();
 setupTask2();
 setupTask5();
+setupTask7();
 </script>
 
 </body>
