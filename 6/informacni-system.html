@@ -1,0 +1,1302 @@
+﻿<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>6. třída – Informační systém</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+
+    <style>
+      body {
+        background: radial-gradient(1200px 600px at 20% 0%, #e8f4ff 0%, rgba(232, 244, 255, 0) 60%),
+          radial-gradient(900px 500px at 90% 20%, #fff3e6 0%, rgba(255, 243, 230, 0) 55%),
+          linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      }
+      .hero {
+        border: 1px solid rgba(13, 110, 253, 0.15);
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(6px);
+      }
+      .work-area {
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.8);
+        overflow: hidden;
+      }
+      .board {
+        position: relative;
+        height: 880px;
+        background-image: linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+        background-size: 24px 24px;
+        background-position: 0 0, 0 0;
+      }
+      .board:focus {
+        outline: none;
+      }
+      .node {
+        position: absolute;
+        min-width: 160px;
+        max-width: 320px;
+        padding: 0.55rem 0.65rem;
+        border-radius: 0.9rem;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.08);
+        cursor: grab;
+        user-select: none;
+      }
+      .node:active {
+        cursor: grabbing;
+      }
+      .node.selected {
+        border-color: rgba(13, 110, 253, 0.9);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.2), 0 0.8rem 2rem rgba(0, 0, 0, 0.08);
+      }
+      .board.linking {
+        cursor: crosshair;
+      }
+      .board.linking .node {
+        cursor: crosshair;
+      }
+      .node .title {
+        font-weight: 700;
+        font-size: 0.92rem;
+        line-height: 1.2;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+      }
+      .node .type {
+        font-size: 0.72rem;
+        border-radius: 999px;
+        padding: 0.18rem 0.5rem;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        color: rgba(0, 0, 0, 0.65);
+        background: rgba(0, 0, 0, 0.03);
+        white-space: nowrap;
+      }
+      .node .type.type-entita {
+        color: var(--bs-primary);
+        border-color: var(--bs-primary);
+        background: rgba(13, 110, 253, 0.1);
+      }
+      .node .type.type-proces {
+        color: var(--bs-success);
+        border-color: var(--bs-success);
+        background: rgba(25, 135, 84, 0.1);
+      }
+      .node .type.type-data {
+        color: #997404;
+        border-color: var(--bs-warning);
+        background: rgba(255, 193, 7, 0.15);
+      }
+      .node .type.type-uzivatel {
+        color: var(--bs-secondary);
+        border-color: var(--bs-secondary);
+        background: rgba(108, 117, 125, 0.1);
+      }
+      .hint-board-wrap {
+        overflow-x: auto;
+      }
+      .hint-board {
+        position: relative;
+        width: 740px;
+        height: 380px;
+        border-radius: 0.9rem;
+        background: #ffffff;
+        border: 1px dashed rgba(13, 202, 240, 0.35);
+      }
+      .hint-board .node {
+        cursor: default;
+        box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.06);
+        z-index: 2;
+      }
+      .hint-board .node:active {
+        cursor: default;
+      }
+      .hint-board .svg-layer {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+      }
+      .node .content {
+        font-size: 0.9rem;
+        color: rgba(0, 0, 0, 0.78);
+        line-height: 1.25;
+        white-space: pre-wrap;
+      }
+      .node .actions {
+        display: flex;
+        gap: 0.35rem;
+        margin-top: 0.45rem;
+      }
+      .node .btn {
+        --bs-btn-padding-y: 0.25rem;
+        --bs-btn-padding-x: 0.5rem;
+        --bs-btn-font-size: 0.8rem;
+        border-radius: 0.65rem;
+      }
+      .palette .btn {
+        border-radius: 0.9rem;
+      }
+      .svg-layer {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      .kbd {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.85em;
+        padding: 0.12rem 0.35rem;
+        border-radius: 0.4rem;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        background: rgba(255, 255, 255, 0.85);
+      }
+      .blank {
+        border: 2px dashed rgba(13, 202, 240, 0.55);
+        border-radius: 0.6rem;
+        padding: 0.35rem 0.55rem;
+        min-height: 2.35rem;
+        min-width: 170px;
+        display: inline-block;
+        background: rgba(13, 202, 240, 0.06);
+        vertical-align: middle;
+      }
+      .blank[data-filled] {
+        cursor: grab;
+      }
+      .blank[data-filled]:active {
+        cursor: grabbing;
+      }
+      .blank.dragging {
+        opacity: 0.5;
+      }
+      .word {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.95);
+        padding: 0.35rem 0.6rem;
+        cursor: grab;
+        user-select: none;
+      }
+      .word:active {
+        cursor: grabbing;
+      }
+      .word.dragging {
+        opacity: 0.5;
+      }
+      .word-bank {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        min-height: 2.5rem;
+      }
+      .ok {
+        border-color: rgba(25, 135, 84, 0.65) !important;
+        background: rgba(25, 135, 84, 0.06) !important;
+      }
+      .bad {
+        border-color: rgba(220, 53, 69, 0.55) !important;
+        background: rgba(220, 53, 69, 0.05) !important;
+      }
+      .btn-lg {
+        border-radius: 0.9rem;
+      }
+      .result {
+        font-weight: 700;
+        margin-top: 10px;
+      }
+      #task3Card.all-done {
+        background: rgba(25, 135, 84, 0.08) !important;
+        box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.45),
+          0 0.5rem 1.5rem rgba(0, 0, 0, 0.06) !important;
+        transition: box-shadow 200ms ease, background-color 200ms ease;
+      }
+      #task3Card.all-done .inner-box {
+        background: rgba(25, 135, 84, 0.05);
+        border-color: rgba(25, 135, 84, 0.35) !important;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container py-4 py-md-5">
+      <div class="hero rounded-4 p-4 p-md-5 shadow-sm mb-4">
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+          <a class="btn btn-outline-secondary" href="../home.html" aria-label="Zpět na domovskou stránku">
+            <span class="d-inline-flex align-items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 1-.5.5H3.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L3.707 7.5H14.5A.5.5 0 0 1 15 8z"/>
+              </svg>
+              <span>Zpět</span>
+            </span>
+          </a>
+          <span class="badge rounded-pill text-bg-info px-3 py-2">6. třída</span>
+        </div>
+
+        <div class="d-flex flex-column flex-md-row align-items-md-center gap-3 gap-md-4">
+          <div class="flex-grow-1">
+            <h1 class="display-6 fw-bold mb-2">Informační systém</h1>
+            <p class="lead mb-0">
+              Informační systémy slouží k automatizaci a uživatelsky přívětivému zpracování dat. Zkus si procvičit
+              doplňovačku, krátký mini‑kvíz a modelování školního informačního systému.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-12 col-xl-6">
+          <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4">
+              <h2 class="h5 fw-bold mb-2">Úloha 1: Doplň pojmy</h2>
+              <p class="text-body-secondary mb-3">
+                Přetáhni slova ze slovní banky do správných mezer. Dvojklikem na vyplněnou mezeru slovo vrátíš zpátky
+                do banky.
+              </p>
+
+              <div class="vstack gap-3" id="fillTask">
+                <div>
+                  <div class="fw-semibold mb-2">Slovní banka (přetáhni do mezer):</div>
+                  <div class="word-bank" id="wordBank"></div>
+                </div>
+
+                <div class="p-3 rounded-4 border">
+                  <div class="mb-2">
+                    1) <strong>Informační systém</strong> je soubor lidí, pravidel a technologií, který pomáhá sbírat,
+                    ukládat a zpracovávat <span class="blank" data-accept="data"></span>.
+                  </div>
+                  <div class="mb-2">
+                    2) <strong>Data</strong> jsou surové záznamy (např. „8A, Novák, 12“). Když data správně vysvětlíme,
+                    dostaneme <span class="blank" data-accept="informace"></span>.
+                  </div>
+                  <div class="mb-2">
+                    3) V IS se často používá <strong>databáze</strong>, která slouží k dlouhodobému ukládání
+                    <span class="blank" data-accept="dat"></span>.
+                  </div>
+                  <div class="mb-2">
+                    4) Když uživatel něco vyplní, IS provede <strong>zpracování</strong> a vytvoří
+                    <span class="blank" data-accept="výstup"></span> (např. vysvědčení, seznam, statistiku).
+                  </div>
+                  <div>
+                    5) Vztah mezi dvěma věcmi v systému (např. „žák je ve třídě“) nazýváme
+                    <span class="blank" data-accept="vazba"></span>.
+                  </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+                  <button class="btn btn-primary" type="button" onclick="checkTask1()">Zkontrolovat</button>
+                  <button class="btn btn-outline-secondary" type="button" onclick="resetTask1()">Reset</button>
+                </div>
+
+                <div class="result" id="result1"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-xl-6">
+          <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4">
+              <h2 class="h5 fw-bold mb-2">Úloha 2: Data nebo informace?</h2>
+              <p class="text-body-secondary mb-3">
+                U každé věty vyber, jestli je to spíš <strong>data</strong> (surové) nebo <strong>informace</strong>
+                (má význam).
+              </p>
+
+              <div class="vstack gap-2" id="task2">
+                <div class="p-3 rounded-4 border" data-q="1">
+                  <div class="fw-semibold mb-2">1) „Novák, 12, 8A“</div>
+                  <div class="d-flex flex-wrap gap-2">
+                    <input class="btn-check" type="radio" name="t2-1" id="t2-1-data" value="data" autocomplete="off" />
+                    <label class="btn btn-outline-info btn-sm" for="t2-1-data">Data</label>
+
+                    <input class="btn-check" type="radio" name="t2-1" id="t2-1-info" value="informace" autocomplete="off" />
+                    <label class="btn btn-outline-info btn-sm" for="t2-1-info">Informace</label>
+                  </div>
+                </div>
+
+                <div class="p-3 rounded-4 border" data-q="2">
+                  <div class="fw-semibold mb-2">2) „Oběd: 85 Kč“</div>
+                  <div class="d-flex flex-wrap gap-2">
+                    <input class="btn-check" type="radio" name="t2-2" id="t2-2-data" value="data" autocomplete="off" />
+                    <label class="btn btn-outline-info btn-sm" for="t2-2-data">Data</label>
+
+                    <input class="btn-check" type="radio" name="t2-2" id="t2-2-info" value="informace" autocomplete="off" />
+                    <label class="btn btn-outline-info btn-sm" for="t2-2-info">Informace</label>
+                  </div>
+                </div>
+
+                <div class="p-3 rounded-4 border" data-q="3">
+                  <div class="fw-semibold mb-2">3) „Novák má dnes 2 neomluvené hodiny.“</div>
+                  <div class="d-flex flex-wrap gap-2">
+                    <input class="btn-check" type="radio" name="t2-3" id="t2-3-data" value="data" autocomplete="off" />
+                    <label class="btn btn-outline-info btn-sm" for="t2-3-data">Data</label>
+
+                    <input class="btn-check" type="radio" name="t2-3" id="t2-3-info" value="informace" autocomplete="off" />
+                    <label class="btn btn-outline-info btn-sm" for="t2-3-info">Informace</label>
+                  </div>
+                </div>
+
+                <div class="p-3 rounded-4 border" data-q="4">
+                  <div class="fw-semibold mb-2">4) „12. 4. 2026“</div>
+                  <div class="d-flex flex-wrap gap-2">
+                    <input class="btn-check" type="radio" name="t2-4" id="t2-4-data" value="data" autocomplete="off" />
+                    <label class="btn btn-outline-info btn-sm" for="t2-4-data">Data</label>
+
+                    <input class="btn-check" type="radio" name="t2-4" id="t2-4-info" value="informace" autocomplete="off" />
+                    <label class="btn btn-outline-info btn-sm" for="t2-4-info">Informace</label>
+                  </div>
+                </div>
+
+                <div class="p-3 rounded-4 border" data-q="5">
+                  <div class="fw-semibold mb-2">5) „Dnes je 12. 4. 2026 a je neděle.“</div>
+                  <div class="d-flex flex-wrap gap-2">
+                    <input class="btn-check" type="radio" name="t2-5" id="t2-5-data" value="data" autocomplete="off" />
+                    <label class="btn btn-outline-info btn-sm" for="t2-5-data">Data</label>
+
+                    <input class="btn-check" type="radio" name="t2-5" id="t2-5-info" value="informace" autocomplete="off" />
+                    <label class="btn btn-outline-info btn-sm" for="t2-5-info">Informace</label>
+                  </div>
+                </div>
+
+                <div class="p-3 rounded-4 border" data-q="6">
+                  <div class="fw-semibold mb-2">6) „Oběd stojí 85 Kč, takže mi stačí stovka.“</div>
+                  <div class="d-flex flex-wrap gap-2">
+                    <input class="btn-check" type="radio" name="t2-6" id="t2-6-data" value="data" autocomplete="off" />
+                    <label class="btn btn-outline-info btn-sm" for="t2-6-data">Data</label>
+
+                    <input class="btn-check" type="radio" name="t2-6" id="t2-6-info" value="informace" autocomplete="off" />
+                    <label class="btn btn-outline-info btn-sm" for="t2-6-info">Informace</label>
+                  </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                  <button class="btn btn-primary" type="button" onclick="checkTask2()">Zkontrolovat</button>
+                  <button class="btn btn-outline-secondary" type="button" onclick="resetTask2()">Reset</button>
+                </div>
+
+                <div class="result" id="result2"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="card border-0 shadow-sm rounded-4 h-100" id="task3Card">
+            <div class="card-body p-4">
+              <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-2">
+                <div>
+                  <h2 class="h5 fw-bold mb-1">Úloha 3: Školní systém – známkování</h2>
+                  <div class="text-body-secondary">
+                    Postav model informačního systému, ve kterém se ve škole eviduje známkování žáků. Přidej prvky,
+                    přesuň je a propojuj čarami.
+                  </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2 palette justify-content-lg-end">
+                  <button class="btn btn-outline-primary" data-add="entita">+ Entita</button>
+                  <button class="btn btn-outline-success" data-add="proces">+ Proces</button>
+                  <button class="btn btn-outline-warning" data-add="data">+ Data</button>
+                  <button class="btn btn-outline-secondary" data-add="uživatel">+ Uživatel</button>
+                  <button id="btnClearBoard" class="btn btn-outline-danger">Smazat vše</button>
+                </div>
+              </div>
+
+              <hr class="my-3" />
+
+              <div class="row g-3">
+                <div class="col-12 col-lg-3">
+                  <div class="p-3 rounded-4 border bg-body inner-box">
+                    <h3 class="h6 fw-bold mb-2">Zadání</h3>
+                    <p class="mb-2">
+                      Představ si, že ve škole vzniká informační systém pro <strong>evidenci známek</strong>. Vytvoř
+                      jeho jednoduchý model. Postupně přidávej krabice, pojmenuj je a propojuj čarami.
+                    </p>
+                    <ol class="mb-2 ps-3">
+                      <li>
+                        Vytvoř alespoň:
+                        <ul class="mt-1 ps-2">
+                          <li><strong>4 entity</strong> (např. Žák, Učitel, Předmět, Známka. Každá entita obsahuje údaje. Např. učitel - jméno, příjmení, předměty...)</li>
+                          <li><strong>2 procesy</strong> (např. „zapsat známku“, „vypočítat průměr“, „vystavit vysvědčení“)</li>
+                          <li><strong>3 datové položky</strong> (např. jméno žáka, hodnota 1–5, datum, název předmětu)</li>
+                          <li><strong>2 uživatele</strong> (např. učitel, žák, rodič, ředitel). Bráno z hlediska pravomocí. Uživatelům přiřaď čárami, s jakými kartami interagují.</li>
+                        </ul>
+                      </li>
+                      <p class="mb-0 small">
+                        <a
+                          href="#"
+                          id="openHintModal"
+                          class="link-primary text-decoration-underline"
+                          data-bs-toggle="modal"
+                          data-bs-target="#hintModal"
+                        >Nápověda</a>
+                      </p>  
+                      <li class="mt-2">
+                        Propoj prvky čarami a u každé čáry doplň <strong>sloveso</strong>, které vazbu vysvětlí (např.
+                        „zapisuje“, „dostává“, „patří do“, „vyučuje“, „čte“).
+                      </li>
+                    </ol>
+                  </div>
+
+                  <div class="p-3 rounded-4 border bg-body mt-3 inner-box">
+                    <h3 class="h6 fw-bold mb-2">Automatická kontrola</h3>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" id="chk1" disabled />
+                      <label class="form-check-label" for="chk1">Mám aspoň 4 entity.</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" id="chk2" disabled />
+                      <label class="form-check-label" for="chk2">Mám aspoň 2 procesy.</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" id="chk3" disabled />
+                      <label class="form-check-label" for="chk3">Mám aspoň 3 datové položky.</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" id="chk4" disabled />
+                      <label class="form-check-label" for="chk4">Mám aspoň 2 uživatele.</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" id="chk5" disabled />
+                      <label class="form-check-label" for="chk5">Každá čára má popis slovesem.</label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-lg-9">
+                  <div class="work-area">
+                    <div id="board" class="board" tabindex="0" aria-label="Pracovní plocha pro model IS">
+                      <svg class="svg-layer" id="svgLayer" aria-hidden="true"></svg>
+                    </div>
+                  </div>
+
+                  <div class="d-flex align-items-center justify-content-between gap-2 mt-2">
+                    <div class="small text-body-secondary">
+                      Tip: Krabici upravíš tlačítkem <strong>Upravit</strong>. Čáru vytvoříš klikem na 1. krabici a
+                      pak na 2. krabici.
+                    </div>
+                    <button id="btnClearLinks" class="btn btn-outline-secondary btn-sm">Smazat čáry</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div
+      class="modal fade"
+      id="editNodeModal"
+      tabindex="-1"
+      aria-labelledby="editNodeModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editNodeModalLabel">Upravit prvek</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="editNodeTitle" class="form-label">Název</label>
+              <input type="text" class="form-control" id="editNodeTitle" />
+            </div>
+            <div class="mb-0">
+              <label for="editNodeContent" class="form-label">Text</label>
+              <textarea class="form-control" id="editNodeContent" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Zrušit</button>
+            <button type="button" class="btn btn-primary" id="editNodeSave">Uložit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="deleteNodeModal"
+      tabindex="-1"
+      aria-labelledby="deleteNodeModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteNodeModalLabel">Smazat prvek?</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-0">
+              Opravdu chceš smazat prvek <strong id="deleteNodeName"></strong>? Společně s ním zmizí i všechny
+              jeho čáry.
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Zrušit</button>
+            <button type="button" class="btn btn-danger" id="deleteNodeConfirm">Smazat</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="hintModal"
+      tabindex="-1"
+      aria-labelledby="hintModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+        <div class="modal-content rounded-4">
+          <div class="modal-header">
+            <h5 class="modal-title" id="hintModalLabel">Nápověda - vzorové řešení</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-body-secondary mb-3">
+              Tady je krátká <strong>ukázka</strong> – od každého typu karty jedna (entita, proces, data,
+              uživatel) a příklad toho, jak se propojují čárami se slovesy. Ve své úloze ale budeš potřebovat <strong>víc
+              karet</strong> (4 entity, 2 procesy, 3 data, 2 uživatele).
+            </p>
+            <div class="hint-board-wrap">
+              <div class="hint-board" id="hintBoard"></div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Rozumím</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+      const WORDS = ["data", "informace", "dat", "výstup", "vazba"];
+
+      const board = document.getElementById("board");
+      const svgLayer = document.getElementById("svgLayer");
+      const wordBank = document.getElementById("wordBank");
+
+      const state = {
+        nodes: [],
+        links: [],
+        linkingFromId: null,
+        drag: null,
+      };
+
+      const attemptsByResultId = {};
+      const bumpAttempts = (resultId) => {
+        attemptsByResultId[resultId] = (attemptsByResultId[resultId] ?? 0) + 1;
+        return attemptsByResultId[resultId];
+      };
+      const setResult = (id, ok, okText = "✔ Správně!", badText = "✘ Zkus to znovu") => {
+        const el = document.getElementById(id);
+        const attempts = attemptsByResultId[id] ?? 0;
+        el.innerHTML =
+          (ok ? okText : badText) +
+          `<div class="small text-body-secondary mt-1">Pokusy: ${attempts}</div>`;
+        el.className = "result " + (ok ? "text-success" : "text-danger");
+      };
+      const clearResult = (id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerText = "";
+        el.className = "result";
+      };
+
+      function uid(prefix) {
+        return `${prefix}-${Math.random().toString(16).slice(2)}-${Date.now().toString(16)}`;
+      }
+
+      function clamp(n, min, max) {
+        return Math.max(min, Math.min(max, n));
+      }
+
+      function boardRect() {
+        return board.getBoundingClientRect();
+      }
+
+      function nodeCenter(node) {
+        return { x: node.x + node.w / 2, y: node.y + node.h / 2 };
+      }
+
+      function typeBadge(type) {
+        switch (type) {
+          case "entita":
+            return "Entita";
+          case "proces":
+            return "Proces";
+          case "data":
+            return "Data";
+          case "uživatel":
+            return "Uživatel";
+          default:
+            return type;
+        }
+      }
+
+      function defaultTitle(type) {
+        switch (type) {
+          case "entita":
+            return "Nová entita";
+          case "proces":
+            return "Nový proces";
+          case "data":
+            return "Nová data";
+          case "uživatel":
+            return "Nový uživatel";
+          default:
+            return "Prvek";
+        }
+      }
+
+      let dragSource = null;
+
+      function createWordChip(text) {
+        const el = document.createElement("div");
+        el.className = "word";
+        el.textContent = text;
+        el.draggable = true;
+        el.dataset.word = text;
+        el.addEventListener("dragstart", (e) => {
+          e.dataTransfer.setData("text/plain", text);
+          e.dataTransfer.effectAllowed = "move";
+          el.classList.add("dragging");
+          dragSource = { kind: "chip", el };
+        });
+        el.addEventListener("dragend", () => {
+          el.classList.remove("dragging");
+          dragSource = null;
+        });
+        return el;
+      }
+
+      function renderWordBank() {
+        wordBank.innerHTML = "";
+        const shuffled = [...WORDS].sort(() => Math.random() - 0.5);
+        for (const w of shuffled) wordBank.appendChild(createWordChip(w));
+      }
+
+      function returnWordToBank(text) {
+        wordBank.appendChild(createWordChip(text));
+      }
+
+      function fillBlank(b, text) {
+        b.textContent = text;
+        b.dataset.filled = text;
+        b.draggable = true;
+        b.classList.remove("ok", "bad");
+      }
+
+      function clearBlank(b) {
+        b.textContent = "";
+        delete b.dataset.filled;
+        b.draggable = false;
+        b.classList.remove("ok", "bad");
+      }
+
+      function setupBlanks() {
+        document.querySelectorAll(".blank").forEach((b) => {
+          b.addEventListener("dragstart", (e) => {
+            if (!b.dataset.filled) {
+              e.preventDefault();
+              return;
+            }
+            e.dataTransfer.setData("text/plain", b.dataset.filled);
+            e.dataTransfer.effectAllowed = "move";
+            b.classList.add("dragging");
+            dragSource = { kind: "blank", el: b };
+          });
+          b.addEventListener("dragend", () => {
+            b.classList.remove("dragging");
+            dragSource = null;
+          });
+          b.addEventListener("dragover", (e) => e.preventDefault());
+          b.addEventListener("drop", (e) => {
+            e.preventDefault();
+            const text = e.dataTransfer.getData("text/plain");
+            if (!text || !dragSource) return;
+            if (dragSource.kind === "blank" && dragSource.el === b) return;
+            if (dragSource.kind === "chip") {
+              dragSource.el.remove();
+            } else if (dragSource.kind === "blank") {
+              clearBlank(dragSource.el);
+            }
+            if (b.dataset.filled) returnWordToBank(b.dataset.filled);
+            fillBlank(b, text);
+            dragSource = null;
+          });
+          b.addEventListener("dblclick", () => {
+            if (b.dataset.filled) {
+              returnWordToBank(b.dataset.filled);
+              clearBlank(b);
+            }
+          });
+        });
+      }
+
+      function checkTask1() {
+        bumpAttempts("result1");
+        let correct = 0;
+        const blanks = [...document.querySelectorAll(".blank")];
+        for (const b of blanks) {
+          const accept = (b.dataset.accept || "").trim().toLowerCase();
+          const value = (b.textContent || "").trim().toLowerCase();
+          const good = accept === value && value !== "";
+          b.classList.toggle("ok", good);
+          b.classList.toggle("bad", !good);
+          if (good) correct++;
+        }
+        const ok = correct === blanks.length;
+        setResult(
+          "result1",
+          ok,
+          "✔ Správně!",
+          `✘ Zkus to znovu (správně ${correct} z ${blanks.length})`
+        );
+      }
+
+      function resetTask1() {
+        document.querySelectorAll(".blank").forEach((b) => clearBlank(b));
+        renderWordBank();
+        clearResult("result1");
+      }
+
+      const TASK2_KEY = {
+        1: "data",
+        2: "data",
+        3: "informace",
+        4: "data",
+        5: "informace",
+        6: "informace",
+      };
+
+      function checkTask2() {
+        bumpAttempts("result2");
+        let correct = 0;
+        const total = Object.keys(TASK2_KEY).length;
+        for (let i = 1; i <= total; i++) {
+          const chosen = document.querySelector(`input[name="t2-${i}"]:checked`)?.value;
+          if (chosen && chosen === TASK2_KEY[i]) correct++;
+        }
+        const ok = correct === total;
+        setResult(
+          "result2",
+          ok,
+          "✔ Správně!",
+          `✘ Zkus to znovu (správně ${correct} z ${total})`
+        );
+      }
+
+      function resetTask2() {
+        for (let i = 1; i <= 6; i++) {
+          document
+            .querySelectorAll(`input[name="t2-${i}"]`)
+            .forEach((el) => (el.checked = false));
+        }
+        clearResult("result2");
+      }
+
+      function addNode(type) {
+        const r = boardRect();
+        const w = 220;
+        const h = 100;
+        const node = {
+          id: uid("n"),
+          type,
+          title: defaultTitle(type),
+          content: "Co dělá?",
+          x: Math.round(r.width / 2 - w / 2 + (Math.random() * 40 - 20)),
+          y: Math.round(r.height / 2 - h / 2 + (Math.random() * 40 - 20)),
+          w,
+          h,
+        };
+        state.nodes.push(node);
+        renderBoard();
+      }
+
+      function deleteNode(nodeId) {
+        state.nodes = state.nodes.filter((n) => n.id !== nodeId);
+        state.links = state.links.filter(
+          (l) => l.from !== nodeId && l.to !== nodeId
+        );
+        if (state.linkingFromId === nodeId) state.linkingFromId = null;
+        renderBoard();
+      }
+
+      function addOrEditLink(fromId, toId) {
+        if (fromId === toId) return;
+        const existing =
+          state.links.find((l) => l.from === fromId && l.to === toId) ||
+          state.links.find((l) => l.from === toId && l.to === fromId);
+        const label = window.prompt(
+          "Popis vazby (sloveso, může být i prázdné):",
+          existing?.label ?? ""
+        );
+        if (label === null) return;
+        const trimmed = label.trim();
+        if (existing) {
+          existing.label = trimmed;
+        } else {
+          state.links.push({ id: uid("l"), from: fromId, to: toId, label: trimmed });
+        }
+        renderLinks();
+        updateQuickCheck();
+      }
+
+      function clearLinks() {
+        state.links = [];
+        renderLinks();
+        updateQuickCheck();
+      }
+
+      function clearBoard() {
+        state.nodes = [];
+        state.links = [];
+        state.linkingFromId = null;
+        renderBoard();
+      }
+
+      function renderBoard() {
+        [...board.querySelectorAll(".node")].forEach((n) => n.remove());
+        board.classList.toggle("linking", !!state.linkingFromId);
+        for (const node of state.nodes) {
+          const el = document.createElement("div");
+          el.className = "node";
+          el.style.left = `${node.x}px`;
+          el.style.top = `${node.y}px`;
+          el.style.width = `${node.w}px`;
+          el.style.minHeight = `${node.h}px`;
+          el.dataset.nodeId = node.id;
+
+          if (node.id === state.linkingFromId) el.classList.add("selected");
+
+          const title = document.createElement("div");
+          title.className = "title";
+          const titleText = document.createElement("div");
+          titleText.textContent = node.title;
+          const type = document.createElement("span");
+          const typeSlug = node.type === "uživatel" ? "uzivatel" : node.type;
+          type.className = "type type-" + typeSlug;
+          type.textContent = typeBadge(node.type);
+          title.appendChild(titleText);
+          title.appendChild(type);
+
+          const content = document.createElement("div");
+          content.className = "content";
+          content.textContent = node.content;
+
+          const actions = document.createElement("div");
+          actions.className = "actions";
+          const btnEdit = document.createElement("button");
+          btnEdit.className = "btn btn-outline-secondary btn-sm";
+          btnEdit.type = "button";
+          btnEdit.textContent = "Upravit";
+          btnEdit.addEventListener("pointerdown", (e) => e.stopPropagation());
+          btnEdit.addEventListener("click", (e) => {
+            e.stopPropagation();
+            editNode(node.id);
+          });
+          const btnDel = document.createElement("button");
+          btnDel.className = "btn btn-outline-danger btn-sm";
+          btnDel.type = "button";
+          btnDel.textContent = "Smazat";
+          btnDel.addEventListener("pointerdown", (e) => e.stopPropagation());
+          btnDel.addEventListener("click", (e) => {
+            e.stopPropagation();
+            confirmDeleteNode(node.id);
+          });
+          const btnLink = document.createElement("button");
+          const isLinkingFromThis = state.linkingFromId === node.id;
+          btnLink.className = isLinkingFromThis
+            ? "btn btn-primary btn-sm"
+            : "btn btn-outline-primary btn-sm";
+          btnLink.type = "button";
+          btnLink.textContent = isLinkingFromThis ? "Zrušit" : "Propojit";
+          btnLink.addEventListener("pointerdown", (e) => e.stopPropagation());
+          btnLink.addEventListener("click", (e) => {
+            e.stopPropagation();
+            toggleLinkingFrom(node.id);
+          });
+          actions.appendChild(btnEdit);
+          actions.appendChild(btnDel);
+          actions.appendChild(btnLink);
+
+          el.appendChild(title);
+          el.appendChild(content);
+          el.appendChild(actions);
+
+          el.addEventListener("pointerdown", (e) => {
+            if (e.target.closest(".actions")) return;
+            startDrag(e, node.id);
+          });
+          el.addEventListener("click", (e) => {
+            if (e.target.closest(".actions")) return;
+            e.stopPropagation();
+            handleNodeClick(node.id);
+          });
+
+          board.appendChild(el);
+        }
+        renderLinks();
+        updateQuickCheck();
+      }
+
+      let editingNodeId = null;
+      let editModal = null;
+
+      function openEditModal() {
+        if (!editModal) {
+          editModal = new bootstrap.Modal(document.getElementById("editNodeModal"));
+        }
+        editModal.show();
+      }
+
+      function editNode(nodeId) {
+        const node = state.nodes.find((n) => n.id === nodeId);
+        if (!node) return;
+        editingNodeId = nodeId;
+        document.getElementById("editNodeTitle").value = node.title;
+        document.getElementById("editNodeContent").value = node.content;
+        openEditModal();
+      }
+
+      document.getElementById("editNodeSave").addEventListener("click", () => {
+        const node = state.nodes.find((n) => n.id === editingNodeId);
+        if (!node) return;
+        const newTitle = document.getElementById("editNodeTitle").value.trim();
+        const newContent = document.getElementById("editNodeContent").value.trim();
+        if (newTitle) node.title = newTitle;
+        if (newContent) node.content = newContent;
+        editModal?.hide();
+        editingNodeId = null;
+        renderBoard();
+      });
+
+      let deletingNodeId = null;
+      let deleteModal = null;
+
+      function confirmDeleteNode(nodeId) {
+        const node = state.nodes.find((n) => n.id === nodeId);
+        if (!node) return;
+        deletingNodeId = nodeId;
+        document.getElementById("deleteNodeName").textContent = node.title || "tento prvek";
+        if (!deleteModal) {
+          deleteModal = new bootstrap.Modal(document.getElementById("deleteNodeModal"));
+        }
+        deleteModal.show();
+      }
+
+      document.getElementById("deleteNodeConfirm").addEventListener("click", () => {
+        if (deletingNodeId) deleteNode(deletingNodeId);
+        deletingNodeId = null;
+        deleteModal?.hide();
+      });
+
+      document.getElementById("deleteNodeModal").addEventListener("hidden.bs.modal", () => {
+        deletingNodeId = null;
+      });
+
+      function toggleLinkingFrom(nodeId) {
+        if (state.linkingFromId === nodeId) {
+          state.linkingFromId = null;
+          renderBoard();
+          return;
+        }
+        if (state.linkingFromId) {
+          const from = state.linkingFromId;
+          state.linkingFromId = null;
+          renderBoard();
+          addOrEditLink(from, nodeId);
+          return;
+        }
+        state.linkingFromId = nodeId;
+        renderBoard();
+      }
+
+      function handleNodeClick(nodeId) {
+        if (!state.linkingFromId) return;
+        if (state.linkingFromId === nodeId) {
+          state.linkingFromId = null;
+          renderBoard();
+          return;
+        }
+        const from = state.linkingFromId;
+        state.linkingFromId = null;
+        renderBoard();
+        addOrEditLink(from, nodeId);
+      }
+
+      function startDrag(e, nodeId) {
+        const node = state.nodes.find((n) => n.id === nodeId);
+        if (!node) return;
+
+        const rect = boardRect();
+        const startX = e.clientX - rect.left;
+        const startY = e.clientY - rect.top;
+        state.drag = {
+          nodeId,
+          offsetX: startX - node.x,
+          offsetY: startY - node.y,
+        };
+        e.currentTarget.setPointerCapture(e.pointerId);
+      }
+
+      function onDragMove(e) {
+        if (!state.drag) return;
+        const node = state.nodes.find((n) => n.id === state.drag.nodeId);
+        if (!node) return;
+
+        const rect = boardRect();
+        const x = e.clientX - rect.left - state.drag.offsetX;
+        const y = e.clientY - rect.top - state.drag.offsetY;
+        node.x = Math.round(clamp(x, 8, rect.width - node.w - 8));
+        node.y = Math.round(clamp(y, 8, rect.height - node.h - 8));
+        const el = board.querySelector(`[data-node-id="${node.id}"]`);
+        if (el) {
+          el.style.left = `${node.x}px`;
+          el.style.top = `${node.y}px`;
+        }
+        renderLinks();
+      }
+
+      function onDragEnd() {
+        state.drag = null;
+      }
+
+      function renderLinks() {
+        while (svgLayer.firstChild) svgLayer.removeChild(svgLayer.firstChild);
+
+        const rect = boardRect();
+        svgLayer.setAttribute(
+          "viewBox",
+          `0 0 ${Math.round(rect.width)} ${Math.round(rect.height)}`
+        );
+        svgLayer.setAttribute("preserveAspectRatio", "none");
+
+        for (const link of state.links) {
+          const from = state.nodes.find((n) => n.id === link.from);
+          const to = state.nodes.find((n) => n.id === link.to);
+          if (!from || !to) continue;
+
+          const a = nodeCenter(from);
+          const b = nodeCenter(to);
+
+          const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          line.setAttribute("x1", a.x);
+          line.setAttribute("y1", a.y);
+          line.setAttribute("x2", b.x);
+          line.setAttribute("y2", b.y);
+          line.setAttribute("stroke", "rgba(0,0,0,0.55)");
+          line.setAttribute("stroke-width", "2");
+          svgLayer.appendChild(line);
+
+          const midX = (a.x + b.x) / 2;
+          const midY = (a.y + b.y) / 2;
+          let angle = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
+          if (angle > 90) angle -= 180;
+          if (angle < -90) angle += 180;
+
+          if (link.label && link.label.trim()) {
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", midX);
+            text.setAttribute("y", midY - 6);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("font-size", "13");
+            text.setAttribute("font-weight", "600");
+            text.setAttribute("fill", "rgba(0,0,0,0.78)");
+            text.setAttribute("transform", `rotate(${angle} ${midX} ${midY})`);
+            text.textContent = link.label;
+            svgLayer.appendChild(text);
+          }
+        }
+      }
+
+      function updateQuickCheck() {
+        const counts = { entita: 0, proces: 0, data: 0, "uživatel": 0 };
+        for (const n of state.nodes) counts[n.type] = (counts[n.type] || 0) + 1;
+
+        const conds = {
+          chk1: counts.entita >= 4,
+          chk2: counts.proces >= 2,
+          chk3: counts.data >= 3,
+          chk4: counts["uživatel"] >= 2,
+          chk5:
+            state.links.length > 0 &&
+            state.links.every((l) => l.label && l.label.trim()),
+        };
+
+        let allDone = true;
+        for (const id of Object.keys(conds)) {
+          const el = document.getElementById(id);
+          if (!el) continue;
+          el.checked = conds[id];
+          if (!conds[id]) allDone = false;
+        }
+
+        const card = document.getElementById("task3Card");
+        if (card) card.classList.toggle("all-done", allDone);
+      }
+
+      board.addEventListener("pointermove", onDragMove);
+      board.addEventListener("pointerup", onDragEnd);
+      board.addEventListener("pointercancel", onDragEnd);
+      board.addEventListener("click", (e) => {
+        if (e.target.closest(".node")) return;
+        if (state.linkingFromId) {
+          state.linkingFromId = null;
+          renderBoard();
+        }
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && state.linkingFromId) {
+          state.linkingFromId = null;
+          renderBoard();
+        }
+      });
+
+      document.querySelectorAll("[data-add]").forEach((btn) => {
+        btn.addEventListener("click", () => addNode(btn.dataset.add));
+      });
+
+      document.getElementById("btnClearBoard").addEventListener("click", () => {
+        if (!confirm("Smazat celý model (krabice i čáry)?")) return;
+        clearBoard();
+      });
+      document.getElementById("btnClearLinks").addEventListener("click", () => {
+        if (!confirm("Smazat všechny čáry?")) return;
+        clearLinks();
+      });
+
+      renderWordBank();
+      setupBlanks();
+      renderBoard();
+
+      const HINT_NODES = [
+        { id: "hu1", type: "uživatel", title: "Učitel", content: "přihlášený do systému", x: 40, y: 30, w: 180, h: 75 },
+        { id: "hp1", type: "proces", title: "Zapsat známku", content: "učitel uloží známku", x: 520, y: 30, w: 180, h: 75 },
+        { id: "he1", type: "entita", title: "Známka", content: "hodnota, datum, předmět", x: 520, y: 260, w: 180, h: 80 },
+        { id: "hd1", type: "data", title: "Hodnota 1–5", content: "číslo", x: 40, y: 260, w: 180, h: 80 },
+      ];
+      const HINT_LINKS = [
+        { from: "hu1", to: "hp1", label: "spouští" },
+        { from: "hp1", to: "he1", label: "vytváří" },
+        { from: "he1", to: "hd1", label: "obsahuje" },
+      ];
+
+      let hintRendered = false;
+      function renderHintBoard() {
+        const board = document.getElementById("hintBoard");
+        if (!board) return;
+        board.innerHTML = "";
+
+        const svgNS = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(svgNS, "svg");
+        svg.setAttribute("class", "svg-layer");
+        svg.setAttribute("width", "740");
+        svg.setAttribute("height", "380");
+        svg.setAttribute("viewBox", "0 0 740 380");
+        board.appendChild(svg);
+
+        for (const node of HINT_NODES) {
+          const el = document.createElement("div");
+          el.className = "node";
+          el.style.left = `${node.x}px`;
+          el.style.top = `${node.y}px`;
+          el.style.width = `${node.w}px`;
+          el.style.minHeight = `${node.h}px`;
+
+          const title = document.createElement("div");
+          title.className = "title";
+          const titleText = document.createElement("div");
+          titleText.textContent = node.title;
+          const type = document.createElement("span");
+          const typeSlug = node.type === "uživatel" ? "uzivatel" : node.type;
+          type.className = "type type-" + typeSlug;
+          type.textContent = typeBadge(node.type);
+          title.appendChild(titleText);
+          title.appendChild(type);
+
+          const content = document.createElement("div");
+          content.className = "content";
+          content.textContent = node.content;
+
+          el.appendChild(title);
+          el.appendChild(content);
+          board.appendChild(el);
+        }
+
+        const byId = new Map(HINT_NODES.map((n) => [n.id, n]));
+        for (const link of HINT_LINKS) {
+          const a = byId.get(link.from);
+          const b = byId.get(link.to);
+          if (!a || !b) continue;
+          const ax = a.x + a.w / 2;
+          const ay = a.y + a.h / 2;
+          const bx = b.x + b.w / 2;
+          const by = b.y + b.h / 2;
+
+          const line = document.createElementNS(svgNS, "line");
+          line.setAttribute("x1", ax);
+          line.setAttribute("y1", ay);
+          line.setAttribute("x2", bx);
+          line.setAttribute("y2", by);
+          line.setAttribute("stroke", "rgba(0,0,0,0.45)");
+          line.setAttribute("stroke-width", "2");
+          svg.appendChild(line);
+
+          const midX = (ax + bx) / 2;
+          const midY = (ay + by) / 2;
+          let angle = (Math.atan2(by - ay, bx - ax) * 180) / Math.PI;
+          if (angle > 90) angle -= 180;
+          if (angle < -90) angle += 180;
+
+          const text = document.createElementNS(svgNS, "text");
+          text.setAttribute("x", midX);
+          text.setAttribute("y", midY - 6);
+          text.setAttribute("text-anchor", "middle");
+          text.setAttribute("font-size", "13");
+          text.setAttribute("font-weight", "600");
+          text.setAttribute("fill", "rgba(0,0,0,0.78)");
+          text.setAttribute("stroke", "rgba(255,255,255,0.9)");
+          text.setAttribute("stroke-width", "3");
+          text.setAttribute("paint-order", "stroke");
+          text.setAttribute("transform", `rotate(${angle} ${midX} ${midY})`);
+          text.textContent = link.label;
+          svg.appendChild(text);
+        }
+      }
+
+      const hintModalEl = document.getElementById("hintModal");
+      if (hintModalEl) {
+        hintModalEl.addEventListener("shown.bs.modal", () => {
+          if (!hintRendered) {
+            renderHintBoard();
+            hintRendered = true;
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
