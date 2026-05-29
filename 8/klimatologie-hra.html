@@ -1,0 +1,1609 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Klimatologie – hra (8. třída)</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+
+    <style>
+      body {
+        background: radial-gradient(1200px 600px at 20% 0%, #e8f4ff 0%, rgba(232, 244, 255, 0) 60%),
+          radial-gradient(900px 500px at 90% 20%, #fff3e6 0%, rgba(255, 243, 230, 0) 55%),
+          linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      }
+      .hero {
+        border: 1px solid rgba(13, 110, 253, 0.15);
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(6px);
+      }
+      .mono {
+        font-variant-numeric: tabular-nums;
+      }
+      .kpi {
+        border: 1px solid rgba(13, 110, 253, 0.12);
+        background: rgba(13, 110, 253, 0.035);
+      }
+      canvas {
+        width: 100%;
+        display: block;
+      }
+      #chart {
+        height: 320px;
+      }
+      #tradeChart {
+        height: 180px;
+      }
+      .small-help {
+        font-size: 0.92rem;
+      }
+      .source-dot {
+        width: 0.85rem;
+        height: 0.85rem;
+        border-radius: 999px;
+        display: inline-block;
+        flex: 0 0 auto;
+      }
+      .meta-icon {
+        width: 16px;
+        height: 16px;
+        vertical-align: -0.15em;
+      }
+      .meta-icon-text {
+        width: 16px;
+        height: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        line-height: 1;
+      }
+      .legend-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.25rem 0.55rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        background: rgba(255, 255, 255, 0.7);
+      }
+      .hud-root {
+        display: flex;
+        justify-content: flex-end;
+      }
+      .hud-shell {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        max-width: min(328px, calc(96vw - 44px));
+        transition: max-width 180ms ease;
+      }
+      .hud-toggle {
+        flex: 0 0 28px;
+        width: 28px;
+        padding: 0.2rem 0.15rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        align-self: stretch;
+        border-radius: 0.75rem 0 0 0.75rem;
+        border-right: none;
+        box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
+        z-index: 2;
+      }
+      .hud-panel {
+        flex: 0 1 auto;
+        width: min(300px, calc(96vw - 80px));
+        min-width: 0;
+        max-width: min(300px, calc(96vw - 80px));
+        overflow: hidden;
+        transition: width 180ms ease, max-width 180ms ease, opacity 180ms ease;
+      }
+      .hud-time {
+        min-width: 8.25rem;
+        display: flex;
+        flex-direction: column;
+      }
+      .hud-time #btnFastSpeed {
+        margin-top: auto;
+        align-self: flex-start;
+      }
+      .hud-finance {
+        min-width: 8.75rem;
+      }
+      .hud-root.minimized .hud-shell {
+        max-width: 28px;
+      }
+      .hud-root.minimized .hud-panel {
+        width: 0;
+        max-width: 0;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .hud-root.minimized .hud-panel .card {
+        border: none;
+        box-shadow: none;
+      }
+      .hud-root.minimized .hud-toggle {
+        border-radius: 0.75rem;
+        border-right: 1px solid var(--bs-border-color);
+      }
+      .mix-row {
+        border-radius: 0.9rem;
+        padding: 0.65rem 0.75rem;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        background: rgba(255, 255, 255, 0.75);
+      }
+      .mix-row:hover {
+        border-color: rgba(13, 110, 253, 0.25);
+      }
+      .inv-card {
+        position: relative;
+        overflow: hidden;
+      }
+      .inv-level-fill {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 0;
+        background: rgba(25, 135, 84, 0.28);
+        transition: width 200ms ease;
+        pointer-events: none;
+        z-index: 0;
+      }
+      .inv-card-body {
+        position: relative;
+        z-index: 1;
+      }
+      .snackbar-wrap {
+        position: fixed;
+        left: 1rem;
+        bottom: 1rem;
+        z-index: 1090;
+        pointer-events: none;
+        max-width: min(360px, calc(100vw - 2rem));
+      }
+      .snackbar {
+        pointer-events: auto;
+        padding: 0.75rem 1rem;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(220, 53, 69, 0.35);
+        background: rgba(255, 255, 255, 0.97);
+        box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.14);
+        transform: translateY(1rem);
+        opacity: 0;
+        transition: transform 220ms ease, opacity 220ms ease;
+      }
+      .snackbar.is-visible {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      .btn-lg {
+        border-radius: 0.9rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="container py-4 py-md-5">
+      <div class="hero rounded-4 p-4 p-md-5 shadow-sm mb-4">
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+          <a class="btn btn-outline-secondary" href="../home.html" aria-label="Zpět na domovskou stránku">
+            <span class="d-inline-flex align-items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M15 8a.5.5 0 0 1-.5.5H3.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L3.707 7.5H14.5A.5.5 0 0 1 15 8z"
+                />
+              </svg>
+              <span>Zpět</span>
+            </span>
+          </a>
+          <span class="badge text-bg-primary px-3 py-2">8. třída</span>
+        </div>
+
+        <div class="d-flex flex-column flex-md-row align-items-md-center gap-3 gap-md-4">
+          <div class="flex-grow-1">
+            <h1 class="display-6 fw-bold mb-2">Klimatologie – uhlíková neutralita do 2050</h1>
+            <p class="lead mb-0">
+              Hraješ za EU. Od roku <b>2025</b> upravuješ energetický mix (výrobu elektřiny), rozpočet a dopady na populaci.
+              Cíl je splnit milníky a být v roce <b>2050 uhlíkově neutrální</b> (emise vyrovná pohlcení).
+            </p>
+          </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <div class="row g-3 align-items-md-center">
+          <div class="col-12 col-lg-8">
+            <div class="small-help text-body-secondary">
+              <div class="mb-1">
+                <b>Milníky EU (zjednodušeně):</b> do 2030 alespoň −55 % oproti 1990, do 2040 asi −90 %, do 2050 neutralita.
+              </div>
+              <div>
+                Simulace běží pořád (po měsících). Každý měsíc se přepočítá ekonomika, pracovní místa, rozpočet, emise a pohlcení.
+              </div>
+              <div class="d-flex flex-wrap gap-2 mt-2">
+                <span class="legend-chip">
+                  <svg class="meta-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                    <path d="M4.406 3.342A5.53 5.53 0 0 1 8 2c2.69 0 4.923 2 5.166 4.579A3 3 0 0 1 13 12H4a4 4 0 0 1 .406-8.658Z"/>
+                  </svg>
+                  <span>emise</span>
+                </span>
+                <span class="legend-chip">
+                  <svg class="meta-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path
+                      d="M14.04,12H10V11H5.5A3.5,3.5 0 0,1 2,7.5A3.5,3.5 0 0,1 5.5,4C6.53,4 7.45,4.44 8.09,5.15C8.5,3.35 10.08,2 12,2C13.92,2 15.5,3.35 15.91,5.15C16.55,4.44 17.47,4 18.5,4A3.5,3.5 0 0,1 22,7.5A3.5,3.5 0 0,1 18.5,11H14.04V12M10,16.9V15.76H5V13.76H19V15.76H14.04V16.92L20,19.08C20.58,19.29 21,19.84 21,20.5A1.5,1.5 0 0,1 19.5,22H4.5A1.5,1.5 0 0,1 3,20.5C3,19.84 3.42,19.29 4,19.08L10,16.9Z"
+                    />
+                  </svg>
+                  <span>stabilita</span>
+                </span>
+                <span class="legend-chip">
+                  <span class="meta-icon-text" aria-hidden="true">€</span>
+                  <span>cena</span>
+                </span>
+                <span class="legend-chip">
+                  <svg class="meta-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                    <path d="M11.251 0a.5.5 0 0 1 .471.667L9.5 6H13a.5.5 0 0 1 .39.812l-8 9.5A.5.5 0 0 1 4.5 16l2.25-6H3a.5.5 0 0 1-.39-.812l8-9.5A.5.5 0 0 1 11.251 0Z"/>
+                  </svg>
+                  <span>výroba</span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-lg-4">
+            <div class="d-grid d-sm-flex gap-2 justify-content-lg-end">
+              <button id="btnPause" class="btn btn-primary btn-lg" type="button">Spustit</button>
+              <button id="btnReset" class="btn btn-outline-secondary btn-lg" type="button">Reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-12 col-lg-5">
+          <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4 p-md-4">
+              <h2 class="h5 fw-bold mb-2">Energetický mix (výroba elektřiny)</h2>
+              <p class="text-body-secondary mb-3">
+                Procenta jsou jen <b>informační</b>. Mix měníš tím, že <b>kupuješ/prodáváš elektrárny</b>. Výstavba stojí peníze a
+                rychlé zavírání fosilních zdrojů může zvýšit nezaměstnanost a zhoršit ekonomiku.
+              </p>
+
+              <div class="vstack gap-2" id="mixControls"></div>
+
+              <div class="rounded-4 border bg-body-tertiary p-3 mt-3" id="impactBox">
+                <div class="fw-semibold mb-2">Jak elektrárny ovlivňují společnost</div>
+                <div class="small text-body-secondary mb-2">
+                  <b>Nezaměstnanost</b> roste hlavně při rychlém poklesu uhlí+plyn.
+                  <b>Stabilita sítě</b> = jak spolehlivý je mix (uhlí, jádro, baterie…).
+                  <b>Riziko výpadků</b> = šance výpadků při hodně větru+slunci a nízké stabilitě.
+                  <b>Spokojenost</b> klesá při drahé energii, výpadcích a vysoké nezaměstnanosti.
+                </div>
+                <div class="row g-2">
+                  <div class="col-12 col-md-4">
+                    <div class="d-flex justify-content-between">
+                      <span class="text-body-secondary small">Podíl fosilu</span>
+                      <span class="mono fw-semibold" id="impactFossil">—</span>
+                    </div>
+                    <div class="progress" style="height: 8px">
+                      <div class="progress-bar bg-danger" id="impactFossilBar" style="width: 0%"></div>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <div class="d-flex justify-content-between">
+                      <span class="text-body-secondary small">Nestálé zdroje</span>
+                      <span class="mono fw-semibold" id="impactVolatility">—</span>
+                    </div>
+                    <div class="progress" style="height: 8px">
+                      <div class="progress-bar bg-warning" id="impactVolatilityBar" style="width: 0%"></div>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <div class="d-flex justify-content-between">
+                      <span class="text-body-secondary small">Stabilita sítě</span>
+                      <span class="mono fw-semibold" id="impactStability">—</span>
+                    </div>
+                    <div class="progress" style="height: 8px">
+                      <div class="progress-bar bg-success" id="impactStabilityBar" style="width: 0%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <hr class="my-4" />
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-7">
+          <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4 p-md-4">
+              <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-2">
+                <h2 class="h5 fw-bold mb-0">Graf emisí (navazuje na vývoj)</h2>
+                <div class="text-body-secondary small">
+                  Index (1990 = 100): součet emisí ze všech elektráren (MWh × intenzita). Může přesáhnout 100 %.
+                  Cíl 2050: <b>emise ≤ pohlcení</b>.
+                </div>
+              </div>
+
+              <div class="rounded-4 border bg-white p-2">
+                <canvas id="chart" width="900" height="320" aria-label="Graf emisí" role="img"></canvas>
+              </div>
+
+              <div class="row g-2 mt-3">
+                <div class="col-12 col-md-4">
+                  <div class="kpi rounded-4 p-3 h-100">
+                    <div class="text-body-secondary small">Rok</div>
+                    <div class="display-6 fw-bold mono mb-0" id="kpiYear">2025</div>
+                  </div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="kpi rounded-4 p-3 h-100">
+                    <div class="text-body-secondary small">Emise (index)</div>
+                    <div class="display-6 fw-bold mono mb-0" id="kpiEmissions">—</div>
+                    <div class="small text-body-secondary" id="kpiMilestone">—</div>
+                  </div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="kpi rounded-4 p-3 h-100">
+                    <div class="text-body-secondary small">Pohlcení (index)</div>
+                    <div class="display-6 fw-bold mono mb-0" id="kpiSinks">—</div>
+                    <div class="small text-body-secondary" id="kpiNeutrality">—</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row g-2 mt-1">
+                <div class="col-12 col-md-4">
+                  <div class="kpi rounded-4 p-3 h-100">
+                    <div class="text-body-secondary small">Nezaměstnanost</div>
+                    <div class="h2 fw-bold mono mb-0" id="kpiUnemployment">—</div>
+                    <div class="small text-body-secondary">vliv: rychlé zavírání fosilních zdrojů</div>
+                  </div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="kpi rounded-4 p-3 h-100">
+                    <div class="text-body-secondary small">Spokojenost populace</div>
+                    <div class="h2 fw-bold mono mb-0" id="kpiHappiness">—</div>
+                    <div class="small text-body-secondary">0–100 (práce, ceny energie, investice)</div>
+                  </div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="kpi rounded-4 p-3 h-100">
+                    <div class="text-body-secondary small">Riziko výpadků</div>
+                    <div class="h2 fw-bold mono mb-0" id="kpiBlackouts">—</div>
+                    <div class="small text-body-secondary">musí zůstat pod <span class="mono" id="kpiBlackoutMax">—</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="alert alert-success rounded-4 mt-4 d-none" id="winBox" role="status">
+                <div class="fw-bold mb-1">Splněno!</div>
+                <div class="mb-0">
+                  Do roku <b>2050</b> jsi dosáhl(a) <b>uhlíkové neutrality</b> (emise jsou vyvážené pohlcením).
+                </div>
+              </div>
+              <div class="alert alert-warning rounded-4 mt-4 d-none" id="loseBox" role="status">
+                <div class="fw-bold mb-1">Krize</div>
+                <div class="mb-0" id="loseText"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card border-0 shadow-sm rounded-4 mt-4">
+            <div class="card-body p-4 p-md-4">
+              <h2 class="h5 fw-bold mb-2">Bilance elektřiny (měsíčně)</h2>
+              <div class="text-body-secondary small mb-3">Ukazuje posledních 12 měsíců (export/import).</div>
+
+              <div class="row g-2">
+                <div class="col-12 col-md-4">
+                  <div class="text-body-secondary small">Poptávka</div>
+                  <div class="h5 fw-bold mono mb-0" id="pwrDemand">—</div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="text-body-secondary small">Výroba</div>
+                  <div class="h5 fw-bold mono mb-0" id="pwrSupply">—</div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="text-body-secondary small">Rozdíl</div>
+                  <div class="h5 fw-bold mono mb-0" id="pwrDiff">—</div>
+                  <div class="small mono text-end mt-1" id="pwrTrade">—</div>
+                </div>
+              </div>
+
+              <div class="rounded-4 border bg-white p-2 mt-3">
+                <canvas id="tradeChart" width="900" height="180" aria-label="Sloupcový graf exportu/importu" role="img"></canvas>
+              </div>
+              <div class="text-body-secondary small mt-2">
+                Zelená = <b>export</b> (přebytek), červená = <b>import</b> (nedostatek).
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm rounded-4 mt-4">
+        <div class="card-body p-4 p-md-4">
+          <h2 class="h5 fw-bold mb-2">Investice a opatření</h2>
+          <p class="text-body-secondary mb-3">
+            Každá investice stojí peníze, ale může zlepšit emise, stabilitu sítě, nezaměstnanost nebo spokojenost.
+            Všechny investice jde také <b>prodat</b> (část peněz se vrátí).
+          </p>
+          <div class="row g-2" id="investments"></div>
+        </div>
+      </div>
+    </main>
+
+    <div class="snackbar-wrap" aria-live="polite">
+      <div class="snackbar d-none" id="warningBox" role="alert">
+        <div class="fw-semibold text-danger small mb-1">Pozor</div>
+        <div class="small text-body-secondary mb-0" id="warningText"></div>
+      </div>
+    </div>
+
+    <div class="position-fixed bottom-0 end-0 p-3" id="hudWrap" style="z-index: 1080">
+      <div class="hud-root" id="hudRoot">
+        <div class="hud-shell">
+          <button
+            class="btn btn-outline-secondary hud-toggle"
+            id="btnHudToggle"
+            type="button"
+            aria-label="Minimalizovat panel"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+              <path
+                fill-rule="evenodd"
+                d="M9.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L8.293 8 6.146 10.146a.5.5 0 0 0 .708.708l3-3z"
+              />
+            </svg>
+          </button>
+          <div class="hud-panel">
+            <div class="card border-0 shadow-sm rounded-4 rounded-start-0 h-100">
+            <div class="card-body p-2 px-3">
+              <div class="d-flex align-items-stretch justify-content-between gap-2">
+                <div class="hud-time">
+                  <div class="text-body-secondary small">Čas</div>
+                  <div class="fw-bold mono" id="hudTime">—</div>
+                  <button
+                    id="btnFastSpeed"
+                    class="btn btn-outline-secondary btn-sm mono"
+                    type="button"
+                    aria-pressed="false"
+                    aria-label="Zapnout 5× rychlost"
+                    title="5× rychleji (zapnout/vypnout)"
+                  >
+                    &gt;&gt;5×
+                  </button>
+                </div>
+                <div class="text-end hud-finance">
+                  <div class="text-body-secondary small">Finance (mld. €)</div>
+                  <div class="h3 fw-bold mono mb-0" id="hudBudget">—</div>
+                  <div class="text-body-secondary small" id="hudBudgetHint">—</div>
+                  <div class="small mono mt-1" id="hudBudgetDelta">—</div>
+                </div>
+              </div>
+              <hr class="my-2" />
+              <div class="d-flex align-items-center justify-content-between gap-2">
+                <div class="text-body-secondary small">Mezerník: spustit/pozastavit</div>
+                <div class="badge text-bg-light border mono" id="hudStatus">PAUZA</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+      // ===== Helpers
+      const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+      const lerp = (a, b, t) => a + (b - a) * t;
+      const fmt1 = (n) => (Number.isFinite(n) ? n.toFixed(1).replace('.', ',') : '—');
+      const fmt0 = (n) => (Number.isFinite(n) ? Math.round(n).toString() : '—');
+      const fmtMoney = (n) => (Number.isFinite(n) ? n.toFixed(1).replace('.', ',') : '—');
+      const clampBudget = (x) => clamp(x, MIN_BUDGET, MAX_BUDGET);
+
+      const MONTHS = ['leden', 'únor', 'březen', 'duben', 'květen', 'červen', 'červenec', 'srpen', 'září', 'říjen', 'listopad', 'prosinec'];
+
+      const ICON_STABILITY =
+        '<svg class="meta-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14.04,12H10V11H5.5A3.5,3.5 0 0,1 2,7.5A3.5,3.5 0 0,1 5.5,4C6.53,4 7.45,4.44 8.09,5.15C8.5,3.35 10.08,2 12,2C13.92,2 15.5,3.35 15.91,5.15C16.55,4.44 17.47,4 18.5,4A3.5,3.5 0 0,1 22,7.5A3.5,3.5 0 0,1 18.5,11H14.04V12M10,16.9V15.76H5V13.76H19V15.76H14.04V16.92L20,19.08C20.58,19.29 21,19.84 21,20.5A1.5,1.5 0 0,1 19.5,22H4.5A1.5,1.5 0 0,1 3,20.5C3,19.84 3.42,19.29 4,19.08L10,16.9Z"/></svg>';
+
+      // ===== Model assumptions (school-friendly, simplified)
+      // Emissions index: 1990 = 100
+      // Neutrality: residual emissions can remain if they are balanced by removals/sinks.
+      // Typical net-zero frameworks target ~90%+ reductions with <=10% residual emissions (often even less in power sector).
+      // In our model, win at 2050 requires emissions <= sinks and <= 5 % of 1990 index.
+      const ACCEPTABLE_RESIDUAL_INDEX = 5;
+      const MAX_BLACKOUT_RISK = 20; // %
+      const MIN_BUDGET = -50; // mld. € – krize až pod touto hranicí
+      const MAX_BUDGET = 1000;
+      const DEMAND_GROWTH_PER_YEAR = 0.01; // +1 % poptávky ročně
+      const DEMAND_GROWTH_START_YEAR = 2025;
+      const DEMAND_GROWTH_START_MONTH = 1;
+      const DEMAND_SEASONAL_AMP = 0.0192; // sezónní výkyvy poptávky (~±1,9 %, celkem cca −84 % oproti původním ±12 %)
+      const SWING_AMPLITUDE = 0.4; // ostatní kolísání: 40 % původní amplitudy (−60 %)
+
+      const SOURCES = [
+        { key: 'coal', name: 'Uhlí', color: '#dc3545', intensity: 1.0, plantCost: 33, plantCap: 10, plantMWh: 520, jobs: 1.0, stable: 1.0 },
+        { key: 'gas', name: 'Plyn', color: '#6f42c1', intensity: 0.6, plantCost: 27, plantCap: 9, plantMWh: 420, jobs: 0.7, stable: 0.9 },
+        { key: 'nuclear', name: 'Jádro', color: '#0d6efd', intensity: 0.05, plantCost: 99, plantCap: 14, plantMWh: 780, jobs: 0.85, stable: 1.0 },
+        { key: 'wind', name: 'Vítr', color: '#20c997', intensity: 0.1, plantCost: 36, plantCap: 10, plantMWh: 260, jobs: 0.35, stable: 0.45 },
+        { key: 'solar', name: 'Slunce', color: '#ffc107', intensity: 0.1, plantCost: 24, plantCap: 8, plantMWh: 180, jobs: 0.25, stable: 0.35 },
+        { key: 'hydro', name: 'Hydro', color: '#0dcaf0', intensity: 0, plantCost: 55, plantCap: 8, plantMWh: 300, jobs: 0.25, stable: 0.75 },
+        { key: 'biomass', name: 'Biomasa', color: '#198754', intensity: 0.3, plantCost: 21, plantCap: 7, plantMWh: 240, jobs: 0.45, stable: 0.8 },
+      ];
+
+      const TARGETS = [
+        { year: 2030, target: 45, label: '2030: ≤ 45 (−55 %)' },
+        { year: 2040, target: 8, label: '2040: ~8 (−92 %)' },
+        { year: 2050, target: ACCEPTABLE_RESIDUAL_INDEX, label: `2050: emise ≤ pohlcení (ideál ≤ ${ACCEPTABLE_RESIDUAL_INDEX} %)` },
+      ];
+
+      const INV_MAX_LEVEL = 4;
+
+      // Investice: každá úroveň (0–4) = procenta z aktuální hodnoty (viz pctPerLevel).
+      const INVESTMENTS = [
+        {
+          id: 'efficiency',
+          name: 'Zateplování + úspory',
+          cost: 18,
+          sellRate: 0.7,
+          effects: 'spotřeba −3 % / úroveň, emise −2,5 % / úroveň',
+          pctPerLevel: { demand: 3, emissions: 2.5 },
+        },
+        {
+          id: 'reskill',
+          name: 'Rekvalifikace',
+          cost: 14,
+          sellRate: 0.6,
+          effects: 'šok nezaměstnanosti −10 % / úroveň',
+          pctPerLevel: { unemploymentShock: 10 },
+        },
+        {
+          id: 'removals',
+          name: 'Pohlcování CO₂ (lesy/technologie)',
+          cost: 28,
+          sellRate: 0.55,
+          effects: 'pohlcení +8 % / úroveň (po 2030), spokojenost −1,5 % / úroveň',
+          pctPerLevel: { sinks: 8, happiness: 1.5 },
+        },
+        {
+          id: 'storage',
+          name: 'Baterie a akumulace',
+          cost: 20,
+          sellRate: 0.65,
+          effects: 'stabilita +4 % / úroveň, riziko výpadků −12 % / úroveň, volatilita V+S −3 % / úroveň',
+          pctPerLevel: { stability: 4, blackoutRisk: 12, volatility: 3 },
+        },
+        {
+          id: 'grid',
+          name: 'Posílení sítě',
+          cost: 16,
+          sellRate: 0.6,
+          effects: 'stabilita +1,5 % / úroveň, riziko výpadků −5 % / úroveň, volatilita V+S −1,25 % / úroveň',
+          pctPerLevel: { stability: 1.5, blackoutRisk: 5, volatility: 1.25 },
+        },
+        {
+          id: 'heat',
+          name: 'Tepelná čerpadla a chytré vytápění',
+          cost: 17,
+          sellRate: 0.55,
+          effects: 'emise −2,5 % / úroveň',
+          pctPerLevel: { emissions: 2.5 },
+        },
+      ];
+
+      function investmentLevel(id) {
+        return clamp(state.inv[id] ?? 0, 0, INV_MAX_LEVEL);
+      }
+
+      /** Součet % za všechny úrovně dané investice (např. 3. úroveň × 4 %/úroveň = 12 %). */
+      function investmentEffectPct(id, stat) {
+        const inv = INVESTMENTS.find((x) => x.id === id);
+        const perLevel = inv?.pctPerLevel?.[stat] ?? 0;
+        return investmentLevel(id) * perLevel;
+      }
+
+      function scaleDownByPct(value, pctDown) {
+        return value * Math.max(0, 1 - pctDown / 100);
+      }
+
+      function scaleUpByPct(value, pctUp) {
+        return value * (1 + pctUp / 100);
+      }
+
+      const initial = () => {
+        // start paused
+        const start = { year: 2025, month: 1 }; // leden 2025
+
+        // Short history 2023-01 .. 2025-01 (25 měsíců) so player sees recent trend
+        const historyT = [];
+        const historyE = [];
+        const historyS = [];
+        let y = 2023;
+        let m = 1;
+        for (let i = 0; i < 25; i++) {
+          historyT.push({ year: y, month: m });
+          // historie před startem: plynule z 93 % (2023) na 99 % (leden 2025)
+          const e = 93 + ((99 - 93) * i) / 24;
+          historyE.push(clamp(e, 90, 100));
+          historyS.push(6.0); // baseline sinks shown as a line
+          m++;
+          if (m > 12) {
+            m = 1;
+            y++;
+          }
+        }
+
+        // Plants chosen to roughly mimic original mix shares.
+        const plants = { coal: 18, gas: 3, nuclear: 7, wind: 2, solar: 2, hydro: 1, biomass: 2 };
+
+        // Poptávka v lednu 2025 = 16 000 MWh (sezóna a růst 2 %/rok se počítají z tohoto základu).
+        const startSeasonal = 1 + DEMAND_SEASONAL_AMP * Math.cos(((start.month - 1) / 12) * Math.PI * 2);
+        const powerBaseDemand = 16000 / startSeasonal;
+
+        return {
+          running: false,
+          time: start,
+          historyT,
+          historyE,
+          historyS,
+          plants,
+          powerBaseDemand,
+
+          budget: 0,
+          unemployment: 6.4,
+          happiness: 54,
+          blackoutRisk: 2.5,
+
+          // investments levels
+          inv: Object.fromEntries(INVESTMENTS.map((x) => [x.id, 0])),
+
+          lastFossilShare: null,
+          speed5x: false,
+          message: null,
+          lost: false,
+          won: false,
+          gameOver: false,
+        };
+      };
+
+      const GAME_END_YEAR = 2050;
+      const GAME_END_MONTH = 12;
+
+      function isGameEndTime(time) {
+        return (
+          time.year > GAME_END_YEAR ||
+          (time.year === GAME_END_YEAR && time.month >= GAME_END_MONTH)
+        );
+      }
+
+      const MONTH_MS_NORMAL = 1000;
+      const MONTH_MS_FAST = Math.round(1000 / 5);
+      const getMonthMs = () => (state.speed5x ? MONTH_MS_FAST : MONTH_MS_NORMAL);
+
+      let state = initial();
+
+      // ===== UI refs
+      const elMixControls = document.getElementById('mixControls');
+      const elInvestments = document.getElementById('investments');
+      const warningBox = document.getElementById('warningBox');
+      const warningText = document.getElementById('warningText');
+      const hudTime = document.getElementById('hudTime');
+      const hudBudget = document.getElementById('hudBudget');
+      const hudBudgetHint = document.getElementById('hudBudgetHint');
+      const hudBudgetDelta = document.getElementById('hudBudgetDelta');
+      const hudStatus = document.getElementById('hudStatus');
+      const hudRoot = document.getElementById('hudRoot');
+      const btnHudToggle = document.getElementById('btnHudToggle');
+      const SVG_HUD_COLLAPSE =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M6.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L7.707 8l2.147 2.146a.5.5 0 0 1-.708.708l-3-3z"/></svg>';
+      const SVG_HUD_EXPAND =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M9.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L8.293 8 6.146 10.146a.5.5 0 0 0 .708.708l3-3z"/></svg>';
+      const impactFossil = document.getElementById('impactFossil');
+      const impactFossilBar = document.getElementById('impactFossilBar');
+      const impactVolatility = document.getElementById('impactVolatility');
+      const impactVolatilityBar = document.getElementById('impactVolatilityBar');
+      const impactStability = document.getElementById('impactStability');
+      const impactStabilityBar = document.getElementById('impactStabilityBar');
+      const pwrDemand = document.getElementById('pwrDemand');
+      const pwrSupply = document.getElementById('pwrSupply');
+      const pwrDiff = document.getElementById('pwrDiff');
+      const pwrTrade = document.getElementById('pwrTrade');
+
+      function hideWarning() {
+        if (!warningBox) return;
+        warningBox.classList.remove('is-visible');
+        window.clearTimeout(window.__warnHideT);
+        window.__warnHideT = window.setTimeout(() => warningBox.classList.add('d-none'), 220);
+      }
+
+      function showWarning(text) {
+        if (!warningBox || !warningText) return;
+        warningText.textContent = text;
+        warningBox.classList.remove('d-none');
+        requestAnimationFrame(() => warningBox.classList.add('is-visible'));
+        window.clearTimeout(window.__warnT);
+        window.clearTimeout(window.__warnHideT);
+        window.__warnT = window.setTimeout(hideWarning, 4000);
+      }
+
+      function totalCapacity(plants) {
+        let total = 0;
+        SOURCES.forEach((s) => (total += (plants[s.key] ?? 0) * s.plantCap));
+        return Math.max(1, total);
+      }
+
+      function sharesFromPlants(plants) {
+        const total = totalCapacity(plants);
+        const shares = {};
+        SOURCES.forEach((s) => {
+          shares[s.key] = ((plants[s.key] ?? 0) * s.plantCap * 100) / total;
+        });
+        return shares;
+      }
+
+      function totalSupplyMWh(plants) {
+        return Math.max(
+          1,
+          SOURCES.reduce((acc, s) => acc + (plants[s.key] ?? 0) * s.plantMWh, 0),
+        );
+      }
+
+      /** Součet emisních jednotek: Σ (počet elektráren × MWh/měsíc × intenzita). */
+      function totalEmissionsUnits(plants) {
+        return SOURCES.reduce(
+          (acc, s) => acc + (plants[s.key] ?? 0) * s.plantMWh * s.intensity,
+          0,
+        );
+      }
+
+      const EMISSION_REF_PLANTS = { coal: 18, gas: 3, nuclear: 7, wind: 2, solar: 2, hydro: 1, biomass: 2 };
+      const EMISSION_REF_TOTAL = totalEmissionsUnits(EMISSION_REF_PLANTS);
+      const EMISSION_INDEX_AT_REFERENCE = 99;
+
+      function buildMixControls() {
+        elMixControls.innerHTML = '';
+        SOURCES.forEach((s) => {
+          const row = document.createElement('div');
+          row.className = 'mix-row';
+          row.innerHTML = `
+            <div class="d-flex align-items-center justify-content-between gap-2">
+              <div class="d-flex align-items-center gap-2">
+                <span class="source-dot" style="background:${s.color}"></span>
+                <div>
+                  <div class="fw-semibold">${s.name}</div>
+                  <div class="text-body-secondary small">
+                    <span class="me-2 d-inline-flex align-items-center gap-1">
+                      <svg class="meta-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                        <path d="M4.406 3.342A5.53 5.53 0 0 1 8 2c2.69 0 4.923 2 5.166 4.579A3 3 0 0 1 13 12H4a4 4 0 0 1 .406-8.658Z"/>
+                      </svg>
+                      <span class="mono">${fmt1(s.intensity)}</span>
+                    </span>
+                    <span class="me-2 d-inline-flex align-items-center gap-1">
+                      <span class="meta-icon-text" aria-hidden="true">€</span>
+                      <span class="mono">${fmtMoney(s.plantCost)}</span>
+                    </span>
+                    <span class="me-2 d-inline-flex align-items-center gap-1">
+                      ${ICON_STABILITY}
+                      <span class="mono">${fmt0(s.stable * 100)}%</span>
+                    </span>
+                    <span class="d-inline-flex align-items-center gap-1">
+                      <svg class="meta-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                        <path d="M11.251 0a.5.5 0 0 1 .471.667L9.5 6H13a.5.5 0 0 1 .39.812l-8 9.5A.5.5 0 0 1 4.5 16l2.25-6H3a.5.5 0 0 1-.39-.812l8-9.5A.5.5 0 0 1 11.251 0Z"/>
+                      </svg>
+                      <span class="mono">${fmt0(s.plantMWh)} MWh</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="text-end">
+                <div class="fw-bold mono"><span id="pct-${s.key}">0</span> %</div>
+                <div class="text-body-secondary small">elektrárny: <span class="mono" id="cnt-${s.key}">0</span></div>
+              </div>
+            </div>
+            <div class="d-flex gap-2 mt-2">
+              <button class="btn btn-outline-primary btn-sm" type="button" id="buy-${s.key}">Koupit</button>
+              <button class="btn btn-outline-secondary btn-sm" type="button" id="sell-${s.key}">Prodat</button>
+            </div>
+          `;
+          elMixControls.appendChild(row);
+        });
+
+        SOURCES.forEach((s) => {
+          document.getElementById(`buy-${s.key}`).addEventListener('click', () => buyPlant(s.key));
+          document.getElementById(`sell-${s.key}`).addEventListener('click', () => sellPlant(s.key));
+        });
+      }
+
+      function syncMixUI() {
+        const shares = sharesFromPlants(state.plants);
+        SOURCES.forEach((s) => {
+          const pct = document.getElementById(`pct-${s.key}`);
+          const cnt = document.getElementById(`cnt-${s.key}`);
+          if (pct) pct.textContent = fmt0(shares[s.key]);
+          if (cnt) cnt.textContent = fmt0(state.plants[s.key] ?? 0);
+        });
+      }
+
+      function effectivePlantCost(s) {
+        const rnd = state.inv.rnd ?? 0;
+        // Each R&D level reduces costs slightly (up to ~15%)
+        const discount = clamp(0.04 * rnd, 0, 0.15);
+        return s.plantCost * (1 - discount);
+      }
+
+      function buyPlant(key) {
+        if (state.won) return;
+        const s = SOURCES.find((x) => x.key === key);
+        if (!s) return;
+        const cost = effectivePlantCost(s);
+        if (state.budget - cost < MIN_BUDGET) {
+          showWarning(`Nelze koupit: rozpočet by klesl pod ${MIN_BUDGET} mld. €.`);
+          return;
+        }
+        state.budget = clampBudget(state.budget - cost);
+        state.plants[key] = (state.plants[key] ?? 0) + 1;
+        syncMixUI();
+        syncEmissionsSnapshot();
+        refreshImpacts();
+      }
+
+      function sellPlant(key) {
+        if (state.won) return;
+        const s = SOURCES.find((x) => x.key === key);
+        if (!s) return;
+        if ((state.plants[key] ?? 0) <= 0) return;
+        state.plants[key] -= 1;
+        // selling gives a small refund (10 %)
+        state.budget = clampBudget(state.budget + effectivePlantCost(s) * 0.1);
+        syncMixUI();
+        syncEmissionsSnapshot();
+        refreshImpacts();
+      }
+
+      function buildInvestmentsUI() {
+        elInvestments.innerHTML = '';
+        INVESTMENTS.forEach((inv) => {
+          const col = document.createElement('div');
+          col.className = 'col-12 col-md-6';
+          col.innerHTML = `
+            <div class="mix-row inv-card">
+              <div class="inv-level-fill" id="inv-fill-${inv.id}"></div>
+              <div class="inv-card-body">
+                <div class="d-flex align-items-center justify-content-between gap-3">
+                  <div>
+                    <div class="fw-semibold">${inv.name}</div>
+                    <div class="text-body-secondary small">${inv.effects}</div>
+                    <div class="text-body-secondary small mt-1">
+                      úroveň: <span class="mono" id="inv-lvl-${inv.id}">0</span> / ${INV_MAX_LEVEL}
+                      • cena: <span class="mono">${fmtMoney(inv.cost)}</span> mld. €
+                    </div>
+                  </div>
+                  <div class="d-flex flex-column gap-2">
+                    <button class="btn btn-outline-primary btn-sm" type="button" id="inv-buy-${inv.id}">Koupit</button>
+                    <button class="btn btn-outline-secondary btn-sm" type="button" id="inv-sell-${inv.id}">Prodat</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          elInvestments.appendChild(col);
+        });
+
+        INVESTMENTS.forEach((inv) => {
+          document.getElementById(`inv-buy-${inv.id}`).addEventListener('click', () => buyInvestment(inv.id));
+          document.getElementById(`inv-sell-${inv.id}`).addEventListener('click', () => sellInvestment(inv.id));
+        });
+      }
+
+      function syncInvestmentsUI() {
+        INVESTMENTS.forEach((inv) => {
+          const lvl = clamp(state.inv[inv.id] ?? 0, 0, INV_MAX_LEVEL);
+          const lvlEl = document.getElementById(`inv-lvl-${inv.id}`);
+          if (lvlEl) lvlEl.textContent = fmt0(lvl);
+          const fillEl = document.getElementById(`inv-fill-${inv.id}`);
+          if (fillEl) fillEl.style.width = `${(lvl / INV_MAX_LEVEL) * 100}%`;
+        });
+      }
+
+      function buyInvestment(id) {
+        if (state.won) return;
+        const inv = INVESTMENTS.find((x) => x.id === id);
+        if (!inv) return;
+        const lvl = state.inv[id] ?? 0;
+        if (lvl >= INV_MAX_LEVEL) return;
+        if (state.budget - inv.cost < MIN_BUDGET) {
+          showWarning(`Nelze koupit: rozpočet by klesl pod ${MIN_BUDGET} mld. €.`);
+          return;
+        }
+        state.budget = clampBudget(state.budget - inv.cost);
+        state.inv[id] = lvl + 1;
+        syncInvestmentsUI();
+        refreshImpacts();
+      }
+
+      function sellInvestment(id) {
+        if (state.won) return;
+        const inv = INVESTMENTS.find((x) => x.id === id);
+        if (!inv) return;
+        const lvl = state.inv[id] ?? 0;
+        if (lvl <= 0) return;
+        state.inv[id] = lvl - 1;
+        state.budget = clampBudget(state.budget + inv.cost * inv.sellRate);
+        syncInvestmentsUI();
+        refreshImpacts();
+      }
+
+      function syncEmissionsSnapshot() {
+        if (!state.historyE.length) return;
+        state.historyE[state.historyE.length - 1] = computeEmissionsIndex(state.plants, state.time);
+      }
+
+      function refreshImpacts() {
+        const share = sharesFromPlants(state.plants);
+        state.blackoutRisk = computeBlackoutRisk(share);
+        syncEmissionsSnapshot();
+        renderHUD();
+        renderKPIs();
+        drawChart();
+      }
+
+      buildMixControls();
+      buildInvestmentsUI();
+
+      // ===== Simulation core
+      function computeStability(share) {
+        const total = 100;
+        let st = 0;
+        SOURCES.forEach((s) => {
+          st += (share[s.key] / total) * s.stable;
+        });
+        const stBonus =
+          investmentEffectPct('storage', 'stability') + investmentEffectPct('grid', 'stability');
+        st = scaleUpByPct(st, stBonus);
+        return clamp(st, 0, 1.2);
+      }
+
+      function computeBlackoutRisk(share) {
+        const st = computeStability(share);
+        const volShare = (share.wind + share.solar) / 100;
+        const volRed =
+          investmentEffectPct('storage', 'volatility') + investmentEffectPct('grid', 'volatility');
+        const volatility = scaleDownByPct(volShare, volRed);
+        const baseRisk = volatility * 18 * SWING_AMPLITUDE;
+        const instabilityPenalty = volatility * 95 * clamp(0.82 - st, 0, 1) * 2 * SWING_AMPLITUDE;
+        let risk = baseRisk + instabilityPenalty;
+        const riskRed =
+          investmentEffectPct('storage', 'blackoutRisk') + investmentEffectPct('grid', 'blackoutRisk');
+        risk = scaleDownByPct(risk, riskRed);
+        return clamp(risk, 0, 65);
+      }
+
+      function computeSinksIndex(time) {
+        let sinks = 6.0;
+        const tYear = time.year + (time.month - 1) / 12;
+        const ramp = clamp((tYear - 2030) / 10, 0, 1);
+        const sinksUp = investmentEffectPct('removals', 'sinks') * ramp;
+        sinks = scaleUpByPct(sinks, sinksUp);
+        return clamp(sinks, 0, 28);
+      }
+
+      function computeEmissionsIndex(plants, time) {
+        const total = totalEmissionsUnits(plants);
+        let idx = EMISSION_INDEX_AT_REFERENCE * (total / EMISSION_REF_TOTAL);
+
+        const emisDown =
+          investmentEffectPct('efficiency', 'emissions') + investmentEffectPct('heat', 'emissions');
+        idx = scaleDownByPct(idx, emisDown);
+
+        return clamp(idx, 0, 200);
+      }
+
+      function demandGrowthFactor(time) {
+        const months =
+          (time.year - DEMAND_GROWTH_START_YEAR) * 12 + ((time.month ?? 1) - DEMAND_GROWTH_START_MONTH);
+        return Math.pow(1 + DEMAND_GROWTH_PER_YEAR, Math.max(0, months) / 12);
+      }
+
+      function computeMonthlyDemandMWh(time) {
+        const base = state.powerBaseDemand ?? 16000 / (1 + DEMAND_SEASONAL_AMP);
+        const demandDown = investmentEffectPct('efficiency', 'demand');
+        const month = time.month ?? 1;
+        const seasonal = 1 + DEMAND_SEASONAL_AMP * Math.cos(((month - 1) / 12) * Math.PI * 2);
+        const growth = demandGrowthFactor(time);
+        const demand = scaleDownByPct(base, demandDown) * seasonal * growth;
+        return clamp(demand, 6000, 40000);
+      }
+
+      function computeHappinessTarget(share, st, trade, fossilPct) {
+        const volatility = (share.wind + share.solar) / 100;
+        const energyPrice =
+          1 + 0.45 * SWING_AMPLITUDE * clamp(0.75 - st, 0, 0.75) + 0.12 * SWING_AMPLITUDE * volatility;
+        const demand = trade.demand;
+        const importRatio = demand > 0 ? Math.max(0, -trade.diff) / demand : 0;
+        const exportRatio = demand > 0 ? Math.max(0, trade.diff) / demand : 0;
+        const baseScore = 76;
+        const happyPen = investmentEffectPct('removals', 'happiness');
+        return clamp(
+          baseScore -
+            state.unemployment * 1.6 -
+            (energyPrice - 1) * 26 -
+            state.blackoutRisk * 2.0 * SWING_AMPLITUDE -
+            0.18 * SWING_AMPLITUDE * fossilPct -
+            55 * SWING_AMPLITUDE * importRatio +
+            18 * SWING_AMPLITUDE * exportRatio -
+            baseScore * (happyPen / 100),
+          0,
+          100,
+        );
+      }
+
+      function computeMonthlySupplyMWh(plants) {
+        let supply = 0;
+        SOURCES.forEach((s) => {
+          supply += (plants[s.key] ?? 0) * s.plantMWh;
+        });
+        return supply;
+      }
+
+      function computeTradeBudgetDelta(time, plants) {
+        const demand = computeMonthlyDemandMWh(time);
+        const supply = computeMonthlySupplyMWh(plants);
+        const diff = supply - demand;
+        // prices: deficit buying is more expensive than selling surplus
+        const sellPrice = 0.00096; // mld. € per MWh (export, −20 % oproti původnímu 0,0012)
+        const buyPrice = 0.0100; // mld. € per MWh (import −50 % oproti dřívějším 0,0100)
+        const money = diff >= 0 ? diff * sellPrice : diff * buyPrice; // negative when buying
+        return { demand, supply, diff, money };
+      }
+
+      function triggerCrisis(message) {
+        state.lost = true;
+        state.running = false;
+        state.message = message;
+      }
+
+      function finalizeGame2050(emissions, sinks) {
+        state.gameOver = true;
+        state.running = false;
+        const ok = emissions <= sinks;
+        if (ok) {
+          state.won = true;
+          state.lost = false;
+          state.message = null;
+        } else {
+          state.won = false;
+          state.lost = true;
+          state.message = 'Rok 2050: emise jsou vyšší než pohlcení. Sniž emise nebo zvyš pohlcení (investice).';
+        }
+      }
+
+      function stepOneMonth() {
+        if (!state.running || state.won || state.gameOver) return;
+        if (isGameEndTime(state.time)) return;
+
+        const time = { ...state.time };
+
+        // derive shares from plants
+        const share = sharesFromPlants(state.plants);
+        const trade = computeTradeBudgetDelta(time, state.plants);
+        const fossilShare = (share.coal + share.gas) / 100;
+
+        // unemployment responds to shrinking fossil share
+        const lastFossil = state.lastFossilShare ?? fossilShare;
+        const fossilDrop = Math.max(0, lastFossil - fossilShare);
+        state.lastFossilShare = fossilShare;
+        const shock = fossilDrop * 14 * SWING_AMPLITUDE;
+        const shockMit = scaleDownByPct(1, investmentEffectPct('reskill', 'unemploymentShock'));
+        const uDelta = shock * shockMit - 0.05;
+        state.unemployment = clamp(state.unemployment + uDelta, 2.5, 18.0);
+
+        const st = computeStability(share);
+        state.blackoutRisk = computeBlackoutRisk(share);
+        const fossilPct = share.coal + share.gas;
+
+        const happinessTarget = computeHappinessTarget(share, st, trade, fossilPct);
+        state.happiness = clamp(lerp(state.happiness, happinessTarget, 0.22), 0, 100);
+
+        const taxBase = clamp(1.06 - state.unemployment / 28 - state.blackoutRisk / 120, 0.5, 1.2);
+        const monthlyIncome = (26 / 12) * taxBase * (0.6 + state.happiness / 140);
+        const monthlySpending = (18 / 12) + (state.unemployment * 0.55) / 12 + (state.blackoutRisk * 0.12) / 12;
+        let nextBudget = state.budget + (monthlyIncome - monthlySpending) + trade.money;
+        if (nextBudget < MIN_BUDGET) {
+          triggerCrisis(
+            `Rozpočet klesl pod ${MIN_BUDGET} mld. €. Postav víc výroby, prodej zdroje, nebo sniž poptávku (úspory).`,
+          );
+          return;
+        }
+        state.budget = clampBudget(nextBudget);
+
+        // emissions & sinks
+        const emissions = computeEmissionsIndex(state.plants, time);
+        const sinks = computeSinksIndex(time);
+
+        state.historyT.push(time);
+        state.historyE.push(emissions);
+        state.historyS.push(sinks);
+
+        // store last power stats for UI
+        state.__lastTrade = trade;
+        state.__tradeHistory = state.__tradeHistory ?? [];
+        state.__tradeHistory.push({ time, diff: trade.diff });
+        if (state.__tradeHistory.length > 200) state.__tradeHistory.shift();
+
+        // advance time by 1 month
+        state.time.month += 1;
+        if (state.time.month > 12) {
+          state.time.month = 1;
+          state.time.year += 1;
+        }
+
+        if (isGameEndTime(state.time)) {
+          finalizeGame2050(emissions, sinks);
+          return;
+        }
+
+        // lose conditions (incl. blackout risk)
+        if (state.blackoutRisk > MAX_BLACKOUT_RISK) {
+          triggerCrisis(
+            `Riziko výpadků překročilo ${MAX_BLACKOUT_RISK} %. Zkus investovat do baterií/sítě nebo přidat stabilní zdroje.`,
+          );
+        }
+        if (state.happiness < 18) {
+          triggerCrisis('Velké nepokoje ve společnosti. Zkus rekvalifikace a stabilnější mix (méně výpadků).');
+        }
+        if (state.unemployment > 16.5) {
+          triggerCrisis('Nezaměstnanost je příliš vysoká. Zkus přechod rozložit do více měsíců a koupit rekvalifikace.');
+        }
+      }
+
+      // ===== Rendering
+      const kpiYear = document.getElementById('kpiYear');
+      const kpiEmissions = document.getElementById('kpiEmissions');
+      const kpiMilestone = document.getElementById('kpiMilestone');
+      const kpiSinks = document.getElementById('kpiSinks');
+      const kpiNeutrality = document.getElementById('kpiNeutrality');
+      const kpiUnemployment = document.getElementById('kpiUnemployment');
+      const kpiHappiness = document.getElementById('kpiHappiness');
+      const kpiBlackouts = document.getElementById('kpiBlackouts');
+      const kpiBlackoutMax = document.getElementById('kpiBlackoutMax');
+      const winBox = document.getElementById('winBox');
+      const loseBox = document.getElementById('loseBox');
+      const loseText = document.getElementById('loseText');
+
+      function timeText(t) {
+        return `${MONTHS[(t.month ?? 1) - 1]} ${t.year}`;
+      }
+
+      function milestoneText(time, emissions) {
+        const y = time.year;
+        const t = TARGETS.find((x) => x.year === y);
+        if (!t) {
+          const next = TARGETS.find((x) => x.year > y);
+          return next ? `Další cíl: ${next.label}` : `Cíl: 2050 neutralita`;
+        }
+        const ok = emissions <= t.target + (t.year === 2040 ? 2 : 0);
+        return ok ? `Splněno: ${t.label}` : `Nesplněno: ${t.label}`;
+      }
+
+      // Canvas chart
+      const canvas = document.getElementById('chart');
+      const ctx = canvas.getContext('2d');
+
+      const tradeCanvas = document.getElementById('tradeChart');
+      const tradeCtx = tradeCanvas ? tradeCanvas.getContext('2d') : null;
+
+      function xValForTime(t) {
+        return t.year + (t.month - 1) / 12;
+      }
+
+      function drawChart() {
+        const W = canvas.width;
+        const H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+
+        const padding = { l: 52, r: 16, t: 12, b: 34 };
+        const x0 = padding.l;
+        const x1 = W - padding.r;
+        const y0 = padding.t;
+        const y1 = H - padding.b;
+
+        const ts = state.historyT;
+        const eVals = state.historyE;
+        const sVals = state.historyS;
+        const minX = xValForTime(ts[0]);
+        const maxX = xValForTime(ts[ts.length - 1]);
+
+        const minVal = 0;
+        const peak = Math.max(100, ...eVals, ...TARGETS.map((t) => t.target));
+        const maxVal = Math.max(100, Math.ceil(peak / 20) * 20);
+
+        const xFor = (x) => x0 + ((x - minX) / Math.max(0.0001, maxX - minX)) * (x1 - x0);
+        const yFor = (v) => y1 - ((v - minVal) / (maxVal - minVal)) * (y1 - y0);
+
+        // grid
+        ctx.strokeStyle = 'rgba(0,0,0,0.07)';
+        ctx.lineWidth = 1;
+        for (let v = 0; v <= maxVal; v += 20) {
+          const y = yFor(v);
+          ctx.beginPath();
+          ctx.moveTo(x0, y);
+          ctx.lineTo(x1, y);
+          ctx.stroke();
+        }
+
+        // axes
+        ctx.strokeStyle = 'rgba(0,0,0,0.18)';
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x0, y1);
+        ctx.lineTo(x1, y1);
+        ctx.stroke();
+
+        // y labels
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        ctx.font = '12px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+        for (let v = 0; v <= maxVal; v += 20) {
+          const y = yFor(v);
+          ctx.fillText(String(v), 10, y + 4);
+        }
+
+        // target lines (horizontal)
+        const usedLabelYs = [];
+        const reserveLabelY = (desiredY) => {
+          const minGap = 14;
+          let y = desiredY;
+          // keep inside chart
+          y = clamp(y, y0 + 12, y1 - 6);
+          // avoid collisions with previous labels
+          for (let i = 0; i < 8; i++) {
+            const collide = usedLabelYs.some((yy) => Math.abs(yy - y) < minGap);
+            if (!collide) break;
+            y = clamp(y + minGap, y0 + 12, y1 - 6);
+          }
+          usedLabelYs.push(y);
+          return y;
+        };
+
+        TARGETS.forEach((t) => {
+          const y = yFor(t.target);
+          ctx.strokeStyle = 'rgba(13,110,253,0.18)';
+          ctx.setLineDash([6, 6]);
+          ctx.beginPath();
+          ctx.moveTo(x0, y);
+          ctx.lineTo(x1, y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          const labelY = reserveLabelY(y - 6);
+          // draw a small background so the text is readable and never "overprints"
+          ctx.font = '12px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+          const text = t.label;
+          const textW = ctx.measureText(text).width;
+          ctx.fillStyle = 'rgba(255,255,255,0.85)';
+          ctx.fillRect(x0 + 3, labelY - 12, textW + 10, 16);
+          ctx.fillStyle = 'rgba(13,110,253,0.92)';
+          ctx.fillText(text, x0 + 8, labelY);
+        });
+
+        // sinks series
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#198754';
+        ctx.beginPath();
+        sVals.forEach((v, i) => {
+          const x = xFor(xValForTime(ts[i]));
+          const y = yFor(v);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        // emissions series
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#0b5ed7';
+        ctx.beginPath();
+        eVals.forEach((v, i) => {
+          const x = xFor(xValForTime(ts[i]));
+          const y = yFor(v);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        // current point
+        const curX = xFor(xValForTime(state.historyT[state.historyT.length - 1]));
+        const curE = eVals[eVals.length - 1];
+        const curY = yFor(curE);
+        ctx.fillStyle = '#0b5ed7';
+        ctx.beginPath();
+        ctx.arc(curX, curY, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // x labels (years)
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        const startYear = Math.floor(minX);
+        const endYear = Math.ceil(maxX);
+        for (let y = startYear; y <= endYear; y += 5) {
+          const x = xFor(y);
+          ctx.fillText(String(y), x - 12, H - 12);
+        }
+
+        // legend
+        ctx.fillStyle = 'rgba(11,94,215,0.95)';
+        ctx.fillText('emise', x1 - 110, y0 + 14);
+        ctx.fillStyle = 'rgba(25,135,84,0.95)';
+        ctx.fillText('pohlcení', x1 - 110, y0 + 30);
+      }
+
+      function drawTradeChart() {
+        if (!tradeCtx) return;
+        const W = tradeCanvas.width;
+        const H = tradeCanvas.height;
+        tradeCtx.clearRect(0, 0, W, H);
+
+        const hist = (state.__tradeHistory ?? []).slice(-12);
+        if (hist.length === 0) return;
+
+        const padding = { l: 40, r: 10, t: 8, b: 22 };
+        const x0 = padding.l;
+        const x1 = W - padding.r;
+        const y0 = padding.t;
+        const labelY = H - 8;
+        const chartBottom = labelY - 4;
+        const plotH = chartBottom - y0;
+        const usableH = plotH * 0.9;
+
+        const diffs = hist.map((h) => h.diff);
+        const maxPos = Math.max(0, ...diffs);
+        const maxNeg = Math.max(0, ...diffs.map((d) => (d < 0 ? -d : 0)));
+        const hasPos = maxPos > 0;
+        const hasNeg = maxNeg > 0;
+
+        let zeroY;
+        let posRoom;
+        let negRoom;
+        if (hasPos && hasNeg) {
+          const sum = Math.max(maxPos + maxNeg, 1);
+          posRoom = usableH * (maxPos / sum);
+          negRoom = usableH * (maxNeg / sum);
+          zeroY = chartBottom - negRoom;
+        } else if (hasNeg) {
+          zeroY = y0 + usableH * 0.05;
+          posRoom = 0;
+          negRoom = usableH;
+        } else {
+          zeroY = chartBottom;
+          posRoom = usableH;
+          negRoom = 0;
+        }
+
+        const barW = (x1 - x0) / hist.length;
+        const scalePos = maxPos > 0 ? posRoom / maxPos : 0;
+        const scaleNeg = maxNeg > 0 ? negRoom / maxNeg : 0;
+
+        // nulová osa (export nad, import pod – nebo jen dole při samých plusech)
+        tradeCtx.strokeStyle = 'rgba(0,0,0,0.18)';
+        tradeCtx.beginPath();
+        tradeCtx.moveTo(x0, zeroY);
+        tradeCtx.lineTo(x1, zeroY);
+        tradeCtx.stroke();
+
+        hist.forEach((h, i) => {
+          const x = x0 + i * barW + barW * 0.18;
+          const w = barW * 0.64;
+          const d = h.diff;
+          tradeCtx.fillStyle = d >= 0 ? 'rgba(25,135,84,0.85)' : 'rgba(220,53,69,0.85)';
+          if (d >= 0) {
+            const hPx = d * scalePos;
+            tradeCtx.fillRect(x, zeroY - hPx, w, hPx);
+          } else {
+            const hPx = -d * scaleNeg;
+            tradeCtx.fillRect(x, zeroY, w, hPx);
+          }
+        });
+
+        // month labels
+        tradeCtx.fillStyle = 'rgba(0,0,0,0.55)';
+        tradeCtx.font = '11px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+        hist.forEach((h, i) => {
+          const x = x0 + i * barW + barW * 0.2;
+          const label = String(h.time.month).padStart(2, '0') + '/' + String(h.time.year).slice(-2);
+          tradeCtx.fillText(label, x, labelY);
+        });
+      }
+
+      function renderHUD() {
+        // odhad změny rozpočtu v příštím měsíci (pokud nic nekoupíš/neprodáš)
+        const share = sharesFromPlants(state.plants);
+        const st = computeStability(share);
+        const trade = computeTradeBudgetDelta(state.time, state.plants);
+        const fossilPctForHappiness = share.coal + share.gas;
+        const happinessTarget = computeHappinessTarget(share, st, trade, fossilPctForHappiness);
+        const happinessForBudget = lerp(state.happiness, happinessTarget, 0.22);
+        const taxBase = clamp(1.06 - state.unemployment / 28 - state.blackoutRisk / 120, 0.5, 1.2);
+        const monthlyIncome = (26 / 12) * taxBase * (0.6 + happinessForBudget / 140);
+        const monthlySpending = (18 / 12) + (state.unemployment * 0.55) / 12 + (state.blackoutRisk * 0.12) / 12;
+        const delta = monthlyIncome - monthlySpending + trade.money;
+
+        hudTime.textContent = timeText(state.time);
+        hudBudget.textContent = fmtMoney(state.budget);
+        hudBudgetHint.textContent =
+          state.budget < MIN_BUDGET
+            ? 'Krize: rozpočet pod limitem'
+            : state.budget < 0
+              ? `Ztráta: můžeš jít až na ${MIN_BUDGET} mld. €`
+              : state.budget < 40
+                ? 'Máš málo peněz: zpomal investice'
+                : state.budget > 450
+                  ? 'Velká rezerva'
+                  : 'Rozpočet v normě';
+        hudBudgetDelta.textContent = `${delta >= 0 ? '+' : '−'}${fmtMoney(Math.abs(delta))} / měsíc`;
+        hudBudgetDelta.className = 'small mono ' + (delta >= 0 ? 'text-success' : 'text-danger');
+        hudStatus.textContent = state.running ? 'BĚŽÍ' : 'PAUZA';
+        hudStatus.className = 'badge ' + (state.running ? 'text-bg-success' : 'text-bg-light border') + ' mono';
+
+        // živé vysvětlení dopadů elektráren
+        const fossilPctUi = clamp(share.coal + share.gas, 0, 100);
+        if (impactFossil) impactFossil.textContent = fmt0(fossilPctUi) + ' %';
+        if (impactFossilBar) impactFossilBar.style.width = fossilPctUi + '%';
+
+        const volPct = clamp((share.wind + share.solar), 0, 100);
+        if (impactVolatility) impactVolatility.textContent = fmt0(volPct) + ' %';
+        if (impactVolatilityBar) impactVolatilityBar.style.width = volPct + '%';
+
+        state.blackoutRisk = computeBlackoutRisk(share);
+
+        const stPct = clamp(st * 100, 0, 120);
+        if (impactStability) impactStability.textContent = fmt1(stPct) + ' %';
+        if (impactStabilityBar) impactStabilityBar.style.width = clamp(stPct, 0, 100) + '%';
+
+        // power balance UI
+        const t = computeTradeBudgetDelta(state.time, state.plants);
+        if (pwrDemand) pwrDemand.textContent = fmt0(t.demand) + ' MWh';
+        if (pwrSupply) pwrSupply.textContent = fmt0(t.supply) + ' MWh';
+        if (pwrDiff) pwrDiff.textContent = (t.diff >= 0 ? '+' : '−') + fmt0(Math.abs(t.diff)) + ' MWh';
+        if (pwrTrade) {
+          pwrTrade.textContent = `${t.money >= 0 ? '+' : '−'}${fmtMoney(Math.abs(t.money))} mld. €`;
+          pwrTrade.className = 'small mono text-end mt-1 ' + (t.money >= 0 ? 'text-success' : 'text-danger');
+        }
+      }
+
+      function renderKPIs() {
+        const e = state.historyE[state.historyE.length - 1];
+        const s = state.historyS[state.historyS.length - 1];
+        kpiYear.textContent = state.time.year;
+        kpiEmissions.textContent = fmt1(e);
+        kpiMilestone.textContent = milestoneText(state.time, e);
+        kpiSinks.textContent = fmt1(s);
+        kpiNeutrality.textContent = e <= s ? 'Neutralita: ANO (emise ≤ pohlcení)' : 'Neutralita: NE (emise > pohlcení)';
+
+        kpiUnemployment.textContent = fmt1(state.unemployment) + ' %';
+        kpiHappiness.textContent = fmt0(state.happiness) + ' / 100';
+        kpiBlackouts.textContent = fmt1(state.blackoutRisk) + ' %';
+        kpiBlackoutMax.textContent = fmt0(MAX_BLACKOUT_RISK) + ' %';
+
+        winBox.classList.toggle('d-none', !state.won);
+        loseBox.classList.toggle('d-none', !state.lost);
+        if (state.lost) loseText.textContent = state.message ?? 'Něco se pokazilo.';
+
+        if (btnPause) {
+          if (state.gameOver || state.won) btnPause.textContent = 'Konec hry';
+          else if (state.lost && !state.running) btnPause.textContent = 'Spustit';
+          else btnPause.textContent = state.running ? 'Pozastavit' : 'Spustit';
+        }
+      }
+
+      // ===== Controls
+      const btnPause = document.getElementById('btnPause');
+      const btnReset = document.getElementById('btnReset');
+
+      function toggleRun() {
+        if (state.won || state.gameOver) return;
+        state.running = !state.running;
+        if (state.running && state.lost && !state.gameOver) state.lost = false;
+        btnPause.textContent = state.running ? 'Pozastavit' : 'Spustit';
+      }
+
+      btnPause.addEventListener('click', toggleRun);
+
+      btnReset.addEventListener('click', () => {
+        state = initial();
+        btnPause.textContent = 'Spustit';
+        hideWarning();
+        syncSpeedButton();
+        syncMixUI();
+        syncInvestmentsUI();
+        syncEmissionsSnapshot();
+      });
+
+      const btnFastSpeed = document.getElementById('btnFastSpeed');
+      function syncSpeedButton() {
+        if (!btnFastSpeed) return;
+        const on = !!state.speed5x;
+        btnFastSpeed.setAttribute('aria-pressed', on ? 'true' : 'false');
+        btnFastSpeed.setAttribute('aria-label', on ? 'Vypnout 5× rychlost' : 'Zapnout 5× rychlost');
+        btnFastSpeed.title = on ? '5× rychleji (zapnuto)' : '5× rychleji (vypnuto)';
+        btnFastSpeed.classList.toggle('btn-primary', on);
+        btnFastSpeed.classList.toggle('btn-outline-secondary', !on);
+      }
+      if (btnFastSpeed) {
+        btnFastSpeed.addEventListener('click', () => {
+          state.speed5x = !state.speed5x;
+          syncSpeedButton();
+        });
+      }
+      syncSpeedButton();
+
+      const setHudMinimized = (min) => {
+        if (!hudRoot || !btnHudToggle) return;
+        hudRoot.classList.toggle('minimized', !!min);
+        btnHudToggle.setAttribute('aria-label', min ? 'Vysunout panel' : 'Minimalizovat panel');
+        // vysunutý panel → šipka doprava (zasunout); zasunutý → šipka doleva (vysunout)
+        btnHudToggle.innerHTML = min ? SVG_HUD_COLLAPSE : SVG_HUD_EXPAND;
+      };
+
+      if (btnHudToggle) {
+        btnHudToggle.addEventListener('click', () => {
+          const min = hudRoot ? !hudRoot.classList.contains('minimized') : false;
+          setHudMinimized(min);
+        });
+      }
+
+      window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') {
+          e.preventDefault();
+          toggleRun();
+        }
+      });
+
+      // ===== Main loop (continuous)
+      syncEmissionsSnapshot();
+      syncMixUI();
+      syncInvestmentsUI();
+
+      let lastTick = performance.now();
+
+      function loop(now) {
+        const dt = now - lastTick;
+        const monthMs = getMonthMs();
+        if (dt >= monthMs) {
+          lastTick = now - (dt % monthMs);
+          stepOneMonth();
+        }
+
+        syncMixUI();
+        syncInvestmentsUI();
+        renderHUD();
+        renderKPIs();
+        drawChart();
+        drawTradeChart();
+        requestAnimationFrame(loop);
+      }
+
+      requestAnimationFrame(loop);
+    </script>
+  </body>
+</html>
+
