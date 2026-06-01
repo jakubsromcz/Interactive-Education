@@ -30,6 +30,73 @@
         border: 1px solid rgba(13, 110, 253, 0.12);
         background: rgba(13, 110, 253, 0.035);
       }
+      .kpi.kpi-status-ok {
+        background: rgba(25, 135, 84, 0.14);
+        border-color: rgba(25, 135, 84, 0.45);
+      }
+      .kpi.kpi-status-bad {
+        background: rgba(220, 53, 69, 0.12);
+        border-color: rgba(220, 53, 69, 0.45);
+      }
+      .game-end-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(4px);
+      }
+      .game-end-dialog {
+        max-width: 28rem;
+        width: 100%;
+        border: 2px solid transparent;
+      }
+      .game-end-dialog--win {
+        background: #d1e7dd;
+        border-color: #198754;
+      }
+      .game-end-dialog--win #gameEndTitle {
+        color: #146c43;
+      }
+      .game-end-dialog--lose {
+        background: #f8d7da;
+        border-color: #dc3545;
+      }
+      .game-end-dialog--lose #gameEndTitle {
+        color: #b02a37;
+      }
+      .game-end-dialog--crisis {
+        background: #fff3cd;
+        border-color: #ffc107;
+      }
+      .pwr-balance-row > .col {
+        display: flex;
+        flex-direction: column;
+      }
+      .pwr-index {
+        border: 1px solid rgba(13, 110, 253, 0.12);
+        background: rgba(13, 110, 253, 0.035);
+        flex: 1 1 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 2.5rem;
+        cursor: help;
+      }
+      .pwr-index.pwr-index-ok {
+        background: rgba(25, 135, 84, 0.14);
+        border-color: rgba(25, 135, 84, 0.45);
+      }
+      .pwr-index.pwr-index-bad {
+        background: rgba(220, 53, 69, 0.12);
+        border-color: rgba(220, 53, 69, 0.45);
+      }
+      .game-end-dialog--crisis #gameEndTitle {
+        color: var(--bs-warning-text-emphasis, #664d03);
+      }
       canvas {
         width: 100%;
         display: block;
@@ -96,6 +163,28 @@
         border-right: none;
         box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
         z-index: 2;
+        color: #6c757d !important;
+        border-color: #adb5bd !important;
+        background-color: #f8f9fa !important;
+      }
+      .hud-toggle:hover,
+      .hud-toggle:focus-visible,
+      .hud-root.minimized .hud-toggle:hover,
+      .hud-root.minimized .hud-toggle:focus-visible {
+        color: #6c757d !important;
+        border-color: #6c757d !important;
+        background-color: #e9ecef !important;
+        box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+      }
+      .hud-toggle:active,
+      .hud-root.minimized .hud-toggle:active {
+        color: #495057 !important;
+        border-color: #6c757d !important;
+        background-color: #dee2e6 !important;
+        box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+      }
+      .hud-toggle:focus:not(:focus-visible) {
+        box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
       }
       .hud-panel {
         flex: 0 1 auto;
@@ -221,7 +310,8 @@
             <h1 class="display-6 fw-bold mb-2">Klimatologie – uhlíková neutralita do 2050</h1>
             <p class="lead mb-0">
               Hraješ za EU. Od roku <b>2025</b> upravuješ energetický mix (výrobu elektřiny), rozpočet a dopady na populaci.
-              Cíl je splnit milníky a být v roce <b>2050 uhlíkově neutrální</b> (emise vyrovná pohlcení).
+              Cíl je splnit milníky a v roce <b>2050</b> být <b>uhlíkově neutrální</b> (emise ≤ pohlcení), mít <b>riziko výpadků pod 3 %</b>
+              a <b>výrobu vyšší než spotřebu</b> (modelovaný index za rok &gt; 100 %, včetně sezóny a stability sítě).
             </p>
           </div>
         </div>
@@ -238,13 +328,23 @@
                 Simulace běží pořád (po měsících). Každý měsíc se přepočítá ekonomika, pracovní místa, rozpočet, emise a pohlcení.
               </div>
               <div class="d-flex flex-wrap gap-2 mt-2">
-                <span class="legend-chip">
+                <span
+                  class="legend-chip"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  title="Emisní intenzita zdroje (jednotky CO₂ na vyrobenou MWh)."
+                >
                   <svg class="meta-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                     <path d="M4.406 3.342A5.53 5.53 0 0 1 8 2c2.69 0 4.923 2 5.166 4.579A3 3 0 0 1 13 12H4a4 4 0 0 1 .406-8.658Z"/>
                   </svg>
                   <span>emise</span>
                 </span>
-                <span class="legend-chip">
+                <span
+                  class="legend-chip"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  title="Spolehlivost zdroje pro síť — vyšší stabilita znamená menší riziko výpadků."
+                >
                   <svg class="meta-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path
                       d="M14.04,12H10V11H5.5A3.5,3.5 0 0,1 2,7.5A3.5,3.5 0 0,1 5.5,4C6.53,4 7.45,4.44 8.09,5.15C8.5,3.35 10.08,2 12,2C13.92,2 15.5,3.35 15.91,5.15C16.55,4.44 17.47,4 18.5,4A3.5,3.5 0 0,1 22,7.5A3.5,3.5 0 0,1 18.5,11H14.04V12M10,16.9V15.76H5V13.76H19V15.76H14.04V16.92L20,19.08C20.58,19.29 21,19.84 21,20.5A1.5,1.5 0 0,1 19.5,22H4.5A1.5,1.5 0 0,1 3,20.5C3,19.84 3.42,19.29 4,19.08L10,16.9Z"
@@ -252,11 +352,21 @@
                   </svg>
                   <span>stabilita</span>
                 </span>
-                <span class="legend-chip">
+                <span
+                  class="legend-chip"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  title="Cena jedné elektrárny v mld. € (nákup / částečný prodej)."
+                >
                   <span class="meta-icon-text" aria-hidden="true">€</span>
                   <span>cena</span>
                 </span>
-                <span class="legend-chip">
+                <span
+                  class="legend-chip"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  title="Měsíční výroba jedné elektrárny v MWh."
+                >
                   <svg class="meta-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                     <path d="M11.251 0a.5.5 0 0 1 .471.667L9.5 6H13a.5.5 0 0 1 .39.812l-8 9.5A.5.5 0 0 1 4.5 16l2.25-6H3a.5.5 0 0 1-.39-.812l8-9.5A.5.5 0 0 1 11.251 0Z"/>
                   </svg>
@@ -280,8 +390,8 @@
             <div class="card-body p-4 p-md-4">
               <h2 class="h5 fw-bold mb-2">Energetický mix (výroba elektřiny)</h2>
               <p class="text-body-secondary mb-3">
-                Procenta jsou jen <b>informační</b>. Mix měníš tím, že <b>kupuješ/prodáváš elektrárny</b>. Výstavba stojí peníze a
-                rychlé zavírání fosilních zdrojů může zvýšit nezaměstnanost a zhoršit ekonomiku.
+                Procenta jsou jen <b>informační</b>. Mix měníš nákupem/prodejem elektráren.
+                <b>Uhlí a plyn</b> už nelze stavět – lze je jen <b>odstavovat (prodat)</b>.
               </p>
 
               <div class="vstack gap-2" id="mixControls"></div>
@@ -289,10 +399,9 @@
               <div class="rounded-4 border bg-body-tertiary p-3 mt-3" id="impactBox">
                 <div class="fw-semibold mb-2">Jak elektrárny ovlivňují společnost</div>
                 <div class="small text-body-secondary mb-2">
-                  <b>Nezaměstnanost</b> roste hlavně při rychlém poklesu uhlí+plyn.
-                  <b>Stabilita sítě</b> = jak spolehlivý je mix (uhlí, jádro, baterie…).
-                  <b>Riziko výpadků</b> = šance výpadků při hodně větru+slunci a nízké stabilitě.
-                  <b>Spokojenost</b> klesá při drahé energii, výpadcích a vysoké nezaměstnanosti.
+                  <b>Stabilita sítě</b> = spolehlivost mixu (uhlí, jádro, hydro… vs. vítr, slunce).
+                  <b>Riziko výpadků</b> roste při <b>nízké stabilitě</b>; do 2050 má být pod 3 %.
+                  <b>Spokojenost</b> roste při méně uhlí/plynu, klesá s rizikem výpadků a nezaměstnaností.
                 </div>
                 <div class="row g-2">
                   <div class="col-12 col-md-4">
@@ -353,7 +462,7 @@
                   </div>
                 </div>
                 <div class="col-12 col-md-4">
-                  <div class="kpi rounded-4 p-3 h-100">
+                  <div class="kpi rounded-4 p-3 h-100" id="kpiEmissionsCard">
                     <div class="text-body-secondary small">Emise (index)</div>
                     <div class="display-6 fw-bold mono mb-0" id="kpiEmissions">—</div>
                     <div class="small text-body-secondary" id="kpiMilestone">—</div>
@@ -373,7 +482,7 @@
                   <div class="kpi rounded-4 p-3 h-100">
                     <div class="text-body-secondary small">Nezaměstnanost</div>
                     <div class="h2 fw-bold mono mb-0" id="kpiUnemployment">—</div>
-                    <div class="small text-body-secondary">vliv: rychlé zavírání fosilních zdrojů</div>
+                    <div class="small text-body-secondary">vliv: koupě/prodej elektráren (dle typu)</div>
                   </div>
                 </div>
                 <div class="col-12 col-md-4">
@@ -384,24 +493,14 @@
                   </div>
                 </div>
                 <div class="col-12 col-md-4">
-                  <div class="kpi rounded-4 p-3 h-100">
+                  <div class="kpi rounded-4 p-3 h-100" id="kpiBlackoutCard">
                     <div class="text-body-secondary small">Riziko výpadků</div>
                     <div class="h2 fw-bold mono mb-0" id="kpiBlackouts">—</div>
-                    <div class="small text-body-secondary">musí zůstat pod <span class="mono" id="kpiBlackoutMax">—</span></div>
+                    <div class="small text-body-secondary">cíl 2050: pod <span class="mono" id="kpiBlackoutMax">—</span></div>
                   </div>
                 </div>
               </div>
 
-              <div class="alert alert-success rounded-4 mt-4 d-none" id="winBox" role="status">
-                <div class="fw-bold mb-1">Splněno!</div>
-                <div class="mb-0">
-                  Do roku <b>2050</b> jsi dosáhl(a) <b>uhlíkové neutrality</b> (emise jsou vyvážené pohlcením).
-                </div>
-              </div>
-              <div class="alert alert-warning rounded-4 mt-4 d-none" id="loseBox" role="status">
-                <div class="fw-bold mb-1">Krize</div>
-                <div class="mb-0" id="loseText"></div>
-              </div>
             </div>
           </div>
 
@@ -410,19 +509,30 @@
               <h2 class="h5 fw-bold mb-2">Bilance elektřiny (měsíčně)</h2>
               <div class="text-body-secondary small mb-3">Ukazuje posledních 12 měsíců (export/import).</div>
 
-              <div class="row g-2">
-                <div class="col-12 col-md-4">
+              <div class="row row-cols-2 row-cols-lg-4 g-2 align-items-stretch pwr-balance-row">
+                <div class="col">
                   <div class="text-body-secondary small">Poptávka</div>
                   <div class="h5 fw-bold mono mb-0" id="pwrDemand">—</div>
                 </div>
-                <div class="col-12 col-md-4">
+                <div class="col">
                   <div class="text-body-secondary small">Výroba</div>
                   <div class="h5 fw-bold mono mb-0" id="pwrSupply">—</div>
                 </div>
-                <div class="col-12 col-md-4">
-                  <div class="text-body-secondary small">Rozdíl</div>
+                <div class="col">
+                  <div class="text-body-secondary small">Rozdíl (MWh)</div>
                   <div class="h5 fw-bold mono mb-0" id="pwrDiff">—</div>
-                  <div class="small mono text-end mt-1" id="pwrTrade">—</div>
+                </div>
+                <div class="col">
+                  <div class="text-body-secondary small">Index (12 měs.)</div>
+                  <div
+                    class="pwr-index rounded-3 px-2 text-center"
+                    id="pwrIndexCard"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="Modelovaný průměr za 12 měsíců: sezónní poptávka a výroba včetně výkyvů větru/slunce podle stability sítě (ne historie hry). Nad 100 % = výroba vyšší než spotřeba."
+                  >
+                    <div class="h5 fw-bold mono mb-0" id="pwrSupplyIndex">—</div>
+                  </div>
                 </div>
               </div>
 
@@ -448,6 +558,15 @@
         </div>
       </div>
     </main>
+
+    <div class="game-end-overlay d-none" id="gameEndOverlay" role="dialog" aria-modal="true" aria-labelledby="gameEndTitle">
+      <div class="game-end-dialog card shadow-lg rounded-4 p-4 p-md-5" id="gameEndDialog">
+        <div class="display-4 mb-2" id="gameEndIcon" aria-hidden="true"></div>
+        <h2 class="h4 fw-bold mb-2" id="gameEndTitle"></h2>
+        <p class="mb-4" id="gameEndText"></p>
+        <button type="button" class="btn btn-primary px-4" id="gameEndClose">Rozumím</button>
+      </div>
+    </div>
 
     <div class="snackbar-wrap" aria-live="polite">
       <div class="snackbar d-none" id="warningBox" role="alert">
@@ -535,7 +654,7 @@
       // Typical net-zero frameworks target ~90%+ reductions with <=10% residual emissions (often even less in power sector).
       // In our model, win at 2050 requires emissions <= sinks and <= 5 % of 1990 index.
       const ACCEPTABLE_RESIDUAL_INDEX = 5;
-      const MAX_BLACKOUT_RISK = 20; // %
+      const MAX_BLACKOUT_RISK = 3; // % – cíl do roku 2050 (v průběhu hry bez krize)
       const MIN_BUDGET = -50; // mld. € – krize až pod touto hranicí
       const MAX_BUDGET = 1000;
       const DEMAND_GROWTH_PER_YEAR = 0.01; // +1 % poptávky ročně
@@ -543,15 +662,39 @@
       const DEMAND_GROWTH_START_MONTH = 1;
       const DEMAND_SEASONAL_AMP = 0.0192; // sezónní výkyvy poptávky (~±1,9 %, celkem cca −84 % oproti původním ±12 %)
       const SWING_AMPLITUDE = 0.4; // ostatní kolísání: 40 % původní amplitudy (−60 %)
+      /** Nezaměstnanost při prodeji/koupi: Δ = −počet × jobs × koeficient (% bodů). */
+      const UNEMPLOYMENT_PER_JOB_UNIT = 0.38;
 
       const SOURCES = [
-        { key: 'coal', name: 'Uhlí', color: '#dc3545', intensity: 1.0, plantCost: 33, plantCap: 10, plantMWh: 520, jobs: 1.0, stable: 1.0 },
-        { key: 'gas', name: 'Plyn', color: '#6f42c1', intensity: 0.6, plantCost: 27, plantCap: 9, plantMWh: 420, jobs: 0.7, stable: 0.9 },
-        { key: 'nuclear', name: 'Jádro', color: '#0d6efd', intensity: 0.05, plantCost: 99, plantCap: 14, plantMWh: 780, jobs: 0.85, stable: 1.0 },
-        { key: 'wind', name: 'Vítr', color: '#20c997', intensity: 0.1, plantCost: 36, plantCap: 10, plantMWh: 260, jobs: 0.35, stable: 0.45 },
-        { key: 'solar', name: 'Slunce', color: '#ffc107', intensity: 0.1, plantCost: 24, plantCap: 8, plantMWh: 180, jobs: 0.25, stable: 0.35 },
-        { key: 'hydro', name: 'Hydro', color: '#0dcaf0', intensity: 0, plantCost: 55, plantCap: 8, plantMWh: 300, jobs: 0.25, stable: 0.75 },
-        { key: 'biomass', name: 'Biomasa', color: '#198754', intensity: 0.3, plantCost: 21, plantCap: 7, plantMWh: 240, jobs: 0.45, stable: 0.8 },
+        {
+          key: 'coal',
+          name: 'Uhlí',
+          color: '#dc3545',
+          intensity: 1.0,
+          plantCost: 33,
+          plantCap: 10,
+          plantMWh: 520,
+          jobs: 0.25,
+          stable: 1.0,
+          sellOnly: true,
+        },
+        {
+          key: 'gas',
+          name: 'Plyn',
+          color: '#6f42c1',
+          intensity: 0.6,
+          plantCost: 27,
+          plantCap: 9,
+          plantMWh: 420,
+          jobs: 0.2,
+          stable: 0.9,
+          sellOnly: true,
+        },
+        { key: 'nuclear', name: 'Jádro', color: '#0d6efd', intensity: 0.05, plantCost: 99, plantCap: 14, plantMWh: 780, jobs: 0.22, stable: 1.0 },
+        { key: 'wind', name: 'Vítr', color: '#20c997', intensity: 0.1, plantCost: 36, plantCap: 10, plantMWh: 260, jobs: 0.2, stable: 0.45 },
+        { key: 'solar', name: 'Slunce', color: '#ffc107', intensity: 0.1, plantCost: 24, plantCap: 8, plantMWh: 180, jobs: 0.15, stable: 0.35 },
+        { key: 'hydro', name: 'Hydro', color: '#0dcaf0', intensity: 0, plantCost: 45, plantCap: 8, plantMWh: 300, jobs: 0.18, stable: 0.75 },
+        { key: 'biomass', name: 'Biomasa', color: '#198754', intensity: 0.3, plantCost: 21, plantCap: 7, plantMWh: 240, jobs: 0.21, stable: 0.8 },
       ];
 
       const TARGETS = [
@@ -573,12 +716,12 @@
           pctPerLevel: { demand: 3, emissions: 2.5 },
         },
         {
-          id: 'reskill',
-          name: 'Rekvalifikace',
-          cost: 14,
+          id: 'plantEff',
+          name: 'Efektivita elektráren',
+          cost: 18,
           sellRate: 0.6,
-          effects: 'šok nezaměstnanosti −10 % / úroveň',
-          pctPerLevel: { unemploymentShock: 10 },
+          effects: 'výroba +1 % / úroveň, nezaměstnanost −5 %, spokojenost +3 % / úroveň',
+          pctPerLevel: { supply: 1, happiness: 3, unemploymentOnce: 5 },
         },
         {
           id: 'removals',
@@ -593,16 +736,16 @@
           name: 'Baterie a akumulace',
           cost: 20,
           sellRate: 0.65,
-          effects: 'stabilita +4 % / úroveň, riziko výpadků −12 % / úroveň, volatilita V+S −3 % / úroveň',
-          pctPerLevel: { stability: 4, blackoutRisk: 12, volatility: 3 },
+          effects: 'stabilita +4 % / úroveň, riziko výpadků −6 % / úroveň',
+          pctPerLevel: { stability: 4, blackoutRisk: 6 },
         },
         {
           id: 'grid',
           name: 'Posílení sítě',
           cost: 16,
           sellRate: 0.6,
-          effects: 'stabilita +1,5 % / úroveň, riziko výpadků −5 % / úroveň, volatilita V+S −1,25 % / úroveň',
-          pctPerLevel: { stability: 1.5, blackoutRisk: 5, volatility: 1.25 },
+          effects: 'stabilita +1,5 % / úroveň, riziko výpadků −4 % / úroveň',
+          pctPerLevel: { stability: 1.5, blackoutRisk: 4 },
         },
         {
           id: 'heat',
@@ -680,7 +823,6 @@
           // investments levels
           inv: Object.fromEntries(INVESTMENTS.map((x) => [x.id, 0])),
 
-          lastFossilShare: null,
           speed5x: false,
           message: null,
           lost: false,
@@ -699,7 +841,7 @@
         );
       }
 
-      const MONTH_MS_NORMAL = 1000;
+      const MONTH_MS_NORMAL = 500;
       const MONTH_MS_FAST = Math.round(1000 / 5);
       const getMonthMs = () => (state.speed5x ? MONTH_MS_FAST : MONTH_MS_NORMAL);
 
@@ -730,7 +872,8 @@
       const pwrDemand = document.getElementById('pwrDemand');
       const pwrSupply = document.getElementById('pwrSupply');
       const pwrDiff = document.getElementById('pwrDiff');
-      const pwrTrade = document.getElementById('pwrTrade');
+      const pwrIndexCard = document.getElementById('pwrIndexCard');
+      const pwrSupplyIndex = document.getElementById('pwrSupplyIndex');
 
       function hideWarning() {
         if (!warningBox) return;
@@ -824,7 +967,7 @@
               </div>
             </div>
             <div class="d-flex gap-2 mt-2">
-              <button class="btn btn-outline-primary btn-sm" type="button" id="buy-${s.key}">Koupit</button>
+              ${s.sellOnly ? '' : `<button class="btn btn-outline-primary btn-sm" type="button" id="buy-${s.key}">Koupit</button>`}
               <button class="btn btn-outline-secondary btn-sm" type="button" id="sell-${s.key}">Prodat</button>
             </div>
           `;
@@ -832,7 +975,9 @@
         });
 
         SOURCES.forEach((s) => {
-          document.getElementById(`buy-${s.key}`).addEventListener('click', () => buyPlant(s.key));
+          if (!s.sellOnly) {
+            document.getElementById(`buy-${s.key}`).addEventListener('click', () => buyPlant(s.key));
+          }
           document.getElementById(`sell-${s.key}`).addEventListener('click', () => sellPlant(s.key));
         });
       }
@@ -854,10 +999,22 @@
         return s.plantCost * (1 - discount);
       }
 
+      function applyPlantUnemploymentDelta(sourceKey, plantCountDelta) {
+        const s = SOURCES.find((x) => x.key === sourceKey);
+        if (!s || !plantCountDelta) return;
+        const uDelta = -plantCountDelta * (s.jobs ?? 0) * UNEMPLOYMENT_PER_JOB_UNIT;
+        if (!uDelta) return;
+        state.unemployment = clamp(state.unemployment + uDelta, 2.5, 18.0);
+      }
+
       function buyPlant(key) {
         if (state.won) return;
         const s = SOURCES.find((x) => x.key === key);
         if (!s) return;
+        if (s.sellOnly) {
+          showWarning('Uhlí a plyn nelze nově stavět – lze je jen prodávat (odstavovat).');
+          return;
+        }
         const cost = effectivePlantCost(s);
         if (state.budget - cost < MIN_BUDGET) {
           showWarning(`Nelze koupit: rozpočet by klesl pod ${MIN_BUDGET} mld. €.`);
@@ -865,6 +1022,7 @@
         }
         state.budget = clampBudget(state.budget - cost);
         state.plants[key] = (state.plants[key] ?? 0) + 1;
+        applyPlantUnemploymentDelta(key, 1);
         syncMixUI();
         syncEmissionsSnapshot();
         refreshImpacts();
@@ -876,6 +1034,7 @@
         if (!s) return;
         if ((state.plants[key] ?? 0) <= 0) return;
         state.plants[key] -= 1;
+        applyPlantUnemploymentDelta(key, -1);
         // selling gives a small refund (10 %)
         state.budget = clampBudget(state.budget + effectivePlantCost(s) * 0.1);
         syncMixUI();
@@ -940,6 +1099,9 @@
         }
         state.budget = clampBudget(state.budget - inv.cost);
         state.inv[id] = lvl + 1;
+        if (inv.pctPerLevel?.unemploymentOnce) {
+          state.unemployment = clamp(state.unemployment - inv.pctPerLevel.unemploymentOnce, 2.5, 18.0);
+        }
         syncInvestmentsUI();
         refreshImpacts();
       }
@@ -962,8 +1124,7 @@
       }
 
       function refreshImpacts() {
-        const share = sharesFromPlants(state.plants);
-        state.blackoutRisk = computeBlackoutRisk(share);
+        syncHappinessFromConditions();
         syncEmissionsSnapshot();
         renderHUD();
         renderKPIs();
@@ -988,13 +1149,9 @@
 
       function computeBlackoutRisk(share) {
         const st = computeStability(share);
-        const volShare = (share.wind + share.solar) / 100;
-        const volRed =
-          investmentEffectPct('storage', 'volatility') + investmentEffectPct('grid', 'volatility');
-        const volatility = scaleDownByPct(volShare, volRed);
-        const baseRisk = volatility * 18 * SWING_AMPLITUDE;
-        const instabilityPenalty = volatility * 95 * clamp(0.82 - st, 0, 1) * 2 * SWING_AMPLITUDE;
-        let risk = baseRisk + instabilityPenalty;
+        const stPct = st * 100;
+        // Riziko ze stability: při ~92 % cca 2 %, při ~87 % blízko limitu 3 %
+        let risk = 1.2 + Math.pow(Math.max(0, (98 - stPct) / 28), 1.55) * 7.5;
         const riskRed =
           investmentEffectPct('storage', 'blackoutRisk') + investmentEffectPct('grid', 'blackoutRisk');
         risk = scaleDownByPct(risk, riskRed);
@@ -1046,12 +1203,15 @@
         const exportRatio = demand > 0 ? Math.max(0, trade.diff) / demand : 0;
         const baseScore = 76;
         const happyPen = investmentEffectPct('removals', 'happiness');
+        const plantEffHappy = investmentEffectPct('plantEff', 'happiness');
+        const cleanAirBonus = ((100 - fossilPct) / 100) * 24;
         return clamp(
-          baseScore -
+          baseScore +
+            cleanAirBonus +
+            baseScore * (plantEffHappy / 100) -
             state.unemployment * 1.6 -
             (energyPrice - 1) * 26 -
-            state.blackoutRisk * 2.0 * SWING_AMPLITUDE -
-            0.18 * SWING_AMPLITUDE * fossilPct -
+            state.blackoutRisk * 6.5 -
             55 * SWING_AMPLITUDE * importRatio +
             18 * SWING_AMPLITUDE * exportRatio -
             baseScore * (happyPen / 100),
@@ -1065,7 +1225,35 @@
         SOURCES.forEach((s) => {
           supply += (plants[s.key] ?? 0) * s.plantMWh;
         });
-        return supply;
+        const supplyUp = investmentEffectPct('plantEff', 'supply');
+        return scaleUpByPct(supply, supplyUp);
+      }
+
+      /** Dostupnost větru/slunce v daném měsíci (sezóna + nižší stabilita = větší propady). */
+      function renewableAvailabilityFactor(sourceKey, month, st) {
+        const angle = ((month - 1) / 12) * Math.PI * 2;
+        let seasonal = 1;
+        if (sourceKey === 'solar') seasonal = 0.68 + 0.32 * Math.sin(angle - Math.PI / 2);
+        else if (sourceKey === 'wind') seasonal = 0.8 + 0.2 * Math.cos(angle);
+        const stPct = st * 100;
+        const instability = clamp((94 - stPct) / 38, 0, 1) * SWING_AMPLITUDE;
+        return clamp(seasonal * (1 - instability * 0.38), 0.38, 1.08);
+      }
+
+      /** Efektivní měsíční výroba včetně kolísání OZE podle stability (pro model indexu). */
+      function computeEffectiveMonthlySupplyMWh(plants, share, month) {
+        const supplyUp = investmentEffectPct('plantEff', 'supply');
+        const st = computeStability(share);
+        let total = 0;
+        SOURCES.forEach((s) => {
+          let mwh = (plants[s.key] ?? 0) * s.plantMWh;
+          mwh = scaleUpByPct(mwh, supplyUp);
+          if (s.key === 'wind' || s.key === 'solar') {
+            mwh *= renewableAvailabilityFactor(s.key, month, st);
+          }
+          total += mwh;
+        });
+        return total;
       }
 
       function computeTradeBudgetDelta(time, plants) {
@@ -1079,24 +1267,92 @@
         return { demand, supply, diff, money };
       }
 
+      /** Obchod pro spokojenost — bez měsíční sezóny, aby při nečinnosti nekolísala. */
+      function computeTradeForHappiness(time, plants) {
+        const base = state.powerBaseDemand ?? 16000 / (1 + DEMAND_SEASONAL_AMP);
+        const demandDown = investmentEffectPct('efficiency', 'demand');
+        const growth = demandGrowthFactor(time);
+        const demand = clamp(scaleDownByPct(base, demandDown) * growth, 6000, 40000);
+        const supply = computeMonthlySupplyMWh(plants);
+        const diff = supply - demand;
+        return { demand, supply, diff };
+      }
+
+      function syncHappinessFromConditions() {
+        const share = sharesFromPlants(state.plants);
+        const trade = computeTradeForHappiness(state.time, state.plants);
+        const st = computeStability(share);
+        state.blackoutRisk = computeBlackoutRisk(share);
+        const fossilPct = share.coal + share.gas;
+        const target = computeHappinessTarget(share, st, trade, fossilPct);
+        state.happiness = clamp(Math.round(target), 0, 100);
+      }
+
       function triggerCrisis(message) {
         state.lost = true;
         state.running = false;
         state.message = message;
+        crisisDismissed = false;
+        updateGameModal();
+      }
+
+      /**
+       * Index výroba/spotřeba v % — průměr 12 modelovaných měsíců (aktuální mix, sezóna, výkyvy OZE dle stability).
+       * Nečerpá z reálně odehrané historie.
+       */
+      function computeSupplyDemandIndex12m() {
+        const plants = state.plants;
+        const share = sharesFromPlants(plants);
+        const year = state.time.year;
+        const monthlyPct = [];
+        for (let month = 1; month <= 12; month++) {
+          const time = { year, month };
+          const demand = computeMonthlyDemandMWh(time);
+          const supply = computeEffectiveMonthlySupplyMWh(plants, share, month);
+          if (demand > 0) monthlyPct.push((supply / demand) * 100);
+        }
+        if (!monthlyPct.length) return null;
+        return monthlyPct.reduce((acc, v) => acc + v, 0) / monthlyPct.length;
+      }
+
+      function isSupplyDemandOk12m() {
+        const idx = computeSupplyDemandIndex12m();
+        return idx != null && idx > 100;
+      }
+
+      function buildEndGameFailureMessage(emissionsOk, blackoutOk, supplyOk) {
+        const parts = [];
+        if (!emissionsOk) parts.push('emise jsou vyšší než pohlcení');
+        if (!blackoutOk) {
+          parts.push(`riziko výpadků je ${fmt1(state.blackoutRisk)} % (limit je ${MAX_BLACKOUT_RISK} %)`);
+        }
+        if (!supplyOk) {
+          const idx = computeSupplyDemandIndex12m();
+          parts.push(
+            idx != null
+              ? `index výroby/spotřeby je ${fmt1(idx)} % (potřeba nad 100 %)`
+              : 'výroba nepřevyšuje spotřebu',
+          );
+        }
+        return (
+          'Bohužel jsi selhal(a) a nesplnil normy. Rok 2050: ' + parts.join('; ') + '. Zkus to znovu.'
+        );
       }
 
       function finalizeGame2050(emissions, sinks) {
         state.gameOver = true;
         state.running = false;
-        const ok = emissions <= sinks;
-        if (ok) {
+        const emissionsOk = emissions <= sinks;
+        const blackoutOk = state.blackoutRisk <= MAX_BLACKOUT_RISK;
+        const supplyOk = isSupplyDemandOk12m();
+        if (emissionsOk && blackoutOk && supplyOk) {
           state.won = true;
           state.lost = false;
           state.message = null;
         } else {
           state.won = false;
           state.lost = true;
-          state.message = 'Rok 2050: emise jsou vyšší než pohlcení. Sniž emise nebo zvyš pohlcení (investice).';
+          state.message = buildEndGameFailureMessage(emissionsOk, blackoutOk, supplyOk);
         }
       }
 
@@ -1109,23 +1365,15 @@
         // derive shares from plants
         const share = sharesFromPlants(state.plants);
         const trade = computeTradeBudgetDelta(time, state.plants);
-        const fossilShare = (share.coal + share.gas) / 100;
-
-        // unemployment responds to shrinking fossil share
-        const lastFossil = state.lastFossilShare ?? fossilShare;
-        const fossilDrop = Math.max(0, lastFossil - fossilShare);
-        state.lastFossilShare = fossilShare;
-        const shock = fossilDrop * 14 * SWING_AMPLITUDE;
-        const shockMit = scaleDownByPct(1, investmentEffectPct('reskill', 'unemploymentShock'));
-        const uDelta = shock * shockMit - 0.05;
-        state.unemployment = clamp(state.unemployment + uDelta, 2.5, 18.0);
-
         const st = computeStability(share);
         state.blackoutRisk = computeBlackoutRisk(share);
         const fossilPct = share.coal + share.gas;
 
-        const happinessTarget = computeHappinessTarget(share, st, trade, fossilPct);
-        state.happiness = clamp(lerp(state.happiness, happinessTarget, 0.22), 0, 100);
+        const tradeHappy = computeTradeForHappiness(time, state.plants);
+        const happinessTarget = computeHappinessTarget(share, st, tradeHappy, fossilPct);
+        if (Math.abs(happinessTarget - state.happiness) > 0.05) {
+          state.happiness = clamp(lerp(state.happiness, happinessTarget, 0.22), 0, 100);
+        }
 
         const taxBase = clamp(1.06 - state.unemployment / 28 - state.blackoutRisk / 120, 0.5, 1.2);
         const monthlyIncome = (26 / 12) * taxBase * (0.6 + state.happiness / 140);
@@ -1150,7 +1398,12 @@
         // store last power stats for UI
         state.__lastTrade = trade;
         state.__tradeHistory = state.__tradeHistory ?? [];
-        state.__tradeHistory.push({ time, diff: trade.diff });
+        state.__tradeHistory.push({
+          time,
+          diff: trade.diff,
+          demand: trade.demand,
+          supply: trade.supply,
+        });
         if (state.__tradeHistory.length > 200) state.__tradeHistory.shift();
 
         // advance time by 1 month
@@ -1165,22 +1418,19 @@
           return;
         }
 
-        // lose conditions (incl. blackout risk)
-        if (state.blackoutRisk > MAX_BLACKOUT_RISK) {
-          triggerCrisis(
-            `Riziko výpadků překročilo ${MAX_BLACKOUT_RISK} %. Zkus investovat do baterií/sítě nebo přidat stabilní zdroje.`,
-          );
-        }
+        // lose conditions (riziko výpadků se hodnotí až v roce 2050)
         if (state.happiness < 18) {
-          triggerCrisis('Velké nepokoje ve společnosti. Zkus rekvalifikace a stabilnější mix (méně výpadků).');
+          triggerCrisis('Velké nepokoje ve společnosti. Zkus investici Efektivita elektráren a stabilnější mix.');
         }
         if (state.unemployment > 16.5) {
-          triggerCrisis('Nezaměstnanost je příliš vysoká. Zkus přechod rozložit do více měsíců a koupit rekvalifikace.');
+          triggerCrisis('Nezaměstnanost je příliš vysoká. Zkus přechod rozložit a investovat do efektivity elektráren.');
         }
       }
 
       // ===== Rendering
       const kpiYear = document.getElementById('kpiYear');
+      const kpiEmissionsCard = document.getElementById('kpiEmissionsCard');
+      const kpiBlackoutCard = document.getElementById('kpiBlackoutCard');
       const kpiEmissions = document.getElementById('kpiEmissions');
       const kpiMilestone = document.getElementById('kpiMilestone');
       const kpiSinks = document.getElementById('kpiSinks');
@@ -1189,9 +1439,86 @@
       const kpiHappiness = document.getElementById('kpiHappiness');
       const kpiBlackouts = document.getElementById('kpiBlackouts');
       const kpiBlackoutMax = document.getElementById('kpiBlackoutMax');
-      const winBox = document.getElementById('winBox');
-      const loseBox = document.getElementById('loseBox');
-      const loseText = document.getElementById('loseText');
+      const gameEndOverlay = document.getElementById('gameEndOverlay');
+      const gameEndDialog = document.getElementById('gameEndDialog');
+      const gameEndIcon = document.getElementById('gameEndIcon');
+      const gameEndTitle = document.getElementById('gameEndTitle');
+      const gameEndText = document.getElementById('gameEndText');
+      const gameEndClose = document.getElementById('gameEndClose');
+      let gameEndDismissed = false;
+      let crisisDismissed = false;
+
+      function setGameModalStyle(mode) {
+        if (!gameEndDialog) return;
+        gameEndDialog.classList.remove('game-end-dialog--win', 'game-end-dialog--lose', 'game-end-dialog--crisis');
+        if (mode) gameEndDialog.classList.add(`game-end-dialog--${mode}`);
+      }
+
+      function setGameEndCloseButton(variant) {
+        if (!gameEndClose) return;
+        gameEndClose.classList.remove('btn-primary', 'btn-success', 'btn-danger');
+        if (variant === 'success') gameEndClose.classList.add('btn-success');
+        else if (variant === 'danger') gameEndClose.classList.add('btn-danger');
+        else gameEndClose.classList.add('btn-primary');
+      }
+
+      function updateGameModal() {
+        if (!gameEndOverlay) return;
+
+        if (state.gameOver && !gameEndDismissed) {
+          gameEndOverlay.classList.remove('d-none');
+          if (state.won) {
+            if (gameEndIcon) {
+              gameEndIcon.textContent = '✓';
+              gameEndIcon.classList.remove('d-none');
+            }
+            if (gameEndTitle) gameEndTitle.textContent = 'Splněno';
+            if (gameEndText) {
+              gameEndText.textContent =
+                'Do roku 2050 jsi splnil(a) všechny cíle: emise ≤ pohlcení, riziko výpadků pod 3 % a modelovaný index výroby/spotřeby > 100 %.';
+            }
+            setGameModalStyle('win');
+            setGameEndCloseButton('success');
+          } else {
+            if (gameEndIcon) {
+              gameEndIcon.textContent = '';
+              gameEndIcon.classList.add('d-none');
+            }
+            if (gameEndTitle) gameEndTitle.textContent = 'Konec hry';
+            if (gameEndText) {
+              gameEndText.textContent =
+                state.message ??
+                'Bohužel jsi selhal(a) a nesplnil normy. Rok 2050: cíle nebyly splněny. Zkus to znovu.';
+            }
+            setGameModalStyle('lose');
+            setGameEndCloseButton('danger');
+          }
+          return;
+        }
+
+        if (state.lost && !state.gameOver && !crisisDismissed) {
+          gameEndOverlay.classList.remove('d-none');
+          if (gameEndIcon) {
+            gameEndIcon.textContent = '';
+            gameEndIcon.classList.add('d-none');
+          }
+          if (gameEndTitle) gameEndTitle.textContent = 'Krize';
+          if (gameEndText) gameEndText.textContent = state.message ?? 'Něco se pokazilo. Zkus upravit strategii a pokračovat.';
+          setGameModalStyle('crisis');
+          setGameEndCloseButton('primary');
+          return;
+        }
+
+        gameEndOverlay.classList.add('d-none');
+      }
+
+      if (gameEndClose) {
+        gameEndClose.addEventListener('click', () => {
+          if (state.gameOver) gameEndDismissed = true;
+          else crisisDismissed = true;
+          updateGameModal();
+        });
+      }
 
       function timeText(t) {
         return `${MONTHS[(t.month ?? 1) - 1]} ${t.year}`;
@@ -1440,7 +1767,8 @@
         const st = computeStability(share);
         const trade = computeTradeBudgetDelta(state.time, state.plants);
         const fossilPctForHappiness = share.coal + share.gas;
-        const happinessTarget = computeHappinessTarget(share, st, trade, fossilPctForHappiness);
+        const tradeHappy = computeTradeForHappiness(state.time, state.plants);
+        const happinessTarget = computeHappinessTarget(share, st, tradeHappy, fossilPctForHappiness);
         const happinessForBudget = lerp(state.happiness, happinessTarget, 0.22);
         const taxBase = clamp(1.06 - state.unemployment / 28 - state.blackoutRisk / 120, 0.5, 1.2);
         const monthlyIncome = (26 / 12) * taxBase * (0.6 + happinessForBudget / 140);
@@ -1484,9 +1812,14 @@
         if (pwrDemand) pwrDemand.textContent = fmt0(t.demand) + ' MWh';
         if (pwrSupply) pwrSupply.textContent = fmt0(t.supply) + ' MWh';
         if (pwrDiff) pwrDiff.textContent = (t.diff >= 0 ? '+' : '−') + fmt0(Math.abs(t.diff)) + ' MWh';
-        if (pwrTrade) {
-          pwrTrade.textContent = `${t.money >= 0 ? '+' : '−'}${fmtMoney(Math.abs(t.money))} mld. €`;
-          pwrTrade.className = 'small mono text-end mt-1 ' + (t.money >= 0 ? 'text-success' : 'text-danger');
+        const supplyIdx = computeSupplyDemandIndex12m();
+        if (pwrSupplyIndex) {
+          pwrSupplyIndex.textContent = supplyIdx != null ? fmt1(supplyIdx) + ' %' : '—';
+        }
+        if (pwrIndexCard) {
+          const idxOk = supplyIdx != null && supplyIdx > 100;
+          pwrIndexCard.classList.toggle('pwr-index-ok', supplyIdx != null && idxOk);
+          pwrIndexCard.classList.toggle('pwr-index-bad', supplyIdx != null && !idxOk);
         }
       }
 
@@ -1504,9 +1837,18 @@
         kpiBlackouts.textContent = fmt1(state.blackoutRisk) + ' %';
         kpiBlackoutMax.textContent = fmt0(MAX_BLACKOUT_RISK) + ' %';
 
-        winBox.classList.toggle('d-none', !state.won);
-        loseBox.classList.toggle('d-none', !state.lost);
-        if (state.lost) loseText.textContent = state.message ?? 'Něco se pokazilo.';
+        const emissionsOk = e <= s;
+        if (kpiEmissionsCard) {
+          kpiEmissionsCard.classList.toggle('kpi-status-ok', emissionsOk);
+          kpiEmissionsCard.classList.toggle('kpi-status-bad', !emissionsOk);
+        }
+        const riskOk = state.blackoutRisk <= MAX_BLACKOUT_RISK;
+        if (kpiBlackoutCard) {
+          kpiBlackoutCard.classList.toggle('kpi-status-ok', riskOk);
+          kpiBlackoutCard.classList.toggle('kpi-status-bad', !riskOk);
+        }
+
+        updateGameModal();
 
         if (btnPause) {
           if (state.gameOver || state.won) btnPause.textContent = 'Konec hry';
@@ -1530,12 +1872,17 @@
 
       btnReset.addEventListener('click', () => {
         state = initial();
+        gameEndDismissed = false;
+        crisisDismissed = false;
         btnPause.textContent = 'Spustit';
         hideWarning();
+        syncHappinessFromConditions();
         syncSpeedButton();
         syncMixUI();
         syncInvestmentsUI();
         syncEmissionsSnapshot();
+        updateGameModal();
+        initTooltips();
       });
 
       const btnFastSpeed = document.getElementById('btnFastSpeed');
@@ -1579,6 +1926,7 @@
       });
 
       // ===== Main loop (continuous)
+      syncHappinessFromConditions();
       syncEmissionsSnapshot();
       syncMixUI();
       syncInvestmentsUI();
@@ -1602,6 +1950,16 @@
         requestAnimationFrame(loop);
       }
 
+      function initTooltips() {
+        if (typeof bootstrap === 'undefined') return;
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
+          const existing = bootstrap.Tooltip.getInstance(el);
+          if (existing) existing.dispose();
+          new bootstrap.Tooltip(el);
+        });
+      }
+
+      initTooltips();
       requestAnimationFrame(loop);
     </script>
   </body>
