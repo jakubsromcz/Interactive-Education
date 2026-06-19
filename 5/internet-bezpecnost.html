@@ -87,7 +87,9 @@
     </main>
 
     <script>
+      let attempts = 0;
       function check() {
+        attempts++;
         const ok =
           document.getElementById('q1').value === 'b' &&
           document.getElementById('q2').value === 'c' &&
@@ -95,7 +97,9 @@
 
         const el = document.getElementById('result');
         el.className = 'fw-semibold ' + (ok ? 'text-success' : 'text-danger');
-        el.textContent = ok ? '✔ Skvělé, bezpečně!' : '✘ Ještě jednou';
+        el.innerHTML =
+          (ok ? '✔ Skvělé, bezpečně!' : '✘ Ještě jednou') +
+          `<div class="small text-body-secondary mt-1">Pokusy: ${attempts}</div>`;
       }
     </script>
   </body>

@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Typografie 3 – cvičení (5. třída)</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+    crossorigin="anonymous"
+  />
+  <style>
+    body {
+      background: radial-gradient(1200px 600px at 20% 0%, #e8f4ff 0%, rgba(232, 244, 255, 0) 60%),
+        radial-gradient(900px 500px at 90% 20%, #fff3e6 0%, rgba(255, 243, 230, 0) 55%),
+        linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    }
+    .hero {
+      border: 1px solid rgba(13, 110, 253, 0.15);
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(6px);
+    }
+    .error {
+      background-color: #ffd6d6;
+      outline: 2px solid rgba(220, 53, 69, 0.25);
+    }
+    .correct {
+      background-color: #d7ffe0;
+      outline: 2px solid rgba(25, 135, 84, 0.22);
+    }
+    span[contenteditable] {
+      padding: 0.1rem 0.25rem;
+      border-radius: 0.35rem;
+      display: inline-block;
+      min-width: 0.75rem;
+    }
+    span[contenteditable]:focus {
+      outline: 3px solid rgba(13, 110, 253, 0.25);
+      background-color: #fff3cd;
+    }
+  </style>
+</head>
+<body>
+
+<main class="container py-4 py-md-5">
+  <div class="hero rounded-4 p-4 p-md-5 shadow-sm mb-4">
+    <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+      <a class="btn btn-outline-secondary" href="../home.html" aria-label="Zpět na domovskou stránku">
+        <span class="d-inline-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+            <path fill-rule="evenodd" d="M15 8a.5.5 0 0 1-.5.5H3.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L3.707 7.5H14.5A.5.5 0 0 1 15 8z"/>
+          </svg>
+          <span>Zpět</span>
+        </span>
+      </a>
+      <span class="badge text-bg-success px-3 py-2">5. třída</span>
+    </div>
+
+    <div class="d-flex flex-column flex-md-row align-items-md-center gap-3 gap-md-4">
+      <div class="flex-grow-1">
+        <h1 class="display-6 fw-bold mb-2">Typografie 3 – oprav chyby</h1>
+        <p class="lead mb-0">
+          Nový text, nové chyby. Oprav červené části tak, aby seděly mezery, interpunkce, čísla, datumy a uvozovky.
+        </p>
+      </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <div class="row g-3 align-items-md-center">
+      <div class="col-12">
+        <h2 class="h5 fw-bold mb-2">Jak na to</h2>
+        <ul class="mb-0">
+          <li>Oprav červené části textu.</li>
+          <li>Zaměř se na mezery (před/za interpunkcí, u procent, u měn, u datumů a u závorek).</li>
+          <li class="mt-2">
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#rulesModal"
+            >
+              Všechna pravidla
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4 p-md-4">
+      <h2 class="h5 fw-bold mb-3">Úloha 1: Oprav text</h2>
+
+      <div id="exercise-edit">
+        <p class="fs-5 lh-lg mb-0">
+          V pondělí <span contenteditable="true" class="error" data-correct="18. 5. 2026">18.5.2026</span>
+          máme zkoušku z prezentace.
+          Sraz je v <span contenteditable="true" class="error" data-correct="7:45">7 :45</span>
+          před učebnou a každý přinese <span contenteditable="true" class="error" data-correct="30 Kč">30Kč</span>
+          na materiál.
+          Paní učitelka <span contenteditable="true" class="error" data-correct="napsala: „Nezapomeňte">napsala:" Nezapomeňte</span>
+          na sešit<span contenteditable="true" class="error" data-correct=", a">,a</span>
+          dobrou náladu<span contenteditable="true" class="error" data-correct=".“">&nbsp;. “</span>
+        </p>
+
+        <hr class="my-4" />
+
+        <p class="fs-5 lh-lg mb-0">
+          Bydlíme v okrese <span contenteditable="true" class="error" data-correct="Brno-venkov">Brno - venkov</span>
+          přece.
+          Úspěšnost byla <span contenteditable="true" class="error" data-correct="80 %">80%</span>
+          a časový limit <span contenteditable="true" class="error" data-correct="2-3 min">2 - 3min</span>.
+          Vedoucí je <span contenteditable="true" class="error" data-correct="Mgr. Jana Novotná">Mgr.Jana Novotná</span>
+          <span contenteditable="true" class="error" data-correct="(vedoucí)">( vedoucí )</span>.
+          Vzkaz zní<span contenteditable="true" class="error" data-correct=": „">:"</span>
+          Přijďte včas<span contenteditable="true" class="error" data-correct="…">&nbsp;...</span>
+          děkujeme<span contenteditable="true" class="error" data-correct="!“">&nbsp;!&nbsp;&nbsp;"</span>
+        </p>
+      </div>
+
+      <hr class="my-4" />
+
+      <div class="d-grid d-sm-flex gap-2 align-items-sm-center">
+        <button class="btn btn-primary btn-lg" onclick="checkText()">Zkontrolovat</button>
+        <div id="result" class="fw-semibold"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4 mt-4">
+    <div class="card-body p-4 p-md-4">
+      <h2 class="h5 fw-bold mb-2">Úloha 2: Vyber správnou variantu</h2>
+      <p class="text-body-secondary mb-3">
+        Tady nic nepřepisuješ. Jen vyber, která varianta je typograficky správně.
+      </p>
+
+      <div class="row g-3">
+        <!-- Po sloupcích: 1–5 vlevo, 6–10 uprostřed, 11–15 vpravo -->
+        <div class="col-12 col-md-4">
+          <div class="fw-semibold mb-1">1) Datum</div>
+          <select class="form-select" id="b-q1">
+            <option value="">Vyber…</option>
+            <option value="a">18. 5. 2026</option>
+            <option value="b">18.5.2026</option>
+            <option value="c">18 . 5 . 2026</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="fw-semibold mb-1">6) Rozsah</div>
+          <select class="form-select" id="b-q6">
+            <option value="">Vyber…</option>
+            <option value="a">2 - 3 min</option>
+            <option value="b">2–3 min</option>
+            <option value="c">2 - 3min</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="fw-semibold mb-1">11) Tečka</div>
+          <select class="form-select" id="b-q11">
+            <option value="">Vyber…</option>
+            <option value="a">Hotovo.</option>
+            <option value="b">Hotovo .</option>
+            <option value="c">Hotovo&nbsp;&nbsp;&nbsp;.</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <div class="fw-semibold mb-1">2) Čas</div>
+          <select class="form-select" id="b-q2">
+            <option value="">Vyber…</option>
+            <option value="a">7 :45</option>
+            <option value="b">7 : 45</option>
+            <option value="c">7:45</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="fw-semibold mb-1">7) Měna</div>
+          <select class="form-select" id="b-q7">
+            <option value="">Vyber…</option>
+            <option value="a">30&nbsp;&nbsp;Kč</option>
+            <option value="b">30Kč</option>
+            <option value="c">30 Kč</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="fw-semibold mb-1">12) Výpustka</div>
+          <select class="form-select" id="b-q12">
+            <option value="">Vyber…</option>
+            <option value="a">To je super…</option>
+            <option value="b">To je super. . .</option>
+            <option value="c">To je super …</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <div class="fw-semibold mb-1">3) Osmdesát procent</div>
+          <select class="form-select" id="b-q3">
+            <option value="">Vyber…</option>
+            <option value="a">80%</option>
+            <option value="b">80&nbsp;&nbsp;%</option>
+            <option value="c">80 %</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="fw-semibold mb-1">8) Zkratka a jméno</div>
+          <select class="form-select" id="b-q8">
+            <option value="">Vyber…</option>
+            <option value="a">p.&nbsp;Učitel Novák</option>
+            <option value="b">p.&nbsp;učitel Novák</option>
+            <option value="c">p. učitel Novák</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="fw-semibold mb-1">13) Telefon</div>
+          <select class="form-select" id="b-q13">
+            <option value="">Vyber…</option>
+            <option value="a">+420 777 111 222</option>
+            <option value="b">+420777111222</option>
+            <option value="c">+420 777111222</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <div class="fw-semibold mb-1">4) Titul a jméno</div>
+          <select class="form-select" id="b-q4">
+            <option value="">Vyber…</option>
+            <option value="a">Mgr. Jana Novotná</option>
+            <option value="b">Mgr . Jana Novotná</option>
+            <option value="c">Mgr.Jana Novotná</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="fw-semibold mb-1">9) Uvozovky a dvojtečka</div>
+          <select class="form-select" id="b-q9">
+            <option value="">Vyber…</option>
+            <option value="a">Řekla : „Ahoj“</option>
+            <option value="b">Řekla: „Ahoj“</option>
+            <option value="c">Řekla:„Ahoj“</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="fw-semibold mb-1">14) Jednotky</div>
+          <select class="form-select" id="b-q14">
+            <option value="">Vyber…</option>
+            <option value="a">30kg</option>
+            <option value="b">30 k g</option>
+            <option value="c">30 kg</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <div class="fw-semibold mb-1">5) Závorky</div>
+          <select class="form-select" id="b-q5">
+            <option value="">Vyber…</option>
+            <option value="a">( vedoucí )</option>
+            <option value="b">( vedoucí)</option>
+            <option value="c">(vedoucí)</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="fw-semibold mb-1">10) Čárka</div>
+          <select class="form-select" id="b-q10">
+            <option value="">Vyber…</option>
+            <option value="a">Ahoj, jak se máš?</option>
+            <option value="b">Ahoj ,jak se máš?</option>
+            <option value="c">Ahoj , jak se máš?</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="fw-semibold mb-1">15) Závorky + tečka</div>
+          <select class="form-select" id="b-q15">
+            <option value="">Vyber…</option>
+            <option value="a">Nějaký text (poznámka).</option>
+            <option value="b">Nějaký text (poznámka.)</option>
+            <option value="c">Nějaký text ( poznámka ).</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="d-grid d-sm-flex gap-2 align-items-sm-center mt-4">
+        <button class="btn btn-primary btn-lg" onclick="checkBonus()">Zkontrolovat</button>
+        <div id="bonusResult" class="fw-semibold"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="modal fade" id="rulesModal" tabindex="-1" aria-labelledby="rulesModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title h5 fw-bold" id="rulesModalLabel">Typografická pravidla</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+      </div>
+      <div class="modal-body">
+        <ul class="mb-0">
+          <li>Interpunkční znaménka: tečka, čárka, středník atd. mají za sebou mezeru. Před nimi se mezera nedělá.</li>
+          <li>
+            U závorek se mezera vkládá před otevírací a za uzavírací závorku. Vnitřní mezery se u závorek nedělají.
+          </li>
+          <li>
+            Na místo, kde nelze dovolit rozdělení, se vkládá mezera pevná (nezlomitelná). Např. u datumů, velkých čísel,
+            titulů (<b>Mgr.</b>) a částek.
+          </li>
+          <li>Spojovník/pomlčky: bereme jako stejné, ale mezery okolo se stále kontrolují.</li>
+          <li>Uvozovky: nerozlišujeme typ uvozovek, ale mezery okolo se kontrolují.</li>
+          <li>Tři tečky piš jako výpustku <b>…</b> (ne jako tři tečky).</li>
+          <li><b>50 %</b> (s mezerou) je procento, <b>50%</b> (bez mezery) je přídavné jméno (padesátiprocentní).</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+  crossorigin="anonymous"
+></script>
+
+<script>
+function checkText() {
+  window.__attempts_typografie3 = (window.__attempts_typografie3 ?? 0) + 1;
+  const spans = document.querySelectorAll('#exercise-edit span[data-correct]');
+  let errors = 0;
+
+  const normalizeForCompare = (value) => {
+    let s = String(value ?? '');
+    s = s.replace(/\u00A0/g, ' ');
+    s = s.replace(/[„“"]/g, '"');
+    // sjednotíme typ pomlčky/spojovníku na '-', ale mezery okolo necháme kontrolovat
+    s = s.replace(/[\u2010\u2011\u2012\u2013\u2014\u2212]/g, '-'); // ‐‑‒–—−
+    s = s.replace(/\.{3}/g, '…');
+    return s;
+  };
+
+  spans.forEach(span => {
+    const correct = span.dataset.correct;
+    const userRaw = span.innerText;
+
+    const correctAllowsEdgeSpaces = correct.startsWith(' ') || correct.endsWith(' ');
+    const hasBadSpaces = !correctAllowsEdgeSpaces && (userRaw.startsWith(' ') || userRaw.endsWith(' '));
+
+    const userNorm = normalizeForCompare(userRaw);
+    const correctNorm = normalizeForCompare(correct);
+
+    if (userNorm === correctNorm && !hasBadSpaces) {
+      span.classList.remove('error');
+      span.classList.add('correct');
+    } else {
+      span.classList.remove('correct');
+      span.classList.add('error');
+      errors++;
+    }
+  });
+
+  const result = document.getElementById('result');
+
+  if (errors === 0) {
+    result.className = 'fw-semibold text-success';
+    result.innerHTML = `Vše je správně!<div class="small text-body-secondary mt-1">Pokusy: ${window.__attempts_typografie3}</div>`;
+  } else {
+    result.className = 'fw-semibold text-danger';
+    result.innerHTML = `Počet chyb: ${errors}<div class="small text-body-secondary mt-1">Pokusy: ${window.__attempts_typografie3}</div>`;
+  }
+}
+
+function checkBonus() {
+  window.__attempts_typografie3_bonus = (window.__attempts_typografie3_bonus ?? 0) + 1;
+
+  const correct = {
+    'b-q1': 'a',
+    'b-q2': 'c',
+    'b-q3': 'c',
+    'b-q4': 'a',
+    'b-q5': 'c',
+    'b-q6': 'b',
+    'b-q7': 'c',
+    'b-q8': 'b',
+    'b-q9': 'b',
+    'b-q10': 'a',
+    'b-q11': 'a',
+    'b-q12': 'a',
+    'b-q13': 'a',
+    'b-q14': 'c',
+    'b-q15': 'a',
+  };
+
+  const entries = Object.entries(correct);
+  let errors = 0;
+  entries.forEach(([id, val]) => {
+    if (document.getElementById(id).value !== val) errors++;
+  });
+  const ok = errors === 0;
+
+  const el = document.getElementById('bonusResult');
+  el.className = 'fw-semibold ' + (ok ? 'text-success' : 'text-danger');
+  el.innerHTML =
+    (ok ? '✔ Výborně!' : `✘ Počet chyb: ${errors}`) +
+    `<div class="small text-body-secondary mt-1">Pokusy: ${window.__attempts_typografie3_bonus}</div>`;
+}
+</script>
+
+</body>
+</html>
+

@@ -123,8 +123,8 @@
 
           <p class="fs-5 lh-lg mb-0">
             Dne <span contenteditable="true" class="error" data-correct="18. 5. 2015">18.5.2015</span>
-            došlo k nehodě na trase <span contenteditable="true" class="error" data-correct="Brno–Praha">Brno – Praha</span>.
-            Řidič jel rychlostí <span contenteditable="true" class="error" data-correct="70–80 km/h">70–80km/h</span>
+            došlo k nehodě na trase <span contenteditable="true" class="error" data-correct="Brno-Praha">Brno - Praha</span>.
+            Řidič jel rychlostí <span contenteditable="true" class="error" data-correct="70-80 km/h">70-80km/h</span>
             a překročil limit.
             Na místě zasahoval <span contenteditable="true" class="error" data-correct="Mgr. Jan Novák">Mgr.Jan Novák</span>
             <span contenteditable="true" class="error" data-correct="(velitel zásahu)">( velitel zásahu )</span>.
@@ -186,11 +186,11 @@
           </li>
           <li>
             Pomlčka se ještě používá na spojení svou samostatných slov, mezi nimiž je nějaký vztah (např. odkud kam).
-            Pak se píše bez mezer např. <b>Brno–Praha</b>.
+            Pak se píše bez mezer např. <b>Brno-Praha</b>.
           </li>
           <li>
             Pomlčku také vkládáme mezí čísla, aby vyznačila rozsah. Má funkci intervalu od do. Tady je píšeme bez mezer.
-            Např. <b>1990–2010</b>, <b>70–80 kg</b>.
+            Např. <b>1990-2010</b>, <b>70-80 kg</b>.
           </li>
           <li>
             Tři tečky (výpustka) nahrazují neúplný text nebo nedokončenou větu. Píšeme je bez mezery hned na konci věty.
@@ -222,6 +222,7 @@
 
 <script>
 function checkText() {
+  window.__attempts_typografie1 = (window.__attempts_typografie1 ?? 0) + 1;
   const spans = document.querySelectorAll('span[data-correct]');
   let errors = 0;
 
@@ -229,7 +230,7 @@ function checkText() {
     let s = String(value ?? '');
     s = s.replace(/\u00A0/g, ' ');
     s = s.replace(/[„“"]/g, '"');
-    // sjednotíme spojovník/pomlčku/minus na jeden znak, aby se řešily hlavně mezery
+    // sjednotíme typ pomlčky/spojovníku na '-', ale mezery okolo necháme kontrolovat
     s = s.replace(/[\u2010\u2011\u2012\u2013\u2014\u2212]/g, '-'); // ‐‑‒–—−
     s = s.replace(/\.{3}/g, '…');
     return s;
@@ -259,10 +260,10 @@ function checkText() {
 
   if (errors === 0) {
     result.className = 'fw-semibold text-success';
-    result.innerText = 'Vše je správně!';
+    result.innerHTML = `Vše je správně!<div class="small text-body-secondary mt-1">Pokusy: ${window.__attempts_typografie1}</div>`;
   } else {
     result.className = 'fw-semibold text-danger';
-    result.innerText = 'Počet chyb: ' + errors;
+    result.innerHTML = `Počet chyb: ${errors}<div class="small text-body-secondary mt-1">Pokusy: ${window.__attempts_typografie1}</div>`;
   }
 }
 </script>

@@ -111,13 +111,13 @@
       <hr class="my-4" />
 
       <p class="fs-5 lh-lg mb-0">
-        Trasa je <span contenteditable="true" class="error" data-correct="Praha–Brno">Praha – Brno</span>
+        Trasa je <span contenteditable="true" class="error" data-correct="Praha-Brno">Praha - Brno</span>
         a pojedeme autobusem.
         Cena je <span contenteditable="true" class="error" data-correct="50 %">50%</span>
         z příspěvku školy, zbytek doplatí rodiče.
         Celkem to vychází na <span contenteditable="true" class="error" data-correct="120 Kč">120Kč</span>.
-        Autobus pojede rychlostí <span contenteditable="true" class="error" data-correct="70–80 km/h">70 - 80km/h</span>
-        a cestou pojedeme po trase <span contenteditable="true" class="error" data-correct="Ostrava–Brno">Ostrava - Brno</span>.
+        Autobus pojede rychlostí <span contenteditable="true" class="error" data-correct="70-80 km/h">70 - 80km/h</span>
+        a cestou pojedeme po trase <span contenteditable="true" class="error" data-correct="Ostrava-Brno">Ostrava - Brno</span>.
       </p>
 
       <hr class="my-4" />
@@ -133,7 +133,7 @@
         věcí (žertujeme<span contenteditable="true" class="error" data-correct="…">&nbsp;&nbsp;...</span>),
         stačí jen malý batoh.
         Vzkaz pro rodiče zní<span contenteditable="true" class="error" data-correct=": „">:"</span>
-        Výlet je skvělý<span contenteditable="true" class="error" data-correct="…">.&nbsp;.&nbsp;.</span>
+        Výlet je skvělý&nbsp;<span contenteditable="true" class="error" data-correct="…">.&nbsp;.&nbsp;.</span>
         uvidíte!<span contenteditable="true" class="error" data-correct="“">&nbsp;&nbsp;"</span>
         <span contenteditable="true" class="error" data-correct='Konec. "Další věta."'>Konec."Další věta."</span>
       </p>
@@ -188,11 +188,11 @@
           </li>
           <li>
             Pomlčka se ještě používá na spojení svou samostatných slov, mezi nimiž je nějaký vztah (např. odkud kam).
-            Pak se píše bez mezer např. <b>Brno–Praha</b>.
+            Pak se píše bez mezer např. <b>Brno-Praha</b>.
           </li>
           <li>
             Pomlčku také vkládáme mezí čísla, aby vyznačila rozsah. Má funkci intervalu od do. Tady je píšeme bez mezer.
-            Např. <b>1990–2010</b>, <b>70–80 kg</b>.
+            Např. <b>1990-2010</b>, <b>70-80 kg</b>.
           </li>
           <li>
             Tři tečky (výpustka) nahrazují neúplný text nebo nedokončenou větu. Píšeme je bez mezery hned na konci věty.
@@ -224,6 +224,7 @@
 
 <script>
 function checkText() {
+  window.__attempts_typografie2 = (window.__attempts_typografie2 ?? 0) + 1;
   const spans = document.querySelectorAll('span[data-correct]');
   let errors = 0;
 
@@ -231,6 +232,7 @@ function checkText() {
     let s = String(value ?? '');
     s = s.replace(/\u00A0/g, ' ');
     s = s.replace(/[„“"]/g, '"');
+    // sjednotíme typ pomlčky/spojovníku na '-', ale mezery okolo necháme kontrolovat
     s = s.replace(/[\u2010\u2011\u2012\u2013\u2014\u2212]/g, '-'); // ‐‑‒–—−
     s = s.replace(/\.{3}/g, '…');
     return s;
@@ -260,10 +262,10 @@ function checkText() {
 
   if (errors === 0) {
     result.className = 'fw-semibold text-success';
-    result.innerText = 'Vše je správně!';
+    result.innerHTML = `Vše je správně!<div class="small text-body-secondary mt-1">Pokusy: ${window.__attempts_typografie2}</div>`;
   } else {
     result.className = 'fw-semibold text-danger';
-    result.innerText = 'Počet chyb: ' + errors;
+    result.innerHTML = `Počet chyb: ${errors}<div class="small text-body-secondary mt-1">Pokusy: ${window.__attempts_typografie2}</div>`;
   }
 }
 </script>
