@@ -1,0 +1,1072 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Spouštění aplikací – cvičení (5. třída)</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <style>
+      body {
+        background: radial-gradient(1200px 600px at 20% 0%, #e8f4ff 0%, rgba(232, 244, 255, 0) 60%),
+          radial-gradient(900px 500px at 90% 20%, #fff3e6 0%, rgba(255, 243, 230, 0) 55%),
+          linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      }
+      .hero {
+        border: 1px solid rgba(13, 110, 253, 0.15);
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(6px);
+      }
+      .kbd {
+        display: inline-block;
+        padding: 0.15rem 0.45rem;
+        border: 1px solid #adb5bd;
+        border-bottom-width: 3px;
+        border-radius: 0.4rem;
+        background: #f8f9fa;
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 0.9em;
+        white-space: nowrap;
+      }
+      .step-pane {
+        display: none;
+      }
+      .step-pane.active {
+        display: block;
+      }
+      .star {
+        font-size: 1.35rem;
+        opacity: 0.25;
+      }
+      .star.on {
+        opacity: 1;
+      }
+      .app-card {
+        border: 1px solid rgba(13, 110, 253, 0.12);
+        background: rgba(255, 255, 255, 0.95);
+        cursor: pointer;
+        transition: transform 120ms ease, box-shadow 120ms ease;
+        min-height: 7.5rem;
+      }
+      .app-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.06);
+      }
+      .app-card.flipped .front,
+      .app-card:not(.flipped) .back {
+        display: none;
+      }
+      .app-card.flipped .back,
+      .app-card:not(.flipped) .front {
+        display: block;
+      }
+      .app-emoji {
+        font-size: 2rem;
+        line-height: 1;
+      }
+      .desktop-sim {
+        background: linear-gradient(160deg, #3a7bd5 0%, #3a6075 100%);
+        border-radius: 1rem;
+        padding: 1rem;
+        min-height: 16rem;
+        position: relative;
+        color: #fff;
+      }
+      .desktop-sim.tall {
+        min-height: 20rem;
+        padding-bottom: 3rem;
+      }
+      .desk-icon {
+        width: 5.5rem;
+        text-align: center;
+        cursor: pointer;
+        padding: 0.35rem;
+        border-radius: 0.5rem;
+        border: 2px solid transparent;
+        user-select: none;
+      }
+      .desk-icon:hover,
+      .desk-icon:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.35);
+        outline: none;
+      }
+      .desk-icon .ico {
+        font-size: 2rem;
+        display: block;
+      }
+      .desk-icon .lbl {
+        font-size: 0.75rem;
+        line-height: 1.2;
+      }
+      .taskbar {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(15, 23, 42, 0.85);
+        border-radius: 0 0 1rem 1rem;
+        padding: 0.4rem 0.75rem;
+        display: flex;
+        gap: 0.4rem;
+        align-items: center;
+        flex-wrap: wrap;
+        min-height: 2.5rem;
+      }
+      .task-btn {
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #fff;
+        border-radius: 0.4rem;
+        padding: 0.25rem 0.65rem;
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+      .task-btn:hover {
+        background: rgba(255, 255, 255, 0.22);
+      }
+      .window-sim {
+        background: #fff;
+        color: #212529;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        margin: 0.5rem 0 2.75rem;
+        display: none;
+      }
+      .window-sim.open {
+        display: block;
+      }
+      .win-title {
+        background: #e9ecef;
+        padding: 0.35rem 0.5rem 0.35rem 0.65rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+        font-weight: 600;
+        gap: 0.5rem;
+      }
+      .win-controls {
+        display: flex;
+        gap: 0.25rem;
+      }
+      .win-btn {
+        border: none;
+        border-radius: 0.3rem;
+        width: 1.7rem;
+        height: 1.6rem;
+        line-height: 1;
+        font-weight: 700;
+        font-size: 0.85rem;
+        background: #dee2e6;
+        color: #212529;
+        cursor: pointer;
+      }
+      .win-btn:hover {
+        background: #ced4da;
+      }
+      .win-btn.max {
+        font-size: 0.75rem;
+      }
+      .win-btn.close {
+        background: #dc3545;
+        color: #fff;
+      }
+      .win-btn.close:hover {
+        background: #bb2d3b;
+      }
+      .win-body {
+        padding: 0.85rem 1rem;
+        min-height: 4.5rem;
+      }
+      .window-sim.maximized {
+        margin: 0 0 2.75rem;
+        border-radius: 0.25rem;
+      }
+      .window-sim.maximized .win-body {
+        min-height: 10rem;
+      }
+      .window-sim.minimized {
+        display: none !important;
+      }
+      .snap-stage {
+        position: relative;
+        height: 18rem;
+        overflow: hidden;
+      }
+      .snap-hint {
+        position: absolute;
+        top: 0;
+        bottom: 2.5rem;
+        width: 22%;
+        background: rgba(255, 255, 255, 0.12);
+        border: 2px dashed rgba(255, 255, 255, 0.45);
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 0.8rem;
+        padding: 0.5rem;
+        pointer-events: none;
+        opacity: 0.55;
+      }
+      .snap-hint.left {
+        left: 0.5rem;
+      }
+      .snap-hint.right {
+        right: 0.5rem;
+      }
+      .snap-hint.active {
+        opacity: 1;
+        background: rgba(13, 110, 253, 0.35);
+        border-color: #fff;
+      }
+      .snap-window {
+        position: absolute;
+        width: 42%;
+        left: 29%;
+        top: 1.5rem;
+        background: #fff;
+        color: #212529;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.28);
+        overflow: hidden;
+        z-index: 2;
+        transition: left 80ms ease, width 80ms ease, top 80ms ease;
+      }
+      .snap-window.dragging {
+        transition: none;
+        opacity: 0.95;
+        cursor: grabbing;
+      }
+      .snap-window.snap-left {
+        left: 0.5rem;
+        width: calc(50% - 0.75rem);
+        top: 0.5rem;
+        height: calc(100% - 3.2rem);
+      }
+      .snap-window.snap-right {
+        left: calc(50% + 0.25rem);
+        width: calc(50% - 0.75rem);
+        top: 0.5rem;
+        height: calc(100% - 3.2rem);
+      }
+      .snap-window .win-title {
+        cursor: grab;
+        user-select: none;
+      }
+      .snap-window.dragging .win-title {
+        cursor: grabbing;
+      }
+      .edu-panel {
+        border: 2px dashed rgba(25, 135, 84, 0.35);
+        background: rgba(25, 135, 84, 0.06);
+        border-radius: 1rem;
+        padding: 1rem 1.25rem;
+      }
+      .edu-panel.done {
+        border-style: solid;
+        border-color: rgba(25, 135, 84, 0.55);
+        background: rgba(25, 135, 84, 0.12);
+      }
+      .checklist li.done {
+        text-decoration: line-through;
+        color: #198754;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container py-4 py-md-5">
+      <div class="hero rounded-4 p-4 p-md-5 shadow-sm mb-4">
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+          <a class="btn btn-outline-secondary" href="../home.html" aria-label="Zpět na domovskou stránku">
+            <span class="d-inline-flex align-items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 1-.5.5H3.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L3.707 7.5H14.5A.5.5 0 0 1 15 8z"/>
+              </svg>
+              <span>Zpět</span>
+            </span>
+          </a>
+          <span class="badge text-bg-success px-3 py-2">5. třída</span>
+        </div>
+
+        <h1 class="display-6 fw-bold mb-2">Spouštění aplikací</h1>
+        <p class="lead mb-2">
+          Mise: Pomoz asistentovi <strong>Appíkovi</strong> otevřít správné programy a ovládat okna!
+        </p>
+        <p class="mb-0 text-body-secondary">
+          Procvičíš psaní, malování, kalkulačku, výstřižky, velikost oken i výukové programy. (Windows)
+        </p>
+
+        <div class="d-flex flex-wrap align-items-center gap-3 mt-3">
+          <div id="stars" class="d-flex gap-1" aria-label="Hvězdy">
+            <span class="star" data-i="0">⭐</span>
+            <span class="star" data-i="1">⭐</span>
+            <span class="star" data-i="2">⭐</span>
+            <span class="star" data-i="3">⭐</span>
+            <span class="star" data-i="4">⭐</span>
+            <span class="star" data-i="5">⭐</span>
+            <span class="star" data-i="6">⭐</span>
+            <span class="star" data-i="7">⭐</span>
+          </div>
+          <span class="badge text-bg-light border px-3 py-2" id="stepLabel">Krok 1 / 8</span>
+        </div>
+      </div>
+
+      <!-- 1 -->
+      <section class="step-pane active" id="step1">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">1) Poznej základní aplikace</h2>
+            <p class="text-body-secondary mb-3">Klikni na kartičku – otočí se. Až jich poznáš aspoň 4, jdi dál.</p>
+            <div class="row g-3" id="appCards"></div>
+            <div class="d-flex flex-wrap gap-2 mt-4">
+              <button type="button" class="btn btn-primary btn-lg" id="toStep2" disabled>Další → kvíz</button>
+              <span class="align-self-center text-body-secondary small" id="flipCount">Otočeno: 0 / 4</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2 -->
+      <section class="step-pane" id="step2">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">2) Který program na to?</h2>
+            <p class="text-body-secondary mb-3">Vyber správnou aplikaci k úkolu.</p>
+            <div class="vstack gap-3" id="quiz2"></div>
+            <hr class="my-4" />
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <button type="button" class="btn btn-primary btn-lg" id="checkQuiz2">Zkontrolovat</button>
+              <button type="button" class="btn btn-outline-secondary" id="toStep3" disabled>Další → spouštění</button>
+              <div id="quiz2Result" class="fw-semibold"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3 -->
+      <section class="step-pane" id="step3">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">3) Jak program spustím a ukončím?</h2>
+            <p class="text-body-secondary mb-3">Základní pravidla pro Windows.</p>
+            <div class="vstack gap-3" id="quiz3"></div>
+            <details class="mt-3">
+              <summary class="text-primary" style="cursor: pointer">Nápověda – tahák</summary>
+              <ul class="mt-2 mb-0 small">
+                <li>Spustit: tlačítko Start → napsat název → Enter, nebo dvojklik na ikonu.</li>
+                <li>Ukončit: křížek ✕ vpravo nahoře, nebo nabídka Soubor → Konec / Ukončit.</li>
+                <li>Rychle ukončit okno: <span class="kbd">Alt</span>+<span class="kbd">F4</span>.</li>
+                <li>Minimalizace (−) schová okno na hlavní panel, maximalizace (□) roztáhne na celou obrazovku.</li>
+                <li>Přetažení okna k levému/pravému okraji = polovina obrazovky (přichycení).</li>
+                <li>Výukový program: poslouchám zadání, neukončuji uprostřed práce, na konci uložím / odevzdám.</li>
+              </ul>
+            </details>
+            <hr class="my-4" />
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <button type="button" class="btn btn-primary btn-lg" id="checkQuiz3">Zkontrolovat</button>
+              <button type="button" class="btn btn-outline-secondary" id="toStep4" disabled>Další → plocha</button>
+              <div id="quiz3Result" class="fw-semibold"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section class="step-pane" id="step4">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">4) Simulátor plochy</h2>
+            <p class="text-body-secondary mb-2">
+              Splň úkoly: otevři program <strong>dvojklikem</strong> (nebo klikni 2×) a ukonči ho křížkem ✕.
+            </p>
+            <ol class="checklist mb-3" id="deskCheck">
+              <li data-id="paint">Otevři Malování a zavři ho</li>
+              <li data-id="calc">Otevři Kalkulačku a zavři ji</li>
+              <li data-id="write">Otevři Psaní (Poznámkový blok) a zavři ho</li>
+              <li data-id="snip">Otevři Výstřižky a zavři je</li>
+            </ol>
+
+            <div class="desktop-sim mb-3" id="desktop">
+              <div class="d-flex flex-wrap gap-2 mb-2" id="deskIcons"></div>
+              <div class="window-sim" id="winBox">
+                <div class="win-title">
+                  <span id="winTitle">Program</span>
+                  <div class="win-controls">
+                    <button type="button" class="win-btn close" id="winClose" title="Zavřít" aria-label="Zavřít">✕</button>
+                  </div>
+                </div>
+                <div class="win-body" id="winBody">…</div>
+              </div>
+              <div class="taskbar">
+                <span class="small opacity-75">Hlavní panel:</span>
+                <span id="taskApps" class="small opacity-75">žádný otevřený program</span>
+              </div>
+            </div>
+
+            <div class="small text-body-secondary mb-3" id="deskLog">Čekám na tvoje kliknutí…</div>
+            <button type="button" class="btn btn-primary btn-lg" id="toStep5" disabled>Další → velikost okna</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5 min/max -->
+      <section class="step-pane" id="step5">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">5) Minimalizace a maximalizace</h2>
+            <p class="text-body-secondary mb-2">
+              Vpravo nahoře u okna jsou tři tlačítka:
+              <strong>−</strong> minimalizovat (schovat na panel),
+              <strong>□</strong> maximalizovat (celá plocha),
+              <strong>✕</strong> zavřít.
+            </p>
+            <ol class="checklist mb-3" id="mmCheck">
+              <li data-id="min">Minimalizuj okno (−)</li>
+              <li data-id="restore">Obnov ho kliknutím na hlavní panel</li>
+              <li data-id="max">Maximalizuj okno (□)</li>
+              <li data-id="norm">Vrať normální velikost (znovu □)</li>
+            </ol>
+
+            <div class="desktop-sim tall mb-3" id="mmDesktop">
+              <div class="window-sim open" id="mmWin">
+                <div class="win-title">
+                  <span>📝 Psaní – cvičný dokument</span>
+                  <div class="win-controls">
+                    <button type="button" class="win-btn" id="mmMin" title="Minimalizovat" aria-label="Minimalizovat">−</button>
+                    <button type="button" class="win-btn max" id="mmMax" title="Maximalizovat" aria-label="Maximalizovat">□</button>
+                    <button type="button" class="win-btn close" id="mmClose" title="Zavřít (teď nepotřebuješ)" aria-label="Zavřít">✕</button>
+                  </div>
+                </div>
+                <div class="win-body">
+                  Ahoj! Tohle je cvičné okno. Zkus tlačítka − a □ nahoře vpravo.
+                </div>
+              </div>
+              <div class="taskbar">
+                <span class="small opacity-75">Hlavní panel:</span>
+                <button type="button" class="task-btn" id="mmTaskBtn">📝 Psaní</button>
+              </div>
+            </div>
+
+            <div class="small text-body-secondary mb-3" id="mmLog">Zkus nejdřív minimalizaci (−).</div>
+            <button type="button" class="btn btn-primary btn-lg" id="toStep6" disabled>Další → přichycení</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6 snap -->
+      <section class="step-pane" id="step6">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">6) Přichycení okna ke kraji</h2>
+            <p class="text-body-secondary mb-2">
+              Ve Windows můžeš chytit lištu okna (titulek), přetáhnout ji k <strong>levému</strong> nebo
+              <strong>pravému</strong> okraji obrazovky – okno se roztáhne na polovinu.
+            </p>
+            <ol class="checklist mb-3" id="snapCheck">
+              <li data-id="left">Přichytni okno vlevo (polovina obrazovky)</li>
+              <li data-id="right">Přichytni okno vpravo</li>
+            </ol>
+
+            <div class="desktop-sim tall mb-2" id="snapDesktop">
+              <div class="snap-stage" id="snapStage">
+                <div class="snap-hint left" id="hintLeft">← Pusť tady<br />levá polovina</div>
+                <div class="snap-hint right" id="hintRight">Pusť tady →<br />pravá polovina</div>
+                <div class="snap-window" id="snapWin">
+                  <div class="win-title" id="snapTitle">
+                    <span>🎨 Malování</span>
+                    <span class="small text-body-secondary fw-normal">táhni mě za lištu</span>
+                  </div>
+                  <div class="win-body">
+                    Chytni horní šedou lištu a táhni k levému nebo pravému okraji plochy.
+                  </div>
+                </div>
+              </div>
+              <div class="taskbar">
+                <span class="small opacity-75">Tip: ve škole to funguje stejně u opravdového okna Windows.</span>
+              </div>
+            </div>
+
+            <div class="small text-body-secondary mb-3" id="snapLog">Chytni lištu okna a táhni ke kraji…</div>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="snapReset">Obnovit polohu okna</button>
+            </div>
+            <button type="button" class="btn btn-primary btn-lg" id="toStep7" disabled>Další → výuka</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7 edu -->
+      <section class="step-pane" id="step7">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">7) Výukový program</h2>
+            <p class="text-body-secondary mb-3">
+              Appík spustil cvičení „Násobilka express“. Projdi ho jako ve škole – čti zadání, odpověz, neukončuj uprostřed.
+            </p>
+
+            <div class="edu-panel mb-3" id="eduPanel">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong>📚 Násobilka express</strong>
+                <span class="badge text-bg-secondary" id="eduStepBadge">Úloha 0 / 3</span>
+              </div>
+              <p class="mb-2" id="eduText">Klikni na Start cvičení.</p>
+              <div id="eduChoices" class="d-flex flex-wrap gap-2 mb-2"></div>
+              <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-success" id="eduStart">Start cvičení</button>
+                <button type="button" class="btn btn-outline-danger btn-sm" id="eduQuitEarly">✕ Ukončit hned (špatný nápad)</button>
+              </div>
+              <div class="small mt-2" id="eduHint"></div>
+            </div>
+
+            <div class="vstack gap-3" id="quiz7"></div>
+            <hr class="my-4" />
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <button type="button" class="btn btn-primary btn-lg" id="checkQuiz7">Zkontrolovat otázky</button>
+              <button type="button" class="btn btn-outline-secondary" id="toStep8" disabled>Další → mise</button>
+              <div id="quiz7Result" class="fw-semibold"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8 final -->
+      <section class="step-pane" id="step8">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">8) Finální mise: Školní den Appíka</h2>
+            <p class="text-body-secondary mb-3">Vyber správný postup pro celý den u počítače.</p>
+            <div class="vstack gap-3" id="quiz8"></div>
+            <hr class="my-4" />
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <button type="button" class="btn btn-primary btn-lg" id="checkQuiz8">Dokončit misi</button>
+              <div id="quiz8Result" class="fw-semibold"></div>
+            </div>
+            <div id="finishBox" class="alert alert-success mt-4 d-none" role="status">
+              <h3 class="h5 fw-bold mb-2">Hotovo – Appík má programy pod kontrolou!</h3>
+              <p class="mb-0">
+                Umíš spouštět a ukončovat aplikace, měnit velikost oken i chovat se ve výukovém programu.
+                Tip: na školním PC hledej programy přes Start a napiš jejich název.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const TOTAL = 8;
+
+      const APPS = [
+        { id: "write", emoji: "📝", name: "Psaní (Poznámkový blok / Word)", mean: "Psaní textu – zprávy, úkoly, poznámky." },
+        { id: "paint", emoji: "🎨", name: "Malování", mean: "Kreslení a úprava jednoduchých obrázků." },
+        { id: "calc", emoji: "🔢", name: "Kalkulačka", mean: "Počítání – sčítání, násobení, převody…" },
+        { id: "snip", emoji: "✂️", name: "Výstřižky", mean: "Vyříznutí části obrazovky (screenshot výřezu)." },
+        { id: "edu", emoji: "📚", name: "Výukový program", mean: "Cvičení, hra nebo kurz, který učí (např. násobilka)." },
+        { id: "browser", emoji: "🌐", name: "Prohlížeč", mean: "Internet – stránky, vyhledávání (není to Malování!)." },
+      ];
+
+      const QUIZ2 = [
+        { q: "Chci napsat zprávu paní učitelce.", options: [{ t: "Psaní (Poznámkový blok / Word)", ok: true }, { t: "Kalkulačka", ok: false }, { t: "Výstřižky", ok: false }] },
+        { q: "Chci namalovat slunce a strom.", options: [{ t: "Malování", ok: true }, { t: "Kalkulačka", ok: false }, { t: "Psaní", ok: false }] },
+        { q: "Potřebuju spočítat 24 × 7.", options: [{ t: "Kalkulačka", ok: true }, { t: "Výstřižky", ok: false }, { t: "Malování", ok: false }] },
+        { q: "Chci vystřihnout jen část obrazovky do úkolu.", options: [{ t: "Výstřižky", ok: true }, { t: "Kalkulačka", ok: false }, { t: "Koš", ok: false }] },
+        { q: "Učitelka říká: „Otevřete výukový program na násobilku.“", options: [{ t: "Výukový program (podle pokynu učitele)", ok: true }, { t: "Jen Kalkulačku a nic jiného", ok: false }, { t: "Vypnout počítač", ok: false }] },
+        { q: "Který program NEPATŘÍ mezi základní „pracovní“ nástroje z této hodiny?", options: [{ t: "Hra střílečka bez povolení", ok: true }, { t: "Malování", ok: false }, { t: "Psaní", ok: false }] },
+        { q: "Chci z webu uložit jen obrázek části mapy z obrazovky.", options: [{ t: "Výstřižky (a pak případně vložit do Psaní)", ok: true }, { t: "Jen Kalkulačka", ok: false }, { t: "Jen vypnout monitor", ok: false }] },
+        { q: "Psaní textu a kreslení jsou…", options: [{ t: "dvě různé aplikace (Psaní × Malování)", ok: true }, { t: "vždycky jeden a ten samý program", ok: false }, { t: "jen součást Koše", ok: false }] },
+      ];
+
+      const QUIZ3 = [
+        { q: "Nejrychlejší cesta: Start → napsat „Kalkulačka“ → Enter. To program…", options: [{ t: "spustí", ok: true }, { t: "smaže", ok: false }, { t: "vypne celý počítač", ok: false }] },
+        { q: "Jak bezpečně ukončím otevřený program?", options: [{ t: "Křížek ✕ vpravo nahoře (nebo Soubor → Ukončit)", ok: true }, { t: "Vytáhnu kabel ze zdi", ok: false }, { t: "Smažu ikonu z plochy", ok: false }] },
+        { q: "Zkratka na zavření aktivního okna je často:", options: [{ t: "Alt + F4", ok: true }, { t: "Ctrl + C", ok: false }, { t: "Shift + Delete", ok: false }] },
+        { q: "Program mám rozepsaný a ještě neuložený. Co nejdřív?", options: [{ t: "Uložit (Ctrl + S), teprve pak ukončit", ok: true }, { t: "Hned Alt + F4 bez uložení", ok: false }, { t: "Zmáčknout vypínač monitoru", ok: false }] },
+        { q: "Ikona na ploše – jak program obvykle spustím?", options: [{ t: "Dvojklik levým tlačítkem", ok: true }, { t: "Přetáhnout do Koše", ok: false }, { t: "Pravým tlačítkem a „Odstranit“", ok: false }] },
+        { q: "Výukový program uprostřed úlohy ukončím křížkem. Je to OK?", options: [{ t: "Ne – nejdřív dokončím / uložím / odevzdám podle zadání", ok: true }, { t: "Ano, vždy hned zavřít", ok: false }, { t: "Ano, když mě to nebaví", ok: false }] },
+      ];
+
+      const QUIZ7 = [
+        { q: "Výukový program spustím…", options: [{ t: "podle pokynu učitele (odkaz, ikona, Start…)", ok: true }, { t: "náhodným mazáním souborů", ok: false }, { t: "vypnutím Wi‑Fi", ok: false }] },
+        { q: "V programu nefunguje tlačítko. Co je rozumné?", options: [{ t: "Zeptej se učitele / přečti nápovědu", ok: true }, { t: "Hned restartuj celou školu", ok: false }, { t: "Smaž Windows", ok: false }] },
+        { q: "Cvičení říká „klikni na Start“. Já kliknu na Ukončit. Co se stane?", options: [{ t: "Přeruším práci – špatný nápad uprostřed", ok: true }, { t: "Automaticky dostanu samé jedničky", ok: false }, { t: "Otevře se Malování", ok: false }] },
+        { q: "Po výukovém programu mám ještě namalovat obrázek. Co udělám?", options: [{ t: "Výuku správně ukončím / odevzdám, pak spustím Malování", ok: true }, { t: "Nechám 20 oken otevřených a doufám", ok: false }, { t: "Spustím jen Kalkulačku místo Malování", ok: false }] },
+      ];
+
+      const QUIZ8 = [
+        { q: "Ráno: napsat jméno do souboru. Otevřu…", options: [{ t: "Psaní", ok: true }, { t: "Výstřižky", ok: false }, { t: "Kalkulačku", ok: false }] },
+        { q: "Pak spočítat úlohy z matematiky. Otevřu…", options: [{ t: "Kalkulačku", ok: true }, { t: "Malování", ok: false }, { t: "Koš", ok: false }] },
+        { q: "Pak namalovat ilustraci. Otevřu…", options: [{ t: "Malování", ok: true }, { t: "Kalkulačku", ok: false }, { t: "Jen Výstřižky bez kreslení", ok: false }] },
+        { q: "Chci do úkolu vložit výřez obrazovky. Použiju…", options: [{ t: "Výstřižky", ok: true }, { t: "jen vypínač PC", ok: false }, { t: "jen Alt + F4", ok: false }] },
+        { q: "Chci mít vedle sebe dvě okna. Pomůže…", options: [{ t: "přichytit jedno vlevo a druhé vpravo", ok: true }, { t: "smazat obě ikony", ok: false }, { t: "jen vypnout monitor", ok: false }] },
+        { q: "Tlačítko − u okna znamená…", options: [{ t: "minimalizovat (schovat na panel)", ok: true }, { t: "navždy smazat program", ok: false }, { t: "vypnout počítač", ok: false }] },
+        { q: "Výukový program – správné chování je:", options: [{ t: "spustit → číst zadání → dokončit → ukončit", ok: true }, { t: "spustit → hned zavřít → spustit → zavřít", ok: false }, { t: "nespustit nic a čekat do zvonění", ok: false }] },
+        { q: "Na konci hodiny mám otevřené 4 programy. Co je chytré?", options: [{ t: "Uložit práci a ukončit programy křížkem", ok: true }, { t: "Nechat vše běžet a odejít", ok: false }, { t: "Smazat ikony z plochy", ok: false }] },
+      ];
+
+      const DESK_APPS = [
+        { id: "paint", emoji: "🎨", name: "Malování", body: "Tady bys kreslil(a) štětcem a barvami. Až budeš hotový/á, zavři okno křížkem ✕." },
+        { id: "calc", emoji: "🔢", name: "Kalkulačka", body: "1 + 1 = 2. Hotovo? Zavři kalkulačku křížkem ✕." },
+        { id: "write", emoji: "📝", name: "Psaní", body: "Sem patří text úkolu. Nezapomeň: ve skutečnosti nejdřív uložit, pak zavřít." },
+        { id: "snip", emoji: "✂️", name: "Výstřižky", body: "Vybereš obdélník na obrazovce a uložíš výřez. Pak program ukonči ✕." },
+      ];
+
+      const EDU_TASKS = [
+        { text: "Kolik je 3 × 4?", choices: [{ t: "12", ok: true }, { t: "7", ok: false }, { t: "34", ok: false }] },
+        { text: "Kolik je 5 × 6?", choices: [{ t: "11", ok: false }, { t: "30", ok: true }, { t: "56", ok: false }] },
+        { text: "Kolik je 7 × 8?", choices: [{ t: "15", ok: false }, { t: "48", ok: false }, { t: "56", ok: true }] },
+      ];
+
+      const state = {
+        stars: 0,
+        flipped: new Set(),
+        deskDone: new Set(),
+        openApp: null,
+        lastClick: { id: null, t: 0 },
+        mmDone: new Set(),
+        mmMaximized: false,
+        mmMinimized: false,
+        snapDone: new Set(),
+        eduDone: false,
+        eduIdx: -1,
+      };
+
+      function setStep(n) {
+        document.querySelectorAll(".step-pane").forEach((el) => el.classList.remove("active"));
+        document.getElementById("step" + n).classList.add("active");
+        document.getElementById("stepLabel").textContent = "Krok " + n + " / " + TOTAL;
+      }
+
+      function updateStars() {
+        document.querySelectorAll("#stars .star").forEach((el) => {
+          el.classList.toggle("on", Number(el.dataset.i) < state.stars);
+        });
+      }
+
+      function awardStar() {
+        if (state.stars < TOTAL) {
+          state.stars++;
+          updateStars();
+        }
+      }
+
+      function markCheck(listId, id) {
+        const li = document.querySelector("#" + listId + ' li[data-id="' + id + '"]');
+        if (li) li.classList.add("done");
+      }
+
+      function fillQuiz(containerId, items, prefix) {
+        const root = document.getElementById(containerId);
+        items.forEach((item, i) => {
+          const wrap = document.createElement("div");
+          wrap.innerHTML =
+            `<div class="fw-semibold mb-1">${i + 1}) ${item.q}</div>` +
+            `<select class="form-select" id="${prefix}${i}"><option value="">Vyber…</option>` +
+            item.options.map((o, j) => `<option value="${j}" data-ok="${o.ok}">${o.t}</option>`).join("") +
+            `</select>`;
+          root.appendChild(wrap);
+        });
+      }
+
+      function grade(items, prefix, needAll) {
+        let ok = 0;
+        items.forEach((_, i) => {
+          const sel = document.getElementById(prefix + i);
+          const opt = sel.options[sel.selectedIndex];
+          if (opt && opt.dataset.ok === "true") ok++;
+        });
+        const need = needAll ? items.length : Math.ceil(items.length * 0.8);
+        return { ok, pass: ok >= need, need };
+      }
+
+      // Step 1
+      const cards = document.getElementById("appCards");
+      APPS.forEach((app, i) => {
+        const col = document.createElement("div");
+        col.className = "col-6 col-md-4";
+        col.innerHTML =
+          `<div class="app-card rounded-3 p-3 h-100" data-i="${i}" role="button" tabindex="0">` +
+          `<div class="front text-center"><div class="app-emoji mb-1">${app.emoji}</div><div class="fw-bold small">${app.name}</div><div class="small text-primary mt-1">klikni</div></div>` +
+          `<div class="back text-center"><div class="small text-body-secondary mb-1">K čemu je</div><div class="fw-semibold small">${app.mean}</div></div>` +
+          `</div>`;
+        cards.appendChild(col);
+      });
+      cards.addEventListener("click", (e) => {
+        const card = e.target.closest(".app-card");
+        if (!card) return;
+        card.classList.toggle("flipped");
+        state.flipped.add(card.dataset.i);
+        document.getElementById("flipCount").textContent = "Otočeno: " + state.flipped.size + " / 4";
+        if (state.flipped.size >= 4) document.getElementById("toStep2").disabled = false;
+      });
+      document.getElementById("toStep2").addEventListener("click", () => {
+        awardStar();
+        setStep(2);
+      });
+
+      // Step 2–3
+      fillQuiz("quiz2", QUIZ2, "q2_");
+      document.getElementById("checkQuiz2").addEventListener("click", () => {
+        const { ok, pass, need } = grade(QUIZ2, "q2_", false);
+        const el = document.getElementById("quiz2Result");
+        el.className = "fw-semibold " + (pass ? "text-success" : "text-danger");
+        el.textContent = pass ? "✔ Super (" + ok + "/" + QUIZ2.length + ")" : "✘ Zatím " + ok + "/" + QUIZ2.length + " (aspoň " + need + ")";
+        document.getElementById("toStep3").disabled = !pass;
+        if (pass) awardStar();
+      });
+      document.getElementById("toStep3").addEventListener("click", () => setStep(3));
+
+      fillQuiz("quiz3", QUIZ3, "q3_");
+      document.getElementById("checkQuiz3").addEventListener("click", () => {
+        const { ok, pass, need } = grade(QUIZ3, "q3_", false);
+        const el = document.getElementById("quiz3Result");
+        el.className = "fw-semibold " + (pass ? "text-success" : "text-danger");
+        el.textContent = pass ? "✔ Výborně (" + ok + "/" + QUIZ3.length + ")" : "✘ Zatím " + ok + "/" + QUIZ3.length + " (aspoň " + need + ")";
+        document.getElementById("toStep4").disabled = !pass;
+        if (pass) awardStar();
+      });
+      document.getElementById("toStep4").addEventListener("click", () => setStep(4));
+
+      // Step 4 desktop
+      const icons = document.getElementById("deskIcons");
+      DESK_APPS.forEach((app) => {
+        const el = document.createElement("div");
+        el.className = "desk-icon";
+        el.dataset.id = app.id;
+        el.tabIndex = 0;
+        el.innerHTML = `<span class="ico">${app.emoji}</span><span class="lbl">${app.name}</span>`;
+        icons.appendChild(el);
+      });
+
+      function deskLog(msg) {
+        document.getElementById("deskLog").textContent = msg;
+      }
+
+      function refreshTaskbar() {
+        const app = DESK_APPS.find((a) => a.id === state.openApp);
+        document.getElementById("taskApps").textContent = app ? app.name + " (běží)" : "žádný otevřený program";
+      }
+
+      function openApp(id) {
+        const app = DESK_APPS.find((a) => a.id === id);
+        if (!app) return;
+        if (state.openApp && state.openApp !== id) {
+          deskLog("Nejdřív zavři otevřený program křížkem ✕.");
+          return;
+        }
+        state.openApp = id;
+        document.getElementById("winBox").classList.add("open");
+        document.getElementById("winTitle").textContent = app.emoji + " " + app.name;
+        document.getElementById("winBody").textContent = app.body;
+        refreshTaskbar();
+        deskLog("Otevřeno: " + app.name + ". Teď zavři křížkem ✕.");
+      }
+
+      function closeApp() {
+        if (!state.openApp) return;
+        const id = state.openApp;
+        state.openApp = null;
+        document.getElementById("winBox").classList.remove("open");
+        refreshTaskbar();
+        if (!state.deskDone.has(id)) {
+          state.deskDone.add(id);
+          markCheck("deskCheck", id);
+        }
+        deskLog("Ukončeno. Hotovo " + state.deskDone.size + "/4.");
+        if (state.deskDone.size >= 4) {
+          document.getElementById("toStep5").disabled = false;
+          deskLog("Všechny programy jsi otevřel(a) i ukončil(a)! Můžeš jít dál.");
+          awardStar();
+        }
+      }
+
+      icons.addEventListener("click", (e) => {
+        const icon = e.target.closest(".desk-icon");
+        if (!icon) return;
+        const id = icon.dataset.id;
+        const now = Date.now();
+        if (state.lastClick.id === id && now - state.lastClick.t < 450) {
+          openApp(id);
+          state.lastClick = { id: null, t: 0 };
+        } else {
+          state.lastClick = { id, t: now };
+          deskLog("Ještě jednou klikni (dvojklik) na „" + icon.querySelector(".lbl").textContent + "“.");
+        }
+      });
+
+      document.getElementById("winClose").addEventListener("click", closeApp);
+      document.getElementById("toStep5").addEventListener("click", () => setStep(5));
+
+      // Step 5 min/max
+      const mmWin = document.getElementById("mmWin");
+      const mmLog = document.getElementById("mmLog");
+
+      function mmDone(id, msg) {
+        if (!state.mmDone.has(id)) {
+          state.mmDone.add(id);
+          markCheck("mmCheck", id);
+        }
+        mmLog.textContent = msg + " (" + state.mmDone.size + "/4)";
+        if (state.mmDone.size >= 4) {
+          document.getElementById("toStep6").disabled = false;
+          mmLog.textContent = "Výborně – velikost okna ovládáš! Můžeš jít dál.";
+          awardStar();
+        }
+      }
+
+      document.getElementById("mmMin").addEventListener("click", () => {
+        state.mmMinimized = true;
+        mmWin.classList.add("minimized");
+        mmWin.classList.remove("open");
+        mmDone("min", "Okno je na hlavním panelu. Klikni na „Psaní“ dole.");
+      });
+
+      document.getElementById("mmTaskBtn").addEventListener("click", () => {
+        if (!state.mmMinimized && !state.mmDone.has("min")) {
+          mmLog.textContent = "Nejdřív okno minimalizuj tlačítkem −.";
+          return;
+        }
+        state.mmMinimized = false;
+        mmWin.classList.remove("minimized");
+        mmWin.classList.add("open");
+        if (state.mmDone.has("min")) {
+          mmDone("restore", "Okno je zpět. Teď zkus maximalizaci □.");
+        }
+      });
+
+      document.getElementById("mmMax").addEventListener("click", () => {
+        if (state.mmMinimized) {
+          mmLog.textContent = "Nejdřív obnov okno z panelu.";
+          return;
+        }
+        if (!state.mmMaximized) {
+          state.mmMaximized = true;
+          mmWin.classList.add("maximized");
+          document.getElementById("mmMax").textContent = "❐";
+          document.getElementById("mmMax").title = "Obnovit velikost";
+          mmDone("max", "Okno je přes celou plochu. Klikni znovu na □ / ❐.");
+        } else {
+          state.mmMaximized = false;
+          mmWin.classList.remove("maximized");
+          document.getElementById("mmMax").textContent = "□";
+          document.getElementById("mmMax").title = "Maximalizovat";
+          mmDone("norm", "Normální velikost je zpět.");
+        }
+      });
+
+      document.getElementById("mmClose").addEventListener("click", () => {
+        mmLog.textContent = "Zavírání teď nepotřebuješ – procvič − a □. (✕ umíš už z předchozího kroku.)";
+      });
+
+      document.getElementById("toStep6").addEventListener("click", () => setStep(6));
+
+      // Step 6 snap
+      const snapWin = document.getElementById("snapWin");
+      const snapStage = document.getElementById("snapStage");
+      const snapTitle = document.getElementById("snapTitle");
+      const hintLeft = document.getElementById("hintLeft");
+      const hintRight = document.getElementById("hintRight");
+      let drag = null;
+
+      function snapLog(msg) {
+        document.getElementById("snapLog").textContent = msg;
+      }
+
+      function resetSnapPos() {
+        snapWin.classList.remove("snap-left", "snap-right", "dragging");
+        snapWin.style.left = "";
+        snapWin.style.top = "";
+        snapWin.style.width = "";
+        snapWin.style.height = "";
+        hintLeft.classList.remove("active");
+        hintRight.classList.remove("active");
+      }
+
+      document.getElementById("snapReset").addEventListener("click", () => {
+        resetSnapPos();
+        snapLog("Poloha obnovena. Znovu táhni ke kraji.");
+      });
+
+      function finishSnap(side) {
+        resetSnapPos();
+        snapWin.classList.add(side === "left" ? "snap-left" : "snap-right");
+        if (!state.snapDone.has(side)) {
+          state.snapDone.add(side);
+          markCheck("snapCheck", side);
+        }
+        snapLog(
+          (side === "left" ? "Přichyceno vlevo." : "Přichyceno vpravo.") +
+            " Hotovo " +
+            state.snapDone.size +
+            "/2."
+        );
+        if (state.snapDone.size >= 2) {
+          document.getElementById("toStep7").disabled = false;
+          snapLog("Obě strany hotové! Ve Windows to funguje stejně.");
+          awardStar();
+        }
+      }
+
+      snapTitle.addEventListener("pointerdown", (e) => {
+        if (e.button !== 0) return;
+        const rect = snapWin.getBoundingClientRect();
+        const stageRect = snapStage.getBoundingClientRect();
+        drag = {
+          ox: e.clientX - rect.left,
+          oy: e.clientY - rect.top,
+          stageLeft: stageRect.left,
+          stageTop: stageRect.top,
+          stageW: stageRect.width,
+          stageH: stageRect.height,
+        };
+        snapWin.classList.add("dragging");
+        snapWin.classList.remove("snap-left", "snap-right");
+        snapWin.style.width = rect.width + "px";
+        snapWin.style.height = "auto";
+        snapWin.setPointerCapture(e.pointerId);
+      });
+
+      snapTitle.addEventListener("pointermove", (e) => {
+        if (!drag) return;
+        let x = e.clientX - drag.stageLeft - drag.ox;
+        let y = e.clientY - drag.stageTop - drag.oy;
+        x = Math.max(-20, Math.min(x, drag.stageW - 80));
+        y = Math.max(0, Math.min(y, drag.stageH - 80));
+        snapWin.style.left = x + "px";
+        snapWin.style.top = y + "px";
+        const edge = 48;
+        hintLeft.classList.toggle("active", e.clientX - drag.stageLeft < edge);
+        hintRight.classList.toggle("active", drag.stageW - (e.clientX - drag.stageLeft) < edge);
+      });
+
+      function endDrag(e) {
+        if (!drag) return;
+        const localX = e.clientX - drag.stageLeft;
+        const edge = 56;
+        const nearLeft = localX < edge;
+        const nearRight = localX > drag.stageW - edge;
+        snapWin.classList.remove("dragging");
+        hintLeft.classList.remove("active");
+        hintRight.classList.remove("active");
+        drag = null;
+        if (nearLeft) finishSnap("left");
+        else if (nearRight) finishSnap("right");
+        else snapLog("Ještě blíž ke kraji – táhni až k levému nebo pravému okraji.");
+      }
+
+      snapTitle.addEventListener("pointerup", endDrag);
+      snapTitle.addEventListener("pointercancel", () => {
+        drag = null;
+        snapWin.classList.remove("dragging");
+      });
+
+      document.getElementById("toStep7").addEventListener("click", () => setStep(7));
+
+      // Step 7 edu
+      const eduStart = document.getElementById("eduStart");
+      const eduChoices = document.getElementById("eduChoices");
+      const eduText = document.getElementById("eduText");
+      const eduHint = document.getElementById("eduHint");
+
+      function showEduTask() {
+        const t = EDU_TASKS[state.eduIdx];
+        document.getElementById("eduStepBadge").textContent =
+          "Úloha " + (state.eduIdx + 1) + " / " + EDU_TASKS.length;
+        eduText.textContent = t.text;
+        eduChoices.innerHTML = "";
+        t.choices.forEach((c) => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "btn btn-outline-primary";
+          b.textContent = c.t;
+          b.addEventListener("click", () => {
+            if (c.ok) {
+              eduHint.className = "small text-success mt-2";
+              eduHint.textContent = "✔ Správně!";
+              state.eduIdx++;
+              if (state.eduIdx >= EDU_TASKS.length) {
+                state.eduDone = true;
+                document.getElementById("eduPanel").classList.add("done");
+                eduText.textContent =
+                  "Cvičení dokončeno. Teď můžeš program správně ukončit (ve škole: hotovo / odevzdat).";
+                eduChoices.innerHTML = "";
+                eduStart.classList.add("d-none");
+                document.getElementById("eduQuitEarly").textContent = "✕ Ukončit výuku (teď OK)";
+                document.getElementById("eduQuitEarly").classList.remove("btn-outline-danger");
+                document.getElementById("eduQuitEarly").classList.add("btn-success");
+                eduHint.textContent = "✔ Výukový program jsi prošel/prošla až do konce.";
+              } else {
+                setTimeout(showEduTask, 400);
+              }
+            } else {
+              eduHint.className = "small text-danger mt-2";
+              eduHint.textContent = "✘ Zkus jinou odpověď.";
+            }
+          });
+          eduChoices.appendChild(b);
+        });
+      }
+
+      eduStart.addEventListener("click", () => {
+        state.eduIdx = 0;
+        eduStart.disabled = true;
+        eduHint.textContent = "";
+        showEduTask();
+      });
+
+      document.getElementById("eduQuitEarly").addEventListener("click", () => {
+        if (state.eduDone) {
+          eduHint.className = "small text-success mt-2";
+          eduHint.textContent = "✔ Výuku jsi ukončil(a) až po dokončení – správně.";
+          return;
+        }
+        eduHint.className = "small text-danger mt-2";
+        eduHint.textContent = "✘ Ups – ukončil(a) jsi výuku uprostřed. Spusť znovu a dojdi do konce.";
+        state.eduIdx = -1;
+        eduStart.disabled = false;
+        eduChoices.innerHTML = "";
+        eduText.textContent = "Klikni znovu na Start cvičení.";
+        document.getElementById("eduStepBadge").textContent = "Úloha 0 / 3";
+      });
+
+      fillQuiz("quiz7", QUIZ7, "q7_");
+      document.getElementById("checkQuiz7").addEventListener("click", () => {
+        const { ok, pass, need } = grade(QUIZ7, "q7_", true);
+        const el = document.getElementById("quiz7Result");
+        if (!state.eduDone) {
+          el.className = "fw-semibold text-danger";
+          el.textContent = "✘ Nejdřív dokonči mini výuku nahoře (všechny 3 úlohy).";
+          return;
+        }
+        el.className = "fw-semibold " + (pass ? "text-success" : "text-danger");
+        el.textContent = pass
+          ? "✔ Výuka zvládnutá (" + ok + "/" + QUIZ7.length + ")"
+          : "✘ Otázky: " + ok + "/" + QUIZ7.length + " (potřeba " + need + ")";
+        document.getElementById("toStep8").disabled = !pass;
+        if (pass) awardStar();
+      });
+      document.getElementById("toStep8").addEventListener("click", () => setStep(8));
+
+      fillQuiz("quiz8", QUIZ8, "q8_");
+      document.getElementById("checkQuiz8").addEventListener("click", () => {
+        const { ok, pass } = grade(QUIZ8, "q8_", true);
+        const el = document.getElementById("quiz8Result");
+        el.className = "fw-semibold " + (pass ? "text-success" : "text-danger");
+        el.textContent = pass
+          ? "✔ Mise splněna!"
+          : "✘ Správně " + ok + "/" + QUIZ8.length + " – ještě doladit.";
+        if (pass) {
+          awardStar();
+          document.getElementById("finishBox").classList.remove("d-none");
+        }
+      });
+    </script>
+  </body>
+</html>
