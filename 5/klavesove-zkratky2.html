@@ -1,0 +1,935 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Klávesové zkratky 2 – cvičení (5. třída)</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <style>
+      body {
+        background: radial-gradient(1200px 600px at 20% 0%, #e8f4ff 0%, rgba(232, 244, 255, 0) 60%),
+          radial-gradient(900px 500px at 90% 20%, #fff3e6 0%, rgba(255, 243, 230, 0) 55%),
+          linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      }
+      .hero {
+        border: 1px solid rgba(13, 110, 253, 0.15);
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(6px);
+      }
+      .kbd {
+        display: inline-block;
+        padding: 0.15rem 0.45rem;
+        border: 1px solid #adb5bd;
+        border-bottom-width: 3px;
+        border-radius: 0.4rem;
+        background: #f8f9fa;
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 0.9em;
+        white-space: nowrap;
+      }
+      .step-pane {
+        display: none;
+      }
+      .step-pane.active {
+        display: block;
+      }
+      .editor {
+        min-height: 11rem;
+        font-family: Georgia, "Times New Roman", serif;
+        line-height: 1.55;
+        white-space: pre-wrap;
+      }
+      .editor:focus {
+        outline: 3px solid rgba(13, 110, 253, 0.25);
+      }
+      .hl {
+        background: #ffe066;
+        border-radius: 0.2rem;
+      }
+      .checklist li.done {
+        text-decoration: line-through;
+        color: #198754;
+      }
+      .win-tab {
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        background: #fff;
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        opacity: 0.55;
+        cursor: pointer;
+        transition: opacity 120ms ease, box-shadow 120ms ease;
+      }
+      .win-tab.active {
+        opacity: 1;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+      }
+      .mission-log {
+        max-height: 8rem;
+        overflow: auto;
+        font-size: 0.9rem;
+        background: rgba(33, 37, 41, 0.04);
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+      }
+      mark.find-hit {
+        background: #ffd43b;
+        padding: 0 0.1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container py-4 py-md-5">
+      <div class="hero rounded-4 p-4 p-md-5 shadow-sm mb-4">
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+          <a class="btn btn-outline-secondary" href="../home.html" aria-label="Zpět na domovskou stránku">
+            <span class="d-inline-flex align-items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 1-.5.5H3.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L3.707 7.5H14.5A.5.5 0 0 1 15 8z"/>
+              </svg>
+              <span>Zpět</span>
+            </span>
+          </a>
+          <span class="badge text-bg-warning px-3 py-2">5. třída · 2. hodina (těžší)</span>
+        </div>
+
+        <h1 class="display-6 fw-bold mb-2">Klávesové zkratky 2</h1>
+        <p class="lead mb-2">Mise: <strong>Školní noviny v chaosu</strong> – zachraň číslo před uzávěrkou!</p>
+        <p class="mb-0 text-body-secondary">
+          Těžší hodina – kombinuješ zkratky, hledáš v textu, přepínáš „okna“ a řešíš více kroků za sebou. (Windows)
+        </p>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <span class="badge text-bg-light border px-3 py-2" id="stepLabel">Stanice 1 / 6</span>
+          <span class="badge text-bg-light border px-3 py-2" id="scoreBadge">Body: 0</span>
+        </div>
+      </div>
+
+      <!-- Stanice 1: editor -->
+      <section class="step-pane active" id="step1">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">Stanice 1 – Redakční stůl</h2>
+            <p class="text-body-secondary">
+              Splň úkoly <strong>pomocí zkratek</strong> v editoru (klávesnice). Tlačítka myší jsou schválně vypnutá – trénujeme zkratky.
+            </p>
+
+            <ol class="checklist mb-3" id="check1">
+              <li data-id="select">Označ celý text (<span class="kbd">Ctrl</span>+<span class="kbd">A</span>)</li>
+              <li data-id="copy">Zkopíruj ho (<span class="kbd">Ctrl</span>+<span class="kbd">C</span>)</li>
+              <li data-id="cutline">Vyjmout první řádek a přesunout ho na konec (<span class="kbd">Ctrl</span>+<span class="kbd">X</span> → <span class="kbd">Ctrl</span>+<span class="kbd">V</span>)</li>
+              <li data-id="undo">Udělej chybu a vrať ji (<span class="kbd">Ctrl</span>+<span class="kbd">Z</span>)</li>
+              <li data-id="redo">Znovu proveď to, co jsi vrátil(a) (<span class="kbd">Ctrl</span>+<span class="kbd">Y</span>)</li>
+              <li data-id="save">Ulož práci (<span class="kbd">Ctrl</span>+<span class="kbd">S</span>)</li>
+            </ol>
+
+            <label class="form-label fw-semibold" for="editor">Tvůj článek</label>
+            <textarea class="form-control editor mb-2" id="editor" spellcheck="false">Dnes vyšlo slunce nad školní zahradou.
+Žáci z 5.B sázejí salát a mrkev.
+Robot Ctrlík fotí všechno do novin.
+Na svačinu bude jablko a rohlík.</textarea>
+
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="resetEditor">Obnovit text</button>
+              <span class="small text-body-secondary align-self-center" id="clipInfo">Schránka: (prázdná)</span>
+              <span class="small text-body-secondary align-self-center" id="saveInfo"></span>
+            </div>
+
+            <div class="mission-log mb-3" id="log1">Log mise: čekám na tvoje zkratky…</div>
+
+            <button type="button" class="btn btn-primary btn-lg" id="toStep2" disabled>Další stanice → Detektiv</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stanice 2: najít -->
+      <section class="step-pane" id="step2">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">Stanice 2 – Detektivní hledání</h2>
+            <p class="text-body-secondary mb-2">
+              Spočítej, kolikrát se ve článku objeví slovo <strong>Ctrlík</strong>. Pak zadej číslo.
+            </p>
+            <p class="small text-body-secondary mb-3">
+              <strong>Poznámka:</strong> Pole „Najít“ je zamčené. Aktivuješ ho zkratkou
+              <span class="kbd">Ctrl</span>+<span class="kbd">F</span> (klikni nejdřív kamkoli na stránku a stiskni zkratku).
+            </p>
+
+            <div class="input-group mb-2" style="max-width: 28rem" id="findGroup">
+              <span class="input-group-text">Najít</span>
+              <input
+                type="search"
+                class="form-control"
+                id="findInput"
+                placeholder="nejdřív stiskni Ctrl + F…"
+                autocomplete="off"
+                disabled
+              />
+              <button class="btn btn-outline-primary" type="button" id="doFind" disabled>Hledat</button>
+            </div>
+            <div class="small mb-3" id="findLockHint">🔒 Hledání čeká na <span class="kbd">Ctrl</span>+<span class="kbd">F</span></div>
+
+            <article class="border rounded-3 p-3 mb-3" id="article" style="line-height: 1.6">
+              Jednou ráno přišel do školy robot Ctrlík. Ctrlík měl naplánovanou skvělou reportáž.
+              Nejdřív Ctrlík navštívil tělocvičnu, pak Ctrlík běžel do jídelny. Kamarádi volali:
+              „Hej, počkej!“ Ale Ctrlík už fotil. Ve zprávě se jméno Ctrlík objevilo ještě jednou:
+              „Ctrlík hlásí: všechno v pořádku.“ A to je konec příběhu o robotovi jménem Ctrlík.
+            </article>
+
+            <div class="row g-3 align-items-end">
+              <div class="col-12 col-sm-6 col-md-4">
+                <label class="form-label fw-semibold" for="findCount">Kolikrát je tu „Ctrlík“?</label>
+                <input type="number" class="form-control" id="findCount" min="0" max="99" />
+              </div>
+              <div class="col-auto">
+                <button type="button" class="btn btn-primary" id="checkFind">Zkontrolovat počet</button>
+              </div>
+              <div class="col-12">
+                <div id="findResult" class="fw-semibold"></div>
+              </div>
+            </div>
+
+            <hr class="my-4" />
+            <button type="button" class="btn btn-primary btn-lg" id="toStep3" disabled>Další stanice → Okna</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stanice 3: okna + speciální -->
+      <section class="step-pane" id="step3">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">Stanice 3 – Okna a speciální zkratky</h2>
+            <p class="text-body-secondary mb-3">
+              Přepínej „okna“ jako <span class="kbd">Alt</span>+<span class="kbd">Tab</span> (tady mezerníkem po kliknutí do pásu)
+              a odpověz na otázky.
+            </p>
+
+            <div class="mb-2 fw-semibold">Simulátor oken – klikni sem a mačkej <span class="kbd">Alt</span>+<span class="kbd">Tab</span> nebo mezerník</div>
+            <div class="d-flex flex-wrap gap-2 mb-3" id="windows" tabindex="0">
+              <div class="win-tab active" data-w="0">📝 Poznámkový blok</div>
+              <div class="win-tab" data-w="1">🌐 Prohlížeč</div>
+              <div class="win-tab" data-w="2">📁 Průzkumník</div>
+              <div class="win-tab" data-w="3">🎵 Hudba</div>
+            </div>
+            <p class="small text-body-secondary mb-4">Aktivní okno: <strong id="activeWin">Poznámkový blok</strong></p>
+
+            <div class="vstack gap-3" id="quiz3"></div>
+
+            <hr class="my-4" />
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <button type="button" class="btn btn-primary" id="checkQuiz3">Zkontrolovat</button>
+              <button type="button" class="btn btn-outline-secondary" id="toStep4" disabled>Další → Složky</button>
+              <div id="quiz3Result" class="fw-semibold"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stanice 4: složky + přesuny -->
+      <section class="step-pane" id="step4">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">Stanice 4 – Složky a přesuny</h2>
+            <p class="text-body-secondary mb-3">
+              Redakce má na ploše bordel. Vyber, jak to Ctrlík uklidí pomocí zkratek
+              (jako ve školním úkolu se složkou a vyjmutím).
+            </p>
+
+            <div class="alert alert-light border mb-3">
+              <strong>Situace:</strong> Na ploše leží složka <em>MOJE_PRACE</em>. Chceš ji přesunout do složky
+              <em>HOTOVE_PRACE</em> a uvnitř mít čistý text bez divných barev z webu.
+            </div>
+
+            <div class="vstack gap-3" id="quiz4"></div>
+
+            <hr class="my-4" />
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <button type="button" class="btn btn-primary" id="checkQuiz4">Zkontrolovat</button>
+              <button type="button" class="btn btn-outline-secondary" id="toStep5" disabled>Další → Rychlé volby</button>
+              <div id="quiz4Result" class="fw-semibold"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stanice 5: rychlé rozhodování -->
+      <section class="step-pane" id="step5">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">Stanice 5 – Rychlé volby</h2>
+            <p class="text-body-secondary mb-3">
+              Uzávěrka se blíží! U každé situace vyber správnou zkratku (nebo správný postup).
+            </p>
+
+            <div class="vstack gap-3" id="quiz5"></div>
+
+            <hr class="my-4" />
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <button type="button" class="btn btn-primary" id="checkQuiz5">Zkontrolovat</button>
+              <button type="button" class="btn btn-outline-secondary" id="toStep6" disabled>Finále → Mise</button>
+              <div id="quiz5Result" class="fw-semibold"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stanice 6: finální mise -->
+      <section class="step-pane" id="step6">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">Stanice 6 – Finální uzávěrka</h2>
+            <p class="text-body-secondary mb-3">
+              Tohle je podobné úkolu ze školy: spojuješ víc zkratek do jednoho postupu. Vyber správné pořadí kroků.
+            </p>
+
+            <div class="alert alert-light border mb-3">
+              <strong>Zadání:</strong> Chceš přesunout celý text ze souboru A do souboru B, pak v B najít slovo „Kanice“,
+              na začátek napsat počet výskytů, uložit a přepnout se do prohlížeče.
+            </div>
+
+            <div class="vstack gap-3" id="finalQuiz"></div>
+
+            <hr class="my-4" />
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <button type="button" class="btn btn-primary btn-lg" id="checkFinal">Uzavřít číslo novin</button>
+              <div id="finalResult" class="fw-semibold"></div>
+            </div>
+
+            <div id="finishBox" class="alert alert-success mt-4 d-none" role="status">
+              <h3 class="h5 fw-bold mb-2">Uzávěrka splněna!</h3>
+              <p class="mb-2">
+                Zvládl(a) jsi těžší hodinu: kopírování, vyjímání, zpět/vpřed, hledání, ukládání i přepínání oken.
+              </p>
+              <p class="mb-0">
+                Body: <strong id="finalScore">0</strong> ·
+                Chceš si zopakovat základy? →
+                <a class="alert-link" href="./klavesove-zkratky1.html">Klávesové zkratky 1</a>
+              </p>
+            </div>
+
+            <details class="mt-4">
+              <summary class="text-primary" style="cursor: pointer">Kompletní tahák (co máte umět)</summary>
+              <ul class="mt-2 mb-0 small">
+                <li><span class="kbd">Ctrl</span>+<span class="kbd">A</span> označit vše</li>
+                <li><span class="kbd">Ctrl</span>+<span class="kbd">C</span> kopírovat</li>
+                <li><span class="kbd">Ctrl</span>+<span class="kbd">V</span> vložit</li>
+                <li><span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">V</span> vložit prostý text</li>
+                <li><span class="kbd">Ctrl</span>+<span class="kbd">Z</span> krok zpět · <span class="kbd">Ctrl</span>+<span class="kbd">Y</span> krok dopředu</li>
+                <li><span class="kbd">Ctrl</span>+<span class="kbd">X</span> vyjmout</li>
+                <li><span class="kbd">Ctrl</span>+<span class="kbd">F</span> najít</li>
+                <li><span class="kbd">Ctrl</span>+<span class="kbd">S</span> uložit</li>
+                <li><span class="kbd">Alt</span>+<span class="kbd">Tab</span> přepínání oken</li>
+                <li><span class="kbd">Ctrl</span>+<span class="kbd">Alt</span>+<span class="kbd">Delete</span> možnosti Windows</li>
+                <li><span class="kbd">Shift</span>+písmeno = velké · háček/čárka = diakritika</li>
+              </ul>
+            </details>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const ORIGINAL =
+        "Dnes vyšlo slunce nad školní zahradou.\n" +
+        "Žáci z 5.B sázejí salát a mrkev.\n" +
+        "Robot Ctrlík fotí všechno do novin.\n" +
+        "Na svačinu bude jablko a rohlík.";
+
+      const state = {
+        score: 0,
+        clip: "",
+        history: [],
+        future: [],
+        done1: new Set(),
+        selectedAll: false,
+        undid: false,
+        redid: false,
+        saved: false,
+        cutMoved: false,
+        findOk: false,
+      };
+
+      const WIN_NAMES = ["Poznámkový blok", "Prohlížeč", "Průzkumník", "Hudba"];
+      let winIdx = 0;
+
+      const QUIZ3 = [
+        {
+          q: "Chci rychle přepnout z prohlížeče do Poznámkového bloku.",
+          options: [
+            { t: "Alt + Tab", ok: true },
+            { t: "Ctrl + S", ok: false },
+            { t: "Ctrl + F", ok: false },
+          ],
+        },
+        {
+          q: "Kopíruju z webu a nechci divné barvy/fonty – vložit jako obyčejný text.",
+          options: [
+            { t: "Ctrl + Shift + V", ok: true },
+            { t: "Ctrl + A", ok: false },
+            { t: "Ctrl + Y", ok: false },
+          ],
+        },
+        {
+          q: "Potřebuju nabídku Windows (zamknout, odhlásit, správce úloh…).",
+          options: [
+            { t: "Ctrl + Alt + Delete", ok: true },
+            { t: "Ctrl + Z", ok: false },
+            { t: "Shift + Delete", ok: false },
+          ],
+        },
+        {
+          q: "Chci napsat velké „Ě“ (háček + velké písmeno).",
+          options: [
+            { t: "Shift + klávesa s ě (Shift + háček/písmeno podle klávesnice)", ok: true },
+            { t: "Ctrl + Ě", ok: false },
+            { t: "Alt + Tab", ok: false },
+          ],
+        },
+        {
+          q: "Vrátil(a) jsem krok zpět, ale chci tu změnu zase zpátky.",
+          options: [
+            { t: "Ctrl + Y", ok: true },
+            { t: "Ctrl + C", ok: false },
+            { t: "Ctrl + F", ok: false },
+          ],
+        },
+      ];
+
+      const QUIZ4 = [
+        {
+          q: "Složku chci přesunout (ne kopírovat). Nejdřív ji…",
+          options: [
+            { t: "vyjmu Ctrl + X", ok: true },
+            { t: "uložím Ctrl + S", ok: false },
+            { t: "najdu Ctrl + F", ok: false },
+          ],
+        },
+        {
+          q: "Otevřu složku HOTOVE_PRACE a složku tam…",
+          options: [
+            { t: "vložím Ctrl + V", ok: true },
+            { t: "vyjmu znovu Ctrl + X", ok: false },
+            { t: "smažu Ctrl + Z", ok: false },
+          ],
+        },
+        {
+          q: "Z webu jsem zkopíroval(a) text s divnými barvami. Chci ho vložit „čistě“:",
+          options: [
+            { t: "Ctrl + Shift + V (prostý text)", ok: true },
+            { t: "Ctrl + A", ok: false },
+            { t: "Alt + Tab", ok: false },
+          ],
+        },
+        {
+          q: "Jsem na konci dlouhého dokumentu a chci skočit na začátek. Pomůže klávesa:",
+          options: [
+            { t: "Home", ok: true },
+            { t: "Ctrl + S", ok: false },
+            { t: "Ctrl + Y", ok: false },
+          ],
+        },
+        {
+          q: "Omylem jsem složku vložil(a) vedle místo dovnitř. Co zkusím nejdřív?",
+          options: [
+            { t: "Ctrl + Z (krok zpět) a vložit znovu správně", ok: true },
+            { t: "Ctrl + Alt + Delete a doufat", ok: false },
+            { t: "Ctrl + F přesune složku samo", ok: false },
+          ],
+        },
+        {
+          q: "Správné pořadí přesunu složky je:",
+          options: [
+            { t: "označit → Ctrl + X → otevřít cíl → Ctrl + V", ok: true },
+            { t: "Ctrl + S → Ctrl + F → Alt + Tab", ok: false },
+            { t: "Ctrl + C → Ctrl + C → Ctrl + C", ok: false },
+          ],
+        },
+      ];
+
+      const QUIZ5 = [
+        {
+          q: "Potřebuju rychle přepnout mezi prohlížečem a editorem.",
+          options: [
+            { t: "Alt + Tab", ok: true },
+            { t: "Ctrl + V", ok: false },
+            { t: "Ctrl + Shift + V", ok: false },
+          ],
+        },
+        {
+          q: "Chci vrátit akci, kterou jsem právě „odvolal(a)“ zpět.",
+          options: [
+            { t: "Ctrl + Y", ok: true },
+            { t: "Ctrl + X", ok: false },
+            { t: "Ctrl + F", ok: false },
+          ],
+        },
+        {
+          q: "Kamarád tvrdí: „Ctrl + C text smaže.“ Co odpovíš?",
+          options: [
+            { t: "Ne – C kopíruje, maže/vyjímá X", ok: true },
+            { t: "Ano, má pravdu", ok: false },
+            { t: "Ctrl + C neexistuje", ok: false },
+          ],
+        },
+        {
+          q: "V textu hledám slovo „uzávěrka“.",
+          options: [
+            { t: "Ctrl + F", ok: true },
+            { t: "Ctrl + S", ok: false },
+            { t: "Shift + F", ok: false },
+          ],
+        },
+        {
+          q: "Chci nabídku Windows (odhlásit, správce úloh…).",
+          options: [
+            { t: "Ctrl + Alt + Delete", ok: true },
+            { t: "Ctrl + Shift + V", ok: false },
+            { t: "Ctrl + A", ok: false },
+          ],
+        },
+        {
+          q: "Napsal(a) jsi malé „kanice“, má být „Kanice“. Co použiješ při psaní?",
+          options: [
+            { t: "Shift + K (a zbytek normálně)", ok: true },
+            { t: "Ctrl + K", ok: false },
+            { t: "Alt + Tab", ok: false },
+          ],
+        },
+        {
+          q: "Která dvojice patří k sobě?",
+          options: [
+            { t: "Ctrl + Z = zpět, Ctrl + Y = dopředu", ok: true },
+            { t: "Ctrl + Z = uložit, Ctrl + Y = najít", ok: false },
+            { t: "Ctrl + Z = kopírovat, Ctrl + Y = vložit", ok: false },
+          ],
+        },
+        {
+          q: "Text chci mít na dvou místech najednou (originál zůstane).",
+          options: [
+            { t: "Ctrl + C a Ctrl + V", ok: true },
+            { t: "Ctrl + X a Ctrl + V", ok: false },
+            { t: "jen Ctrl + X", ok: false },
+          ],
+        },
+      ];
+
+      const FINAL = [
+        {
+          q: "Nejdřív v souboru A označím vše a zkopíruju. Správně je:",
+          options: [
+            { t: "Ctrl + A, pak Ctrl + C", ok: true },
+            { t: "Ctrl + S, pak Ctrl + F", ok: false },
+            { t: "Alt + Tab, pak Ctrl + Z", ok: false },
+          ],
+        },
+        {
+          q: "V souboru B text vložím. Správně je:",
+          options: [
+            { t: "Ctrl + V", ok: true },
+            { t: "Ctrl + X", ok: false },
+            { t: "Ctrl + Alt + Delete", ok: false },
+          ],
+        },
+        {
+          q: "Spočítám výskyty slova „Kanice“. Použiju:",
+          options: [
+            { t: "Ctrl + F", ok: true },
+            { t: "Ctrl + Y", ok: false },
+            { t: "Shift + A", ok: false },
+          ],
+        },
+        {
+          q: "Dokument uložím a přepnu se do prohlížeče:",
+          options: [
+            { t: "Ctrl + S, pak Alt + Tab", ok: true },
+            { t: "Ctrl + X, pak Ctrl + Z", ok: false },
+            { t: "Ctrl + A, pak Ctrl + Y", ok: false },
+          ],
+        },
+        {
+          q: "Text chci přesunout (zmizí z původního místa). Místo kopírování použiju:",
+          options: [
+            { t: "Ctrl + X a potom Ctrl + V", ok: true },
+            { t: "jen Ctrl + C", ok: false },
+            { t: "jen Ctrl + F", ok: false },
+          ],
+        },
+      ];
+
+      const TOTAL_STEPS = 6;
+
+      function setStep(n) {
+        document.querySelectorAll(".step-pane").forEach((el) => el.classList.remove("active"));
+        document.getElementById("step" + n).classList.add("active");
+        document.getElementById("stepLabel").textContent = "Stanice " + n + " / " + TOTAL_STEPS;
+      }
+
+      function addScore(n) {
+        state.score += n;
+        document.getElementById("scoreBadge").textContent = "Body: " + state.score;
+      }
+
+      function log1(msg) {
+        const el = document.getElementById("log1");
+        el.textContent = "Log mise: " + msg;
+      }
+
+      function markDone(id) {
+        if (state.done1.has(id)) return;
+        state.done1.add(id);
+        const li = document.querySelector('#check1 li[data-id="' + id + '"]');
+        if (li) li.classList.add("done");
+        addScore(5);
+        if (state.done1.size >= 6) {
+          document.getElementById("toStep2").disabled = false;
+          log1("Stanice 1 splněna! Můžeš jít dál.");
+        }
+      }
+
+      const editor = document.getElementById("editor");
+
+      function pushHistory() {
+        state.history.push(editor.value);
+        if (state.history.length > 40) state.history.shift();
+        state.future = [];
+      }
+
+      document.getElementById("resetEditor").addEventListener("click", () => {
+        editor.value = ORIGINAL;
+        state.clip = "";
+        state.history = [];
+        state.future = [];
+        document.getElementById("clipInfo").textContent = "Schránka: (prázdná)";
+        document.getElementById("saveInfo").textContent = "";
+        log1("Text obnoven. Zkus zkratky znovu.");
+      });
+
+      editor.addEventListener("keydown", (e) => {
+        const key = e.key.toLowerCase();
+
+        // Ctrl+A
+        if (e.ctrlKey && key === "a") {
+          e.preventDefault();
+          editor.select();
+          state.selectedAll = true;
+          markDone("select");
+          log1("Označeno vše (Ctrl+A).");
+          return;
+        }
+
+        // Ctrl+C
+        if (e.ctrlKey && !e.shiftKey && key === "c") {
+          e.preventDefault();
+          const start = editor.selectionStart;
+          const end = editor.selectionEnd;
+          state.clip = start !== end ? editor.value.slice(start, end) : editor.value;
+          document.getElementById("clipInfo").textContent =
+            "Schránka: „" + state.clip.slice(0, 28).replace(/\n/g, " ") + (state.clip.length > 28 ? "…" : "") + "“";
+          if (state.selectedAll || (start === 0 && end === editor.value.length)) markDone("copy");
+          log1("Zkopírováno (Ctrl+C).");
+          return;
+        }
+
+        // Ctrl+X
+        if (e.ctrlKey && key === "x") {
+          e.preventDefault();
+          pushHistory();
+          let start = editor.selectionStart;
+          let end = editor.selectionEnd;
+          if (start === end) {
+            // cut first line if nothing selected and at start-ish: cut current line
+            const val = editor.value;
+            const lineStart = val.lastIndexOf("\n", start - 1) + 1;
+            let lineEnd = val.indexOf("\n", start);
+            if (lineEnd === -1) lineEnd = val.length;
+            else lineEnd += 1;
+            start = lineStart;
+            end = lineEnd;
+          }
+          state.clip = editor.value.slice(start, end);
+          editor.value = editor.value.slice(0, start) + editor.value.slice(end);
+          editor.setSelectionRange(start, start);
+          document.getElementById("clipInfo").textContent =
+            "Schránka: „" + state.clip.slice(0, 28).replace(/\n/g, " ") + "…“";
+          log1("Vyjmuto (Ctrl+X). Teď vlož na konec (Ctrl+V).");
+          editor.dataset.awaitPasteMove = "1";
+          return;
+        }
+
+        // Ctrl+V
+        if (e.ctrlKey && !e.shiftKey && key === "v") {
+          e.preventDefault();
+          if (!state.clip) {
+            log1("Schránka je prázdná – nejdřív kopíruj nebo vyjmi.");
+            return;
+          }
+          pushHistory();
+          const start = editor.selectionStart;
+          const end = editor.selectionEnd;
+          // If awaiting move-to-end, paste at end
+          if (editor.dataset.awaitPasteMove === "1") {
+            editor.value = editor.value.replace(/\n?$/, "\n") + state.clip.replace(/\n$/, "");
+            editor.setSelectionRange(editor.value.length, editor.value.length);
+            editor.dataset.awaitPasteMove = "";
+            state.cutMoved = true;
+            markDone("cutline");
+            log1("Řádek přesunut na konec (Ctrl+X → Ctrl+V).");
+            return;
+          }
+          editor.value = editor.value.slice(0, start) + state.clip + editor.value.slice(end);
+          const pos = start + state.clip.length;
+          editor.setSelectionRange(pos, pos);
+          log1("Vloženo (Ctrl+V).");
+          return;
+        }
+
+        // Ctrl+Z
+        if (e.ctrlKey && key === "z") {
+          e.preventDefault();
+          if (!state.history.length) {
+            // create a tiny change to undo if needed for teaching
+            pushHistory();
+            editor.value = editor.value + " ★";
+            log1("Přidal jsem značku ★ – teď zkus Ctrl+Z.");
+            return;
+          }
+          state.future.push(editor.value);
+          editor.value = state.history.pop();
+          state.undid = true;
+          markDone("undo");
+          log1("Krok zpět (Ctrl+Z). Zkus Ctrl+Y.");
+          return;
+        }
+
+        // Ctrl+Y
+        if (e.ctrlKey && key === "y") {
+          e.preventDefault();
+          if (!state.future.length) {
+            log1("Nejdřív udělej Ctrl+Z, pak Ctrl+Y.");
+            return;
+          }
+          state.history.push(editor.value);
+          editor.value = state.future.pop();
+          state.redid = true;
+          markDone("redo");
+          log1("Krok dopředu (Ctrl+Y).");
+          return;
+        }
+
+        // Ctrl+S
+        if (e.ctrlKey && key === "s") {
+          e.preventDefault();
+          state.saved = true;
+          document.getElementById("saveInfo").textContent = "✔ Uloženo " + new Date().toLocaleTimeString("cs-CZ");
+          markDone("save");
+          log1("Uloženo (Ctrl+S).");
+          return;
+        }
+      });
+
+      document.getElementById("toStep2").addEventListener("click", () => {
+        addScore(10);
+        setStep(2);
+      });
+
+      // Find station
+      const articleText = document.getElementById("article").innerText;
+      const CTRLIK_COUNT = (articleText.match(/Ctrlík/gi) || []).length;
+
+      function runFind() {
+        const q = document.getElementById("findInput").value.trim();
+        const art = document.getElementById("article");
+        if (!q) {
+          art.innerHTML = art.innerText;
+          return 0;
+        }
+        const raw = art.innerText;
+        const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+        let count = 0;
+        art.innerHTML = raw.replace(re, (m) => {
+          count++;
+          return "<mark class=\"find-hit\">" + m + "</mark>";
+        });
+        return count;
+      }
+
+      let findUnlocked = false;
+
+      function unlockFind() {
+        if (findUnlocked) return;
+        findUnlocked = true;
+        const input = document.getElementById("findInput");
+        const btn = document.getElementById("doFind");
+        input.disabled = false;
+        btn.disabled = false;
+        input.placeholder = "napiš hledané slovo…";
+        const hint = document.getElementById("findLockHint");
+        hint.innerHTML = "🔓 Hledání aktivováno – teď můžeš psát a kliknout na Hledat.";
+        hint.classList.add("text-success");
+      }
+
+      document.getElementById("doFind").addEventListener("click", () => {
+        if (!findUnlocked) return;
+        const n = runFind();
+        document.getElementById("findResult").textContent =
+          n ? "Nalezeno zvýraznění: " + n : "Nic nenalezeno – zkus jiné slovo.";
+        document.getElementById("findResult").className = "fw-semibold text-body-secondary";
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (!document.getElementById("step2").classList.contains("active")) return;
+        if (e.ctrlKey && e.key.toLowerCase() === "f") {
+          e.preventDefault();
+          unlockFind();
+          const input = document.getElementById("findInput");
+          input.focus();
+          if (!input.value) input.value = "Ctrlík";
+          runFind();
+        }
+      });
+
+      document.getElementById("checkFind").addEventListener("click", () => {
+        const val = Number(document.getElementById("findCount").value);
+        const el = document.getElementById("findResult");
+        if (val === CTRLIK_COUNT) {
+          el.className = "fw-semibold text-success";
+          el.textContent = "✔ Správně! Ctrlík je tu " + CTRLIK_COUNT + "×.";
+          if (!state.findOk) {
+            state.findOk = true;
+            addScore(20);
+          }
+          document.getElementById("toStep3").disabled = false;
+        } else {
+          el.className = "fw-semibold text-danger";
+          el.textContent = "✘ Ještě ne. Použij hledání a spočítej pečlivě.";
+        }
+      });
+
+      document.getElementById("toStep3").addEventListener("click", () => setStep(3));
+
+      // Windows simulator
+      function renderWins() {
+        document.querySelectorAll(".win-tab").forEach((el) => {
+          el.classList.toggle("active", Number(el.dataset.w) === winIdx);
+        });
+        document.getElementById("activeWin").textContent = WIN_NAMES[winIdx];
+      }
+
+      function cycleWin() {
+        winIdx = (winIdx + 1) % WIN_NAMES.length;
+        renderWins();
+      }
+
+      document.getElementById("windows").addEventListener("keydown", (e) => {
+        if ((e.altKey && e.key === "Tab") || e.key === " " || e.key === "Tab") {
+          e.preventDefault();
+          cycleWin();
+        }
+      });
+      document.querySelectorAll(".win-tab").forEach((el) => {
+        el.addEventListener("click", () => {
+          winIdx = Number(el.dataset.w);
+          renderWins();
+          document.getElementById("windows").focus();
+        });
+      });
+
+      const quiz3 = document.getElementById("quiz3");
+      QUIZ3.forEach((item, i) => {
+        const wrap = document.createElement("div");
+        wrap.innerHTML =
+          `<div class="fw-semibold mb-1">${i + 1}) ${item.q}</div>` +
+          `<select class="form-select" id="q3_${i}"><option value="">Vyber…</option>` +
+          item.options.map((o, j) => `<option value="${j}" data-ok="${o.ok}">${o.t}</option>`).join("") +
+          `</select>`;
+        quiz3.appendChild(wrap);
+      });
+
+      function fillQuiz(containerId, items, idPrefix) {
+        const root = document.getElementById(containerId);
+        items.forEach((item, i) => {
+          const wrap = document.createElement("div");
+          wrap.innerHTML =
+            `<div class="fw-semibold mb-1">${i + 1}) ${item.q}</div>` +
+            `<select class="form-select" id="${idPrefix}${i}"><option value="">Vyber…</option>` +
+            item.options.map((o, j) => `<option value="${j}" data-ok="${o.ok}">${o.t}</option>`).join("") +
+            `</select>`;
+          root.appendChild(wrap);
+        });
+      }
+
+      function gradeQuiz(items, idPrefix, need) {
+        let ok = 0;
+        items.forEach((_, i) => {
+          const sel = document.getElementById(idPrefix + i);
+          const opt = sel.options[sel.selectedIndex];
+          if (opt && opt.dataset.ok === "true") ok++;
+        });
+        return { ok, pass: ok >= need };
+      }
+
+      document.getElementById("checkQuiz3").addEventListener("click", () => {
+        const { ok, pass } = gradeQuiz(QUIZ3, "q3_", 4);
+        const el = document.getElementById("quiz3Result");
+        el.className = "fw-semibold " + (pass ? "text-success" : "text-danger");
+        el.textContent = pass
+          ? "✔ Super (" + ok + "/" + QUIZ3.length + ")"
+          : "✘ Zatím " + ok + "/" + QUIZ3.length + " – oprav (aspoň 4).";
+        document.getElementById("toStep4").disabled = !pass;
+        if (pass) addScore(15);
+      });
+
+      document.getElementById("toStep4").addEventListener("click", () => setStep(4));
+
+      fillQuiz("quiz4", QUIZ4, "q4_");
+      document.getElementById("checkQuiz4").addEventListener("click", () => {
+        const { ok, pass } = gradeQuiz(QUIZ4, "q4_", QUIZ4.length);
+        const el = document.getElementById("quiz4Result");
+        el.className = "fw-semibold " + (pass ? "text-success" : "text-danger");
+        el.textContent = pass
+          ? "✔ Složky zvládnuty! (" + ok + "/" + QUIZ4.length + ")"
+          : "✘ Správně " + ok + "/" + QUIZ4.length + " – oprav všechny.";
+        document.getElementById("toStep5").disabled = !pass;
+        if (pass) addScore(15);
+      });
+
+      document.getElementById("toStep5").addEventListener("click", () => setStep(5));
+
+      fillQuiz("quiz5", QUIZ5, "q5_");
+      document.getElementById("checkQuiz5").addEventListener("click", () => {
+        const need = Math.ceil(QUIZ5.length * 0.85);
+        const { ok, pass } = gradeQuiz(QUIZ5, "q5_", need);
+        const el = document.getElementById("quiz5Result");
+        el.className = "fw-semibold " + (pass ? "text-success" : "text-danger");
+        el.textContent = pass
+          ? "✔ Rychlé volby sedí! (" + ok + "/" + QUIZ5.length + ")"
+          : "✘ Zatím " + ok + "/" + QUIZ5.length + " – oprav (aspoň " + need + ").";
+        document.getElementById("toStep6").disabled = !pass;
+        if (pass) addScore(15);
+      });
+
+      document.getElementById("toStep6").addEventListener("click", () => setStep(6));
+
+      fillQuiz("finalQuiz", FINAL, "fin_");
+
+      document.getElementById("checkFinal").addEventListener("click", () => {
+        const { ok, pass } = gradeQuiz(FINAL, "fin_", FINAL.length);
+        const el = document.getElementById("finalResult");
+        el.className = "fw-semibold " + (pass ? "text-success" : "text-danger");
+        el.textContent = pass
+          ? "✔ Všechny kroky uzávěrky sedí!"
+          : "✘ Správně " + ok + "/" + FINAL.length + " – ještě doladit.";
+        if (pass) {
+          addScore(25);
+          document.getElementById("finalScore").textContent = String(state.score);
+          document.getElementById("finishBox").classList.remove("d-none");
+        }
+      });
+    </script>
+  </body>
+</html>
