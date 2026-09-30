@@ -89,7 +89,12 @@
         text-align: left;
       }
       .pair-btn.selected {
-        outline: 3px solid rgba(13, 110, 253, 0.45);
+        outline: 3px solid rgba(13, 110, 253, 0.65);
+        outline-offset: 2px;
+        background-color: rgba(13, 110, 253, 0.18) !important;
+        border-color: #0d6efd !important;
+        color: #084298 !important;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
       }
       .pair-btn.matched {
         opacity: 0.55;
@@ -98,7 +103,18 @@
         border-color: rgba(25, 135, 84, 0.35);
       }
       .pair-btn.wrong {
-        outline: 3px solid rgba(220, 53, 69, 0.45);
+        outline: 3px solid rgba(220, 53, 69, 0.55);
+        outline-offset: 2px;
+        background-color: rgba(220, 53, 69, 0.12) !important;
+        border-color: #dc3545 !important;
+      }
+      .form-select.is-answer-ok {
+        border-color: #198754;
+        background-color: rgba(25, 135, 84, 0.08);
+      }
+      .form-select.is-answer-bad {
+        border-color: #dc3545;
+        background-color: rgba(220, 53, 69, 0.08);
       }
     </style>
   </head>
@@ -191,12 +207,12 @@
           <div class="card-body p-4">
             <h2 class="h4 fw-bold mb-2">3) Stiskni to opravdu!</h2>
             <p class="text-body-secondary mb-3">
-              Klikni do pole a stiskni zkratku na klávesnici. (Prohlížeč někdy zkratku „sebere“ – to je v pořádku, Ctrlík to stejně pozná.)
+              Stačí stisknout zkratku na klávesnici – nemusíš klikat do pole.
+              (Prohlížeč někdy zkratku „sebere“ – to je v pořádku, Ctrlík to stejně pozná.)
             </p>
             <div class="mb-2 fw-semibold" id="practicePrompt">Připraven?</div>
-            <div class="practice-box mb-3" id="practiceBox" tabindex="0">Klikni sem a čekej na pokyn…</div>
+            <div class="practice-box mb-3" id="practiceBox" tabindex="0">Načítám trénink…</div>
             <div class="d-flex flex-wrap gap-2 align-items-center">
-              <button type="button" class="btn btn-success" id="startPractice">Spustit trénink</button>
               <button type="button" class="btn btn-outline-secondary" id="toStep4" disabled>Další → příběhy</button>
               <span class="text-body-secondary small" id="practiceProgress"></span>
             </div>
@@ -583,7 +599,14 @@
         items.forEach((_, i) => {
           const sel = document.getElementById(idPrefix + i);
           const opt = sel.options[sel.selectedIndex];
-          if (opt && opt.dataset.ok === "true") ok++;
+          const isOk = !!(opt && opt.dataset.ok === "true");
+          sel.classList.remove("is-answer-ok", "is-answer-bad");
+          if (isOk) {
+            ok++;
+            sel.classList.add("is-answer-ok");
+          } else {
+            sel.classList.add("is-answer-bad");
+          }
         });
         const pass = needAll ? ok === items.length : ok >= Math.ceil(items.length * 0.8);
         return { ok, pass };
@@ -631,7 +654,10 @@
         if (pass) awardStar();
       });
 
-      document.getElementById("toStep3").addEventListener("click", () => setStep(3));
+      document.getElementById("toStep3").addEventListener("click", () => {
+        setStep(3);
+        startPractice();
+      });
 
       // Practice
       const box = document.getElementById("practiceBox");
@@ -654,29 +680,32 @@
         box.classList.remove("ok", "bad");
         document.getElementById("practiceProgress").textContent =
           "Hotovo: " + state.practiceIdx + " / " + PRACTICE.length;
-        box.focus();
+        setTimeout(() => box.focus(), 50);
       }
 
-      document.getElementById("startPractice").addEventListener("click", () => {
+      function startPractice() {
         state.practiceIdx = 0;
         state.practiceListening = true;
+        document.getElementById("toStep4").disabled = true;
         showPractice();
-      });
+      }
 
-      box.addEventListener("keydown", (e) => {
+      document.addEventListener("keydown", (e) => {
         if (!state.practiceListening) return;
+        if (!document.getElementById("step3").classList.contains("active")) return;
         const p = PRACTICE[state.practiceIdx];
         if (!p) return;
         if (e.ctrlKey || e.altKey || e.metaKey) e.preventDefault();
         if (p.match(e)) {
+          e.preventDefault();
           box.classList.remove("bad");
           box.classList.add("ok");
           box.textContent = "Správně!";
           state.practiceIdx++;
           setTimeout(showPractice, 450);
-        } else if (e.key === "Control" || e.key === "Shift" || e.key === "Alt") {
+        } else if (e.key === "Control" || e.key === "Shift" || e.key === "Alt" || e.key === "Meta") {
           // ignore lone modifiers
-        } else if (e.key.length === 1 || e.key === "Tab" || e.key === "Delete") {
+        } else if (e.ctrlKey || e.altKey || e.metaKey || e.key.length === 1 || e.key === "Tab" || e.key === "Delete") {
           box.classList.add("bad");
           box.textContent = "Ještě ne – zkus znovu: " + p.label;
         }
