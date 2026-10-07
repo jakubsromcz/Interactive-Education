@@ -80,13 +80,32 @@
         background: #ffd43b;
         padding: 0 0.1rem;
       }
-      .form-select.is-answer-ok {
-        border-color: #198754;
-        background-color: rgba(25, 135, 84, 0.08);
+      .help-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid rgba(13, 110, 253, 0.35);
+        background: rgba(13, 110, 253, 0.08);
+        color: #0d6efd;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        user-select: none;
       }
-      .form-select.is-answer-bad {
-        border-color: #dc3545;
-        background-color: rgba(220, 53, 69, 0.08);
+      .help-chip:hover:not(.disabled) {
+        background: rgba(13, 110, 253, 0.16);
+      }
+      .help-chip.disabled {
+        opacity: 0.45;
+        pointer-events: none;
+        cursor: default;
+      }
+      .help-tip-q {
+        display: block;
+        margin-top: 0.35rem;
+        font-weight: 600;
+        color: #212529;
       }
     </style>
   </head>
@@ -239,6 +258,10 @@ Na svačinu bude jablko a rohlík.</textarea>
               <button type="button" class="btn btn-outline-secondary" id="toStep4" disabled>Další → Složky</button>
               <div id="quiz3Result" class="fw-semibold"></div>
             </div>
+            <div class="mt-3">
+              <span class="help-chip disabled" id="help3" role="button" tabindex="0">Potřebuji pomoc</span>
+              <div class="small text-body-secondary mt-2" id="help3Text">Nejdřív zkontroluj odpovědi.</div>
+            </div>
           </div>
         </div>
       </section>
@@ -266,6 +289,10 @@ Na svačinu bude jablko a rohlík.</textarea>
               <button type="button" class="btn btn-outline-secondary" id="toStep5" disabled>Další → Rychlé volby</button>
               <div id="quiz4Result" class="fw-semibold"></div>
             </div>
+            <div class="mt-3">
+              <span class="help-chip disabled" id="help4" role="button" tabindex="0">Potřebuji pomoc</span>
+              <div class="small text-body-secondary mt-2" id="help4Text">Nejdřív zkontroluj odpovědi.</div>
+            </div>
           </div>
         </div>
       </section>
@@ -286,6 +313,10 @@ Na svačinu bude jablko a rohlík.</textarea>
               <button type="button" class="btn btn-primary" id="checkQuiz5">Zkontrolovat</button>
               <button type="button" class="btn btn-outline-secondary" id="toStep6" disabled>Finále → Mise</button>
               <div id="quiz5Result" class="fw-semibold"></div>
+            </div>
+            <div class="mt-3">
+              <span class="help-chip disabled" id="help5" role="button" tabindex="0">Potřebuji pomoc</span>
+              <div class="small text-body-secondary mt-2" id="help5Text">Nejdřív zkontroluj odpovědi.</div>
             </div>
           </div>
         </div>
@@ -311,6 +342,10 @@ Na svačinu bude jablko a rohlík.</textarea>
             <div class="d-flex flex-wrap gap-2 align-items-center">
               <button type="button" class="btn btn-primary btn-lg" id="checkFinal">Uzavřít číslo novin</button>
               <div id="finalResult" class="fw-semibold"></div>
+            </div>
+            <div class="mt-3">
+              <span class="help-chip disabled" id="helpFin" role="button" tabindex="0">Potřebuji pomoc</span>
+              <div class="small text-body-secondary mt-2" id="helpFinText">Nejdřív zkontroluj odpovědi.</div>
             </div>
 
             <div id="finishBox" class="alert alert-success mt-4 d-none" role="status">
@@ -365,6 +400,8 @@ Na svačinu bude jablko a rohlík.</textarea>
         saved: false,
         cutMoved: false,
         findOk: false,
+        tips: { q3: false, q4: false, q5: false, fin: false },
+        lastWrong: { q3: [], q4: [], q5: [], fin: [] },
       };
 
       const WIN_NAMES = ["Poznámkový blok", "Prohlížeč", "Průzkumník", "Hudba"];
@@ -855,13 +892,24 @@ Na svačinu bude jablko a rohlík.</textarea>
         });
       });
 
+      function shuffleOptions(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
       const quiz3 = document.getElementById("quiz3");
       QUIZ3.forEach((item, i) => {
         const wrap = document.createElement("div");
         wrap.innerHTML =
           `<div class="fw-semibold mb-1">${i + 1}) ${item.q}</div>` +
           `<select class="form-select" id="q3_${i}"><option value="">Vyber…</option>` +
-          item.options.map((o, j) => `<option value="${j}" data-ok="${o.ok}">${o.t}</option>`).join("") +
+          shuffleOptions(item.options)
+            .map((o, j) => `<option value="${j}" data-ok="${o.ok}">${o.t}</option>`)
+            .join("") +
           `</select>`;
         quiz3.appendChild(wrap);
       });
@@ -873,36 +921,84 @@ Na svačinu bude jablko a rohlík.</textarea>
           wrap.innerHTML =
             `<div class="fw-semibold mb-1">${i + 1}) ${item.q}</div>` +
             `<select class="form-select" id="${idPrefix}${i}"><option value="">Vyber…</option>` +
-            item.options.map((o, j) => `<option value="${j}" data-ok="${o.ok}">${o.t}</option>`).join("") +
+            shuffleOptions(item.options)
+              .map((o, j) => `<option value="${j}" data-ok="${o.ok}">${o.t}</option>`)
+              .join("") +
             `</select>`;
           root.appendChild(wrap);
         });
       }
 
-      function gradeQuiz(items, idPrefix, need) {
-        let ok = 0;
+      function gradeSilent(items, idPrefix) {
+        const wrongIndexes = [];
         items.forEach((_, i) => {
           const sel = document.getElementById(idPrefix + i);
           const opt = sel.options[sel.selectedIndex];
           const isOk = !!(opt && opt.dataset.ok === "true");
-          sel.classList.remove("is-answer-ok", "is-answer-bad");
-          if (isOk) {
-            ok++;
-            sel.classList.add("is-answer-ok");
-          } else {
-            sel.classList.add("is-answer-bad");
-          }
+          if (!isOk) wrongIndexes.push(i);
         });
-        return { ok, pass: ok >= need };
+        const ok = items.length - wrongIndexes.length;
+        return { ok, errors: wrongIndexes.length, wrongIndexes };
       }
 
+      function setupHelp(tipKey, quizItems, chipId, textId) {
+        const chip = document.getElementById(chipId);
+        const txt = document.getElementById(textId);
+        chip.classList.add("disabled");
+        txt.textContent = "Nejdřív zkontroluj odpovědi.";
+
+        function ask() {
+          if (state.tips[tipKey] || chip.classList.contains("disabled")) return;
+          const wrong = state.lastWrong[tipKey] || [];
+          if (!wrong.length) {
+            txt.textContent = "Všechno sedí – pomoc nepotřebuješ.";
+            return;
+          }
+          const i = wrong[0];
+          txt.innerHTML =
+            "Tip – podívej se na tuhle otázku:" +
+            `<span class="help-tip-q">${i + 1}) ${quizItems[i].q}</span>`;
+          state.tips[tipKey] = true;
+          chip.classList.add("disabled");
+          chip.textContent = "Pomoc už použitá";
+        }
+
+        chip.addEventListener("click", ask);
+        chip.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            ask();
+          }
+        });
+      }
+
+      function enableHelp(tipKey, chipId, textId, hasErrors) {
+        const chip = document.getElementById(chipId);
+        const txt = document.getElementById(textId);
+        if (state.tips[tipKey]) {
+          chip.classList.add("disabled");
+          chip.textContent = "Pomoc už použitá";
+          return;
+        }
+        if (!hasErrors) {
+          chip.classList.add("disabled");
+          txt.textContent = "Bez chyb – pomoc není potřeba.";
+          return;
+        }
+        chip.classList.remove("disabled");
+        chip.textContent = "Potřebuji pomoc";
+        txt.textContent = "Klikni na „Potřebuji pomoc“ (1×) – ukáže jednu špatnou otázku.";
+      }
+
+      setupHelp("q3", QUIZ3, "help3", "help3Text");
       document.getElementById("checkQuiz3").addEventListener("click", () => {
-        const { ok, pass } = gradeQuiz(QUIZ3, "q3_", 4);
+        const { ok, errors, wrongIndexes } = gradeSilent(QUIZ3, "q3_");
+        state.lastWrong.q3 = wrongIndexes;
+        const pass = ok >= 4;
         const el = document.getElementById("quiz3Result");
-        el.className = "fw-semibold " + (pass ? "text-success" : "text-danger");
-        el.textContent = pass
-          ? "✔ Super (" + ok + "/" + QUIZ3.length + ")"
-          : "✘ Zatím " + ok + "/" + QUIZ3.length + " – oprav (aspoň 4).";
+        el.className = "fw-semibold " + (errors === 0 ? "text-success" : "text-danger");
+        el.textContent = errors === 0 ? "✔ Bez chyb!" : "Počet chyb: " + errors;
+        enableHelp("q3", "help3", "help3Text", errors > 0);
         document.getElementById("toStep4").disabled = !pass;
         if (pass) addScore(15);
       });
@@ -910,13 +1006,15 @@ Na svačinu bude jablko a rohlík.</textarea>
       document.getElementById("toStep4").addEventListener("click", () => setStep(4));
 
       fillQuiz("quiz4", QUIZ4, "q4_");
+      setupHelp("q4", QUIZ4, "help4", "help4Text");
       document.getElementById("checkQuiz4").addEventListener("click", () => {
-        const { ok, pass } = gradeQuiz(QUIZ4, "q4_", QUIZ4.length);
+        const { errors, wrongIndexes } = gradeSilent(QUIZ4, "q4_");
+        state.lastWrong.q4 = wrongIndexes;
+        const pass = errors === 0;
         const el = document.getElementById("quiz4Result");
         el.className = "fw-semibold " + (pass ? "text-success" : "text-danger");
-        el.textContent = pass
-          ? "✔ Složky zvládnuty! (" + ok + "/" + QUIZ4.length + ")"
-          : "✘ Správně " + ok + "/" + QUIZ4.length + " – oprav všechny.";
+        el.textContent = pass ? "✔ Bez chyb!" : "Počet chyb: " + errors;
+        enableHelp("q4", "help4", "help4Text", errors > 0);
         document.getElementById("toStep5").disabled = !pass;
         if (pass) addScore(15);
       });
@@ -924,14 +1022,16 @@ Na svačinu bude jablko a rohlík.</textarea>
       document.getElementById("toStep5").addEventListener("click", () => setStep(5));
 
       fillQuiz("quiz5", QUIZ5, "q5_");
+      setupHelp("q5", QUIZ5, "help5", "help5Text");
       document.getElementById("checkQuiz5").addEventListener("click", () => {
         const need = Math.ceil(QUIZ5.length * 0.85);
-        const { ok, pass } = gradeQuiz(QUIZ5, "q5_", need);
+        const { ok, errors, wrongIndexes } = gradeSilent(QUIZ5, "q5_");
+        state.lastWrong.q5 = wrongIndexes;
+        const pass = ok >= need;
         const el = document.getElementById("quiz5Result");
-        el.className = "fw-semibold " + (pass ? "text-success" : "text-danger");
-        el.textContent = pass
-          ? "✔ Rychlé volby sedí! (" + ok + "/" + QUIZ5.length + ")"
-          : "✘ Zatím " + ok + "/" + QUIZ5.length + " – oprav (aspoň " + need + ").";
+        el.className = "fw-semibold " + (errors === 0 ? "text-success" : "text-danger");
+        el.textContent = errors === 0 ? "✔ Bez chyb!" : "Počet chyb: " + errors;
+        enableHelp("q5", "help5", "help5Text", errors > 0);
         document.getElementById("toStep6").disabled = !pass;
         if (pass) addScore(15);
       });
@@ -939,14 +1039,16 @@ Na svačinu bude jablko a rohlík.</textarea>
       document.getElementById("toStep6").addEventListener("click", () => setStep(6));
 
       fillQuiz("finalQuiz", FINAL, "fin_");
+      setupHelp("fin", FINAL, "helpFin", "helpFinText");
 
       document.getElementById("checkFinal").addEventListener("click", () => {
-        const { ok, pass } = gradeQuiz(FINAL, "fin_", FINAL.length);
+        const { errors, wrongIndexes } = gradeSilent(FINAL, "fin_");
+        state.lastWrong.fin = wrongIndexes;
+        const pass = errors === 0;
         const el = document.getElementById("finalResult");
         el.className = "fw-semibold " + (pass ? "text-success" : "text-danger");
-        el.textContent = pass
-          ? "✔ Všechny kroky uzávěrky sedí!"
-          : "✘ Správně " + ok + "/" + FINAL.length + " – ještě doladit.";
+        el.textContent = pass ? "✔ Bez chyb!" : "Počet chyb: " + errors;
+        enableHelp("fin", "helpFin", "helpFinText", errors > 0);
         if (pass) {
           addScore(25);
           document.getElementById("finalScore").textContent = String(state.score);

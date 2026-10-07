@@ -662,14 +662,24 @@
         if (li) li.classList.add("done");
       }
 
+      function shuffleOptions(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
       function fillQuiz(containerId, items, prefix) {
         const root = document.getElementById(containerId);
         items.forEach((item, i) => {
+          const opts = shuffleOptions(item.options);
           const wrap = document.createElement("div");
           wrap.innerHTML =
             `<div class="fw-semibold mb-1">${i + 1}) ${item.q}</div>` +
             `<select class="form-select" id="${prefix}${i}"><option value="">Vyber…</option>` +
-            item.options.map((o, j) => `<option value="${j}" data-ok="${o.ok}">${o.t}</option>`).join("") +
+            opts.map((o, j) => `<option value="${j}" data-ok="${o.ok}">${o.t}</option>`).join("") +
             `</select>`;
           root.appendChild(wrap);
         });

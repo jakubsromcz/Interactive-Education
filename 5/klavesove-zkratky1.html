@@ -108,13 +108,32 @@
         background-color: rgba(220, 53, 69, 0.12) !important;
         border-color: #dc3545 !important;
       }
-      .form-select.is-answer-ok {
-        border-color: #198754;
-        background-color: rgba(25, 135, 84, 0.08);
+      .help-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid rgba(13, 110, 253, 0.35);
+        background: rgba(13, 110, 253, 0.08);
+        color: #0d6efd;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        user-select: none;
       }
-      .form-select.is-answer-bad {
-        border-color: #dc3545;
-        background-color: rgba(220, 53, 69, 0.08);
+      .help-chip:hover:not(.disabled) {
+        background: rgba(13, 110, 253, 0.16);
+      }
+      .help-chip.disabled {
+        opacity: 0.45;
+        pointer-events: none;
+        cursor: default;
+      }
+      .help-tip-q {
+        display: block;
+        margin-top: 0.35rem;
+        font-weight: 600;
+        color: #212529;
       }
     </style>
   </head>
@@ -184,6 +203,10 @@
               <button type="button" class="btn btn-outline-secondary" id="toStep3" disabled>Další → trénink</button>
               <div id="quizResult" class="fw-semibold"></div>
             </div>
+            <div class="mt-3">
+              <span class="help-chip disabled" id="helpQuiz" role="button" tabindex="0">Potřebuji pomoc</span>
+              <div class="small text-body-secondary mt-2" id="helpQuizText">Nejdřív zkontroluj odpovědi.</div>
+            </div>
             <details class="mt-3">
               <summary class="text-primary" style="cursor: pointer">Nápověda – tahák</summary>
               <ul class="mt-2 mb-0 small">
@@ -235,6 +258,10 @@
               <button type="button" class="btn btn-outline-secondary" id="toStep5" disabled>Další → pexeso</button>
               <div id="storiesResult" class="fw-semibold"></div>
             </div>
+            <div class="mt-3">
+              <span class="help-chip disabled" id="helpStories" role="button" tabindex="0">Potřebuji pomoc</span>
+              <div class="small text-body-secondary mt-2" id="helpStoriesText">Nejdřív zkontroluj odpovědi.</div>
+            </div>
           </div>
         </div>
       </section>
@@ -283,6 +310,10 @@
             <div class="d-flex flex-wrap gap-2 align-items-center">
               <button type="button" class="btn btn-primary btn-lg" id="checkMission">Dokončit misi</button>
               <div id="missionResult" class="fw-semibold"></div>
+            </div>
+            <div class="mt-3">
+              <span class="help-chip disabled" id="helpMission" role="button" tabindex="0">Potřebuji pomoc</span>
+              <div class="small text-body-secondary mt-2" id="helpMissionText">Nejdřív zkontroluj odpovědi.</div>
             </div>
 
             <div id="finishBox" class="alert alert-success mt-4 d-none" role="status">
@@ -560,6 +591,8 @@
         practiceListening: false,
         pairSelected: null,
         pairMatched: new Set(),
+        tips: { quiz: false, stories: false, mission: false },
+        lastWrong: { quiz: [], stories: [], mission: [] },
       };
 
       function setStep(n) {
@@ -581,10 +614,19 @@
         }
       }
 
+      function shuffleOptions(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
       function fillSelects(container, items, idPrefix) {
         items.forEach((item, i) => {
           const wrap = document.createElement("div");
-          const opts = item.options
+          const opts = shuffleOptions(item.options)
             .map((o, j) => `<option value="${j}" data-ok="${o.ok}">${o.t}</option>`)
             .join("");
           wrap.innerHTML =
@@ -594,22 +636,66 @@
         });
       }
 
-      function checkSelects(items, idPrefix, needAll) {
-        let ok = 0;
+      function gradeSilent(items, idPrefix, needAll) {
+        const wrongIndexes = [];
         items.forEach((_, i) => {
           const sel = document.getElementById(idPrefix + i);
           const opt = sel.options[sel.selectedIndex];
           const isOk = !!(opt && opt.dataset.ok === "true");
-          sel.classList.remove("is-answer-ok", "is-answer-bad");
-          if (isOk) {
-            ok++;
-            sel.classList.add("is-answer-ok");
-          } else {
-            sel.classList.add("is-answer-bad");
+          if (!isOk) wrongIndexes.push(i);
+        });
+        const ok = items.length - wrongIndexes.length;
+        const need = needAll ? items.length : Math.ceil(items.length * 0.8);
+        return { ok, errors: wrongIndexes.length, wrongIndexes, pass: ok >= need, need };
+      }
+
+      function setupHelp(tipKey, quizItems, chipId, textId) {
+        const chip = document.getElementById(chipId);
+        const txt = document.getElementById(textId);
+        chip.classList.add("disabled");
+        txt.textContent = "Nejdřív zkontroluj odpovědi.";
+
+        function ask() {
+          if (state.tips[tipKey] || chip.classList.contains("disabled")) return;
+          const wrong = state.lastWrong[tipKey] || [];
+          if (!wrong.length) {
+            txt.textContent = "Všechno sedí – pomoc nepotřebuješ.";
+            return;
+          }
+          const i = wrong[0];
+          txt.innerHTML =
+            "Tip – podívej se na tuhle otázku:" +
+            `<span class="help-tip-q">${i + 1}) ${quizItems[i].q}</span>`;
+          state.tips[tipKey] = true;
+          chip.classList.add("disabled");
+          chip.textContent = "Pomoc už použitá";
+        }
+
+        chip.addEventListener("click", ask);
+        chip.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            ask();
           }
         });
-        const pass = needAll ? ok === items.length : ok >= Math.ceil(items.length * 0.8);
-        return { ok, pass };
+      }
+
+      function enableHelp(tipKey, chipId, textId, hasErrors) {
+        const chip = document.getElementById(chipId);
+        const txt = document.getElementById(textId);
+        if (state.tips[tipKey]) {
+          chip.classList.add("disabled");
+          chip.textContent = "Pomoc už použitá";
+          return;
+        }
+        if (!hasErrors) {
+          chip.classList.add("disabled");
+          txt.textContent = "Bez chyb – pomoc není potřeba.";
+          return;
+        }
+        chip.classList.remove("disabled");
+        chip.textContent = "Potřebuji pomoc";
+        txt.textContent = "Klikni na „Potřebuji pomoc“ (1×) – ukáže jednu špatnou otázku.";
       }
 
       // Flashcards
@@ -641,15 +727,15 @@
 
       // Quiz
       fillSelects(document.getElementById("quiz"), QUIZ, "quiz");
+      setupHelp("quiz", QUIZ, "helpQuiz", "helpQuizText");
 
       document.getElementById("checkQuiz").addEventListener("click", () => {
-        const { ok, pass } = checkSelects(QUIZ, "quiz", false);
-        const need = Math.ceil(QUIZ.length * 0.8);
+        const { errors, wrongIndexes, pass } = gradeSilent(QUIZ, "quiz", false);
+        state.lastWrong.quiz = wrongIndexes;
         const el = document.getElementById("quizResult");
-        el.className = "fw-semibold " + (pass ? "text-success" : "text-danger");
-        el.textContent = pass
-          ? "✔ Výborně! (" + ok + "/" + QUIZ.length + ")"
-          : "✘ Zatím " + ok + "/" + QUIZ.length + " – oprav a zkus znovu (aspoň " + need + ").";
+        el.className = "fw-semibold " + (errors === 0 ? "text-success" : "text-danger");
+        el.textContent = errors === 0 ? "✔ Bez chyb!" : "Počet chyb: " + errors;
+        enableHelp("quiz", "helpQuiz", "helpQuizText", errors > 0);
         document.getElementById("toStep3").disabled = !pass;
         if (pass) awardStar();
       });
@@ -715,14 +801,15 @@
 
       // Stories
       fillSelects(document.getElementById("stories"), STORIES, "story");
+      setupHelp("stories", STORIES, "helpStories", "helpStoriesText");
 
       document.getElementById("checkStories").addEventListener("click", () => {
-        const { ok, pass } = checkSelects(STORIES, "story", true);
+        const { errors, wrongIndexes, pass } = gradeSilent(STORIES, "story", true);
+        state.lastWrong.stories = wrongIndexes;
         const el = document.getElementById("storiesResult");
-        el.className = "fw-semibold " + (pass ? "text-success" : "text-danger");
-        el.textContent = pass
-          ? "✔ Skvělé! Všechny situace sedí."
-          : "✘ Správně " + ok + "/" + STORIES.length + " – oprav a zkontroluj znovu.";
+        el.className = "fw-semibold " + (errors === 0 ? "text-success" : "text-danger");
+        el.textContent = errors === 0 ? "✔ Bez chyb!" : "Počet chyb: " + errors;
+        enableHelp("stories", "helpStories", "helpStoriesText", errors > 0);
         document.getElementById("toStep5").disabled = !pass;
         if (pass) awardStar();
       });
@@ -814,14 +901,15 @@
 
       // Mission
       fillSelects(document.getElementById("mission"), MISSION, "mis");
+      setupHelp("mission", MISSION, "helpMission", "helpMissionText");
 
       document.getElementById("checkMission").addEventListener("click", () => {
-        const { ok, pass } = checkSelects(MISSION, "mis", true);
+        const { errors, wrongIndexes, pass } = gradeSilent(MISSION, "mis", true);
+        state.lastWrong.mission = wrongIndexes;
         const el = document.getElementById("missionResult");
-        el.className = "fw-semibold " + (pass ? "text-success" : "text-danger");
-        el.textContent = pass
-          ? "✔ Mise splněna! (" + ok + "/" + MISSION.length + ")"
-          : "✘ Správně " + ok + "/" + MISSION.length + " – ještě doladit.";
+        el.className = "fw-semibold " + (errors === 0 ? "text-success" : "text-danger");
+        el.textContent = errors === 0 ? "✔ Bez chyb!" : "Počet chyb: " + errors;
+        enableHelp("mission", "helpMission", "helpMissionText", errors > 0);
         if (pass) {
           awardStar();
           document.getElementById("finishBox").classList.remove("d-none");
