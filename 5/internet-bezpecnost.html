@@ -86,7 +86,9 @@
       </div>
     </main>
 
+    <script src="../progress.js"></script>
     <script>
+      const PROGRESS_ID = "5/internet-bezpecnost";
       let attempts = 0;
       function check() {
         attempts++;
@@ -100,6 +102,7 @@
         el.innerHTML =
           (ok ? '✔ Skvělé, bezpečně!' : '✘ Ještě jednou') +
           `<div class="small text-body-secondary mt-1">Pokusy: ${attempts}</div>`;
+        if (ok) InfProgress.completeStep(PROGRESS_ID, 1, 1);
       }
     </script>
   </body>

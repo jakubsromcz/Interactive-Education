@@ -194,7 +194,10 @@
               <span>Zpět</span>
             </span>
           </a>
-          <span class="badge text-bg-success px-3 py-2">4. třída</span>
+          <div class="d-flex flex-wrap gap-2 align-items-center">
+            <button type="button" class="btn btn-outline-warning btn-sm" id="restartProgress">Začít znovu</button>
+            <span class="badge text-bg-success px-3 py-2">4. třída</span>
+          </div>
         </div>
 
         <h1 class="display-6 fw-bold mb-2">Klávesové zkratky</h1>
@@ -452,7 +455,9 @@
       </section>
     </main>
 
+    <script src="../progress.js"></script>
     <script>
+      const PROGRESS_ID = "4/klavesove-zkratky";
       const TOTAL = 8;
 
       const PAIRS_BASIC = [
@@ -687,23 +692,41 @@
         starsEl.appendChild(s);
       }
 
+      function updateStarsUI() {
+        document.querySelectorAll("#stars .star").forEach((el) => {
+          el.classList.toggle("on", Number(el.dataset.i) < state.stars);
+        });
+      }
+
       function setStep(n) {
         document.querySelectorAll(".step-pane").forEach((el) => el.classList.remove("active"));
         document.getElementById("step" + n).classList.add("active");
         document.getElementById("stepLabel").textContent = "Krok " + n + " / " + TOTAL;
         state.practiceOn = false;
         state.learnOn = n === 1;
+        if (n === 3 && !document.getElementById("pex4").children.length) {
+          buildPexeso("pex4", PAIRS_BASIC, "pex4Log", "toStep4", 8);
+        }
+        if (n === 4 && !document.getElementById("pex5").children.length) {
+          buildPexeso("pex5", PAIRS_BASIC.concat(PAIRS_EXTRA), "pex5Log", "toStep5", 12);
+        }
         if (n === 6) startPractice();
       }
 
       function awardStar() {
         if (state.stars < TOTAL) {
           state.stars++;
-          document.querySelectorAll("#stars .star").forEach((el) => {
-            el.classList.toggle("on", Number(el.dataset.i) < state.stars);
-          });
+          updateStarsUI();
+          InfProgress.completeStep(PROGRESS_ID, state.stars, TOTAL);
         }
       }
+
+      document.getElementById("restartProgress").addEventListener("click", () => {
+        if (confirm("Opravdu začít cvičení znovu od začátku? Uložený postup se smaže.")) {
+          InfProgress.reset(PROGRESS_ID);
+          location.reload();
+        }
+      });
 
       function shuffle(arr) {
         const a = arr.slice();
@@ -1118,6 +1141,19 @@
           if (state.raceLeft <= 0) endRace();
         }, 1000);
       });
+
+      // Obnovení uložených kroků
+      (function resumeProgress() {
+        const done = InfProgress.completedCount(PROGRESS_ID);
+        state.stars = Math.min(done, TOTAL);
+        updateStarsUI();
+        const next = InfProgress.nextStep(PROGRESS_ID, TOTAL);
+        if (next > 1) setStep(next);
+        if (done >= TOTAL) {
+          const box = document.getElementById("finishBox");
+          if (box) box.classList.remove("d-none");
+        }
+      })();
     </script>
   </body>
 </html>

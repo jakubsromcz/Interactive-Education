@@ -149,7 +149,10 @@
               <span>Zpět</span>
             </span>
           </a>
-          <span class="badge text-bg-success px-3 py-2">5. třída</span>
+          <div class="d-flex flex-wrap gap-2 align-items-center">
+            <button type="button" class="btn btn-outline-warning btn-sm" id="restartProgress">Začít znovu</button>
+            <span class="badge text-bg-success px-3 py-2">5. třída</span>
+          </div>
         </div>
 
         <h1 class="display-6 fw-bold mb-2">Klávesové zkratky 1</h1>
@@ -332,7 +335,9 @@
       </section>
     </main>
 
+    <script src="../progress.js"></script>
     <script>
+      const PROGRESS_ID = "5/klavesove-zkratky1";
       const TOTAL_STEPS = 6;
 
       const FLASH = [
@@ -599,6 +604,7 @@
         document.querySelectorAll(".step-pane").forEach((el) => el.classList.remove("active"));
         document.getElementById("step" + n).classList.add("active");
         document.getElementById("stepLabel").textContent = "Krok " + n + " / " + TOTAL_STEPS;
+        if (n === 3 && typeof startPractice === "function") startPractice();
       }
 
       function updateStars() {
@@ -611,8 +617,16 @@
         if (state.stars < TOTAL_STEPS) {
           state.stars++;
           updateStars();
+          InfProgress.completeStep(PROGRESS_ID, state.stars, TOTAL_STEPS);
         }
       }
+
+      document.getElementById("restartProgress").addEventListener("click", () => {
+        if (confirm("Opravdu začít cvičení znovu od začátku? Uložený postup se smaže.")) {
+          InfProgress.reset(PROGRESS_ID);
+          location.reload();
+        }
+      });
 
       function shuffleOptions(arr) {
         const a = arr.slice();
@@ -915,6 +929,18 @@
           document.getElementById("finishBox").classList.remove("d-none");
         }
       });
+
+      (function resumeProgress() {
+        const done = InfProgress.completedCount(PROGRESS_ID);
+        state.stars = Math.min(done, TOTAL_STEPS);
+        updateStars();
+        const next = InfProgress.nextStep(PROGRESS_ID, TOTAL_STEPS);
+        if (next > 1) setStep(next);
+        if (done >= TOTAL_STEPS) {
+          const box = document.getElementById("finishBox");
+          if (box) box.classList.remove("d-none");
+        }
+      })();
     </script>
   </body>
 </html>

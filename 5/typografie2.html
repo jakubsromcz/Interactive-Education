@@ -222,7 +222,9 @@
   crossorigin="anonymous"
 ></script>
 
+<script src="../progress.js"></script>
 <script>
+const PROGRESS_ID = "5/typografie2";
 function checkText() {
   window.__attempts_typografie2 = (window.__attempts_typografie2 ?? 0) + 1;
   const spans = document.querySelectorAll('span[data-correct]');
@@ -263,6 +265,7 @@ function checkText() {
   if (errors === 0) {
     result.className = 'fw-semibold text-success';
     result.innerHTML = `Vše je správně!<div class="small text-body-secondary mt-1">Pokusy: ${window.__attempts_typografie2}</div>`;
+    InfProgress.completeStep(PROGRESS_ID, 1, 1);
   } else {
     result.className = 'fw-semibold text-danger';
     result.innerHTML = `Počet chyb: ${errors}<div class="small text-body-secondary mt-1">Pokusy: ${window.__attempts_typografie2}</div>`;
