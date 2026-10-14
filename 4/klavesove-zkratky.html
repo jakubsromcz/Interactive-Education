@@ -1,0 +1,1123 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Klávesové zkratky – cvičení (4. třída)</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <style>
+      body {
+        background: radial-gradient(1200px 600px at 20% 0%, #e8f4ff 0%, rgba(232, 244, 255, 0) 60%),
+          radial-gradient(900px 500px at 90% 20%, #fff3e6 0%, rgba(255, 243, 230, 0) 55%),
+          linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      }
+      .hero {
+        border: 1px solid rgba(13, 110, 253, 0.15);
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(6px);
+      }
+      .kbd {
+        display: inline-block;
+        padding: 0.15rem 0.45rem;
+        border: 1px solid #adb5bd;
+        border-bottom-width: 3px;
+        border-radius: 0.4rem;
+        background: #f8f9fa;
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 0.9em;
+        white-space: nowrap;
+      }
+      .step-pane {
+        display: none;
+      }
+      .step-pane.active {
+        display: block;
+      }
+      .star {
+        font-size: 1.25rem;
+        opacity: 0.25;
+      }
+      .star.on {
+        opacity: 1;
+      }
+      .blud {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: 1px dashed rgba(13, 110, 253, 0.35);
+        background: rgba(13, 110, 253, 0.06);
+        border-radius: 1rem;
+        padding: 0.55rem 0.85rem;
+        cursor: pointer;
+        user-select: none;
+        max-width: 100%;
+      }
+      .blud:hover:not(.used):not(.disabled) {
+        background: rgba(13, 110, 253, 0.12);
+      }
+      .blud.used,
+      .blud.disabled {
+        opacity: 0.55;
+        cursor: default;
+      }
+      .blud-face {
+        flex-shrink: 0;
+        line-height: 0;
+      }
+      .blud-icon {
+        width: 2.1rem;
+        height: 2.6rem;
+        display: block;
+      }
+      .blud-tip-q {
+        display: block;
+        margin-top: 0.25rem;
+        font-weight: 600;
+        color: #212529;
+      }
+      .intro-choice {
+        text-align: left;
+      }
+      .pex-grid {
+        display: grid;
+        gap: 0.55rem;
+        max-width: 36rem;
+        margin: 0 auto;
+      }
+      .pex-grid.g4 {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .pex-grid.g5 {
+        grid-template-columns: repeat(5, 1fr);
+      }
+      .pex-card {
+        aspect-ratio: 1;
+        perspective: 700px;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        padding: 0;
+      }
+      .pex-card:disabled {
+        cursor: default;
+      }
+      .pex-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+        transition: transform 0.45s ease;
+      }
+      .pex-card.flipped .pex-inner,
+      .pex-card.matched .pex-inner {
+        transform: rotateY(180deg);
+      }
+      .pex-face {
+        position: absolute;
+        inset: 0;
+        backface-visibility: hidden;
+        border-radius: 0.65rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 0.35rem;
+        font-size: clamp(0.65rem, 2.4vw, 0.85rem);
+        font-weight: 600;
+        line-height: 1.2;
+        box-shadow: 0 0.35rem 0.9rem rgba(0, 0, 0, 0.08);
+      }
+      .pex-front {
+        background: linear-gradient(145deg, #4dabf7, #228be6);
+        color: #fff;
+        font-size: 1.35rem;
+      }
+      .pex-back {
+        background: #fff;
+        color: #212529;
+        border: 1px solid rgba(13, 110, 253, 0.2);
+        transform: rotateY(180deg);
+      }
+      .pex-card.matched .pex-back {
+        background: rgba(25, 135, 84, 0.14);
+        border-color: rgba(25, 135, 84, 0.4);
+      }
+      .pex-card.free .pex-back {
+        background: #fff3cd;
+      }
+      .pex-free-icon {
+        width: 1.6rem;
+        height: 2rem;
+        display: block;
+        margin: 0 auto 0.15rem;
+      }
+      .practice-box {
+        min-height: 7rem;
+        border: 2px dashed rgba(13, 110, 253, 0.35);
+        background: rgba(13, 110, 253, 0.04);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        border-radius: 1rem;
+        padding: 1rem;
+      }
+      .practice-box.ok {
+        border-color: rgba(25, 135, 84, 0.55);
+        background: rgba(25, 135, 84, 0.12);
+      }
+      .practice-box.bad {
+        border-color: rgba(220, 53, 69, 0.45);
+        background: rgba(220, 53, 69, 0.08);
+      }
+      .race-timer {
+        font-variant-numeric: tabular-nums;
+        font-size: 2rem;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container py-4 py-md-5">
+      <div class="hero rounded-4 p-4 p-md-5 shadow-sm mb-4">
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+          <a class="btn btn-outline-secondary" href="../home.html" aria-label="Zpět">
+            <span class="d-inline-flex align-items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 1-.5.5H3.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L3.707 7.5H14.5A.5.5 0 0 1 15 8z"/>
+              </svg>
+              <span>Zpět</span>
+            </span>
+          </a>
+          <span class="badge text-bg-success px-3 py-2">4. třída</span>
+        </div>
+
+        <h1 class="display-6 fw-bold mb-2">Klávesové zkratky</h1>
+        <p class="lead mb-0">
+          Mise s <strong>Bludišťákem</strong> – poprvé trénujeme rychlé klávesy (Windows).
+        </p>
+
+        <div class="d-flex flex-wrap align-items-center gap-3 mt-3">
+          <div id="stars" class="d-flex gap-1 flex-wrap" aria-label="Hvězdy"></div>
+          <span class="badge text-bg-light border px-3 py-2" id="stepLabel">Krok 1 / 8</span>
+        </div>
+      </div>
+
+      <!-- 1 learn -->
+      <section class="step-pane active" id="step1">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">1) Poznej a vyzkoušej</h2>
+            <p class="text-body-secondary mb-3">
+              Klávesová zkratka = stiskneš dvě klávesy najednou. Bludišťák ti ji ukáže – ty ji jen zkusíš stisknout.
+              Nemusíš nic umět předem.
+            </p>
+
+            <div class="alert alert-light border mb-3">
+              <div class="d-flex gap-2 align-items-start">
+                <span class="blud-face" aria-hidden="true">
+                  <svg class="blud-icon" viewBox="0 0 48 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bludišťák">
+                    <rect x="10" y="14" width="28" height="46" rx="12" fill="#7CB342"/>
+                    <rect x="14" y="2" width="7" height="16" rx="3.5" fill="#7CB342"/>
+                    <rect x="27" y="2" width="7" height="16" rx="3.5" fill="#7CB342"/>
+                    <circle cx="19" cy="28" r="5" fill="#fff"/>
+                    <circle cx="29" cy="28" r="5" fill="#fff"/>
+                    <circle cx="19" cy="28" r="2.2" fill="#1a1a1a"/>
+                    <circle cx="29" cy="28" r="2.2" fill="#1a1a1a"/>
+                    <path d="M18 38 Q24 44 30 38" fill="none" stroke="#E53935" stroke-width="2.2" stroke-linecap="round"/>
+                  </svg>
+                </span>
+                <div class="flex-grow-1">
+                  <div class="small text-body-secondary" id="learnHint">Zkratka 1 / 6</div>
+                  <div class="fw-semibold fs-5 mb-1" id="learnMean">…</div>
+                  <div class="mb-2" id="learnKeysRow">Stiskni: <span class="kbd" id="learnKeys">…</span></div>
+                  <div class="small text-body-secondary" id="learnTip">Drž Ctrl a zároveň zmáčkni písmeno.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="practice-box mb-3" id="learnBox">Čekám na tvoji zkratku…</div>
+            <div class="d-flex flex-wrap gap-2 mb-3" id="learnDots"></div>
+            <button type="button" class="btn btn-primary btn-lg" id="toStep2" disabled>Další → zapamatuj</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2 memory with cheat sheet -->
+      <section class="step-pane" id="step2">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">2) Zapamatuj si – tahák je tu</h2>
+            <p class="text-body-secondary mb-3">
+              Teď zkusíš vybrat zkratky. Můžeš koukat na tahák. Po kontrole uvidíš jen počet chyb.
+            </p>
+            <details class="mb-3" open>
+              <summary class="text-primary" style="cursor: pointer">Tahák – koukej sem</summary>
+              <ul class="mt-2 mb-0 small">
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">C</span> = kopírovat</li>
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">V</span> = vložit</li>
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">Z</span> = zpět</li>
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">S</span> = uložit</li>
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">A</span> = označit vše</li>
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">X</span> = vyjmout</li>
+                <li><span class="kbd">Shift</span> + písmeno = velké písmeno</li>
+              </ul>
+            </details>
+            <div class="vstack gap-3" id="quiz2"></div>
+            <hr class="my-4" />
+            <div class="d-flex flex-wrap gap-3 align-items-center mb-3">
+              <button type="button" class="btn btn-primary btn-lg" id="checkQuiz2">Zkontrolovat</button>
+              <div id="quiz2Result" class="fw-semibold"></div>
+            </div>
+            <div class="blud disabled" id="blud2" role="button" tabindex="0">
+              <span class="blud-face" aria-hidden="true">
+                <svg class="blud-icon" viewBox="0 0 48 64" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="14" width="28" height="46" rx="12" fill="#7CB342"/><rect x="14" y="2" width="7" height="16" rx="3.5" fill="#7CB342"/><rect x="27" y="2" width="7" height="16" rx="3.5" fill="#7CB342"/><circle cx="19" cy="28" r="5" fill="#fff"/><circle cx="29" cy="28" r="5" fill="#fff"/><circle cx="19" cy="28" r="2.2" fill="#1a1a1a"/><circle cx="29" cy="28" r="2.2" fill="#1a1a1a"/><path d="M18 38 Q24 44 30 38" fill="none" stroke="#E53935" stroke-width="2.2" stroke-linecap="round"/></svg>
+              </span>
+              <span class="small" id="blud2Text">Bludišťák tip: nejdřív zkontroluj</span>
+            </div>
+            <div class="mt-4">
+              <button type="button" class="btn btn-outline-secondary" id="toStep3" disabled>Další → pexeso 4×4</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3 pexeso 4x4 -->
+      <section class="step-pane" id="step3">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">3) Pexeso 4 × 4</h2>
+            <p class="text-body-secondary mb-3">
+              Otoč dvě kartičky. Najdi dvojici: zkratka + co dělá.
+            </p>
+            <div class="pex-grid g4 mb-3" id="pex4"></div>
+            <div class="text-body-secondary small mb-3" id="pex4Log">Nalezeno: 0 / 8</div>
+            <button type="button" class="btn btn-primary btn-lg" id="toStep4" disabled>Další → pexeso 5×5</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4 pexeso 5x5 -->
+      <section class="step-pane" id="step4">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">4) Pexeso 5 × 5</h2>
+            <p class="text-body-secondary mb-3">
+              Větší hrací plán! Bonusová kartička Bludišťáka se počítá hned. Můžeš koukat na tahák.
+            </p>
+            <details class="mb-3">
+              <summary class="text-primary" style="cursor: pointer">Tahák – koukej sem</summary>
+              <ul class="mt-2 mb-0 small">
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">C</span> = kopírovat</li>
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">V</span> = vložit</li>
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">Z</span> = zpět</li>
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">Y</span> = krok dopředu</li>
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">S</span> = uložit</li>
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">A</span> = označit vše</li>
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">X</span> = vyjmout</li>
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">F</span> = najít</li>
+                <li><span class="kbd">Shift</span> + písmeno = velké písmeno</li>
+                <li><span class="kbd">Home</span> = na začátek řádku</li>
+                <li><span class="kbd">Enter</span> = nový řádek</li>
+                <li><span class="kbd">Backspace</span> = smazat znak vlevo</li>
+              </ul>
+            </details>
+            <div class="pex-grid g5 mb-3" id="pex5"></div>
+            <div class="text-body-secondary small mb-3" id="pex5Log">Nalezeno: 0 / 12</div>
+            <button type="button" class="btn btn-primary btn-lg" id="toStep5" disabled>Další → situace</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5 situations -->
+      <section class="step-pane" id="step5">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">5) Co by udělal Bludišťák?</h2>
+            <p class="text-body-secondary mb-3">Vyber nejlepší řešení. Můžeš koukat na tahák. Uvidíš jen počet chyb.</p>
+            <details class="mb-3">
+              <summary class="text-primary" style="cursor: pointer">Tahák – koukej sem</summary>
+              <ul class="mt-2 mb-0 small">
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">C</span> = kopírovat</li>
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">V</span> = vložit</li>
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">Z</span> = zpět</li>
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">S</span> = uložit</li>
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">A</span> = označit vše</li>
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">X</span> = vyjmout</li>
+                <li><span class="kbd">Ctrl</span> + <span class="kbd">F</span> = najít</li>
+                <li><span class="kbd">Shift</span> + písmeno = velké písmeno</li>
+              </ul>
+            </details>
+            <div class="vstack gap-3" id="quiz5"></div>
+            <hr class="my-4" />
+            <div class="d-flex flex-wrap gap-3 align-items-center mb-3">
+              <button type="button" class="btn btn-primary btn-lg" id="checkQuiz5">Zkontrolovat</button>
+              <div id="quiz5Result" class="fw-semibold"></div>
+            </div>
+            <div class="blud disabled" id="blud5" role="button" tabindex="0">
+              <span class="blud-face" aria-hidden="true">
+                <svg class="blud-icon" viewBox="0 0 48 64" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="14" width="28" height="46" rx="12" fill="#7CB342"/><rect x="14" y="2" width="7" height="16" rx="3.5" fill="#7CB342"/><rect x="27" y="2" width="7" height="16" rx="3.5" fill="#7CB342"/><circle cx="19" cy="28" r="5" fill="#fff"/><circle cx="29" cy="28" r="5" fill="#fff"/><circle cx="19" cy="28" r="2.2" fill="#1a1a1a"/><circle cx="29" cy="28" r="2.2" fill="#1a1a1a"/><path d="M18 38 Q24 44 30 38" fill="none" stroke="#E53935" stroke-width="2.2" stroke-linecap="round"/></svg>
+              </span>
+              <span class="small" id="blud5Text">Bludišťák tip: nejdřív zkontroluj</span>
+            </div>
+            <div class="mt-4">
+              <button type="button" class="btn btn-outline-secondary" id="toStep6" disabled>Další → trénink</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6 practice -->
+      <section class="step-pane" id="step6">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">6) Stiskni zkratku</h2>
+            <p class="text-body-secondary mb-3">
+              Stačí mačkat na klávesnici – nemusíš klikat do pole. (Prohlížeč někdy zkratku sebere, Bludišťák ji stejně pozná.)
+            </p>
+            <div class="mb-2 fw-semibold" id="practicePrompt">…</div>
+            <div class="practice-box mb-3" id="practiceBox" tabindex="0">…</div>
+            <div class="text-body-secondary small mb-3" id="practiceProgress"></div>
+            <button type="button" class="btn btn-primary btn-lg" id="toStep7" disabled>Další → finále</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7 final quiz -->
+      <section class="step-pane" id="step7">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">7) Finále s Bludišťákem</h2>
+            <p class="text-body-secondary mb-3">Lehký kvíz. Uvidíš jen počet chyb. Pak přijde soutěž na čas.</p>
+            <div class="vstack gap-3" id="quiz8"></div>
+            <hr class="my-4" />
+            <div class="d-flex flex-wrap gap-3 align-items-center mb-3">
+              <button type="button" class="btn btn-primary btn-lg" id="checkQuiz8">Zkontrolovat</button>
+              <div id="quiz8Result" class="fw-semibold"></div>
+            </div>
+            <div class="blud disabled" id="blud8" role="button" tabindex="0">
+              <span class="blud-face" aria-hidden="true">
+                <svg class="blud-icon" viewBox="0 0 48 64" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="14" width="28" height="46" rx="12" fill="#7CB342"/><rect x="14" y="2" width="7" height="16" rx="3.5" fill="#7CB342"/><rect x="27" y="2" width="7" height="16" rx="3.5" fill="#7CB342"/><circle cx="19" cy="28" r="5" fill="#fff"/><circle cx="29" cy="28" r="5" fill="#fff"/><circle cx="19" cy="28" r="2.2" fill="#1a1a1a"/><circle cx="29" cy="28" r="2.2" fill="#1a1a1a"/><path d="M18 38 Q24 44 30 38" fill="none" stroke="#E53935" stroke-width="2.2" stroke-linecap="round"/></svg>
+              </span>
+              <span class="small" id="blud8Text">Bludišťák tip: nejdřív zkontroluj</span>
+            </div>
+            <div class="mt-4">
+              <button type="button" class="btn btn-outline-secondary" id="toStep8" disabled>Další → soutěž na čas</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8 timed race (last) -->
+      <section class="step-pane" id="step8">
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-2">8) Soutěž na čas – 60 sekund</h2>
+            <p class="text-body-secondary mb-3">
+              Stihni co nejvíc správných zkratek. Špatný stisk = −1 bod (nejméně 0).
+            </p>
+            <div class="d-flex flex-wrap gap-4 align-items-center mb-3">
+              <div>
+                <div class="small text-body-secondary">Čas</div>
+                <div class="race-timer" id="raceTime">60</div>
+              </div>
+              <div>
+                <div class="small text-body-secondary">Body</div>
+                <div class="race-timer text-primary" id="raceScore">0</div>
+              </div>
+            </div>
+            <div class="mb-2 fw-semibold" id="racePrompt">Klikni na Start</div>
+            <div class="practice-box mb-3" id="raceBox">Připraven?</div>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <button type="button" class="btn btn-success btn-lg" id="raceStart">Start</button>
+            </div>
+            <div class="fw-semibold" id="raceEnd"></div>
+            <div id="finishBox" class="alert alert-success mt-4 d-none" role="status">
+              <h3 class="h5 fw-bold mb-2">Hotovo!</h3>
+              <p class="mb-0">
+                Zvládl(a) jsi první hodinu zkratek. Nejdůležitější:
+                <span class="kbd">Ctrl</span>+<span class="kbd">C</span>,
+                <span class="kbd">Ctrl</span>+<span class="kbd">V</span>,
+                <span class="kbd">Ctrl</span>+<span class="kbd">Z</span>,
+                <span class="kbd">Ctrl</span>+<span class="kbd">S</span>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const TOTAL = 8;
+
+      const PAIRS_BASIC = [
+        { id: "c", a: "Ctrl + C", b: "Kopírovat" },
+        { id: "v", a: "Ctrl + V", b: "Vložit" },
+        { id: "z", a: "Ctrl + Z", b: "Zpět" },
+        { id: "s", a: "Ctrl + S", b: "Uložit" },
+        { id: "a", a: "Ctrl + A", b: "Označit vše" },
+        { id: "x", a: "Ctrl + X", b: "Vyjmout" },
+        { id: "f", a: "Ctrl + F", b: "Najít" },
+        { id: "sh", a: "Shift + písmeno", b: "Velké písmeno" },
+      ];
+
+      const PAIRS_EXTRA = [
+        { id: "y", a: "Ctrl + Y", b: "Krok dopředu" },
+        { id: "home", a: "Home", b: "Na začátek řádku" },
+        { id: "enter", a: "Enter", b: "Nový řádek" },
+        { id: "bs", a: "Backspace", b: "Smazat znak vlevo" },
+      ];
+
+      const LEARN = [
+        {
+          mean: "Kopírovat text",
+          keys: "Ctrl + C",
+          tip: "Drž Ctrl a zmáčkni C.",
+          match: (e) => e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === "c",
+        },
+        {
+          mean: "Vložit text",
+          keys: "Ctrl + V",
+          tip: "Drž Ctrl a zmáčkni V.",
+          match: (e) => e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === "v",
+        },
+        {
+          mean: "Krok zpět (vrátit chybu)",
+          keys: "Ctrl + Z",
+          tip: "Drž Ctrl a zmáčkni Z.",
+          match: (e) => e.ctrlKey && e.key.toLowerCase() === "z",
+        },
+        {
+          mean: "Uložit práci",
+          keys: "Ctrl + S",
+          tip: "Drž Ctrl a zmáčkni S.",
+          match: (e) => e.ctrlKey && e.key.toLowerCase() === "s",
+        },
+        {
+          mean: "Označit vše",
+          keys: "Ctrl + A",
+          tip: "Drž Ctrl a zmáčkni A.",
+          match: (e) => e.ctrlKey && e.key.toLowerCase() === "a",
+        },
+        {
+          mean: "Vyjmout text (přesunout)",
+          keys: "Ctrl + X",
+          tip: "Drž Ctrl a zmáčkni X.",
+          match: (e) => e.ctrlKey && e.key.toLowerCase() === "x",
+        },
+      ];
+
+      const QUIZ2 = [
+        {
+          q: "Kopírovat je…",
+          options: [
+            { t: "Ctrl + C", ok: true },
+            { t: "Ctrl + V", ok: false },
+            { t: "Ctrl + Z", ok: false },
+          ],
+        },
+        {
+          q: "Vložit je…",
+          options: [
+            { t: "Ctrl + V", ok: true },
+            { t: "Ctrl + A", ok: false },
+            { t: "Ctrl + S", ok: false },
+          ],
+        },
+        {
+          q: "Zpět (vrátit změnu) je…",
+          options: [
+            { t: "Ctrl + Z", ok: true },
+            { t: "Ctrl + C", ok: false },
+            { t: "Ctrl + F", ok: false },
+          ],
+        },
+        {
+          q: "Uložit je…",
+          options: [
+            { t: "Ctrl + S", ok: true },
+            { t: "Ctrl + X", ok: false },
+            { t: "Shift + S", ok: false },
+          ],
+        },
+        {
+          q: "Označit celý text je…",
+          options: [
+            { t: "Ctrl + A", ok: true },
+            { t: "Ctrl + C", ok: false },
+            { t: "Ctrl + V", ok: false },
+          ],
+        },
+        {
+          q: "Velké písmeno napíšeš pomocí…",
+          options: [
+            { t: "Shift + písmeno", ok: true },
+            { t: "Ctrl + písmeno", ok: false },
+            { t: "Alt + písmeno", ok: false },
+          ],
+        },
+      ];
+
+      const QUIZ5 = [
+        {
+          q: "Spolužák smazal větu. Co poradíš?",
+          options: [
+            { t: "Zkusit Ctrl + Z", ok: true },
+            { t: "Vypnout počítač", ok: false },
+            { t: "Jen Ctrl + S", ok: false },
+          ],
+        },
+        {
+          q: "Chci text z webu dát do úkolu.",
+          options: [
+            { t: "Ctrl + C a pak Ctrl + V", ok: true },
+            { t: "Jen Ctrl + Z", ok: false },
+            { t: "Jen Shift", ok: false },
+          ],
+        },
+        {
+          q: "Před odchodem ze třídy dokument…",
+          options: [
+            { t: "uložím Ctrl + S", ok: true },
+            { t: "vyjmu Ctrl + X", ok: false },
+            { t: "nic", ok: false },
+          ],
+        },
+        {
+          q: "Chci označit všechno najednou.",
+          options: [
+            { t: "Ctrl + A", ok: true },
+            { t: "Ctrl + F", ok: false },
+            { t: "Ctrl + V", ok: false },
+          ],
+        },
+        {
+          q: "Text chci přesunout (ať na starém místě zmizí).",
+          options: [
+            { t: "Ctrl + X a pak Ctrl + V", ok: true },
+            { t: "jen Ctrl + C", ok: false },
+            { t: "jen Ctrl + S", ok: false },
+          ],
+        },
+      ];
+
+      const QUIZ8 = [
+        {
+          q: "Ctrl + C znamená…",
+          options: [
+            { t: "kopírovat", ok: true },
+            { t: "vložit", ok: false },
+            { t: "uložit", ok: false },
+          ],
+        },
+        {
+          q: "Ctrl + V znamená…",
+          options: [
+            { t: "vložit", ok: true },
+            { t: "zpět", ok: false },
+            { t: "najít", ok: false },
+          ],
+        },
+        {
+          q: "Ctrl + Z znamená…",
+          options: [
+            { t: "krok zpět", ok: true },
+            { t: "kopírovat", ok: false },
+            { t: "označit vše", ok: false },
+          ],
+        },
+        {
+          q: "Ctrl + S znamená…",
+          options: [
+            { t: "uložit", ok: true },
+            { t: "vyjmout", ok: false },
+            { t: "vložit", ok: false },
+          ],
+        },
+        {
+          q: "Správné pořadí je…",
+          options: [
+            { t: "kopírovat → vložit → uložit", ok: true },
+            { t: "uložit → vyjmout → nic", ok: false },
+            { t: "jen Shift pořád dokola", ok: false },
+          ],
+        },
+      ];
+
+      const PRACTICE = [
+        { label: "Ctrl + C", match: (e) => e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === "c" },
+        { label: "Ctrl + V", match: (e) => e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === "v" },
+        { label: "Ctrl + Z", match: (e) => e.ctrlKey && e.key.toLowerCase() === "z" },
+        { label: "Ctrl + S", match: (e) => e.ctrlKey && e.key.toLowerCase() === "s" },
+        { label: "Ctrl + A", match: (e) => e.ctrlKey && e.key.toLowerCase() === "a" },
+      ];
+
+      const RACE_POOL = PRACTICE.concat([
+        { label: "Ctrl + Y", match: (e) => e.ctrlKey && e.key.toLowerCase() === "y" },
+        { label: "Ctrl + X", match: (e) => e.ctrlKey && e.key.toLowerCase() === "x" },
+      ]);
+
+      const state = {
+        stars: 0,
+        learnIdx: 0,
+        learnOn: true,
+        tips: { 2: false, 5: false, 7: false },
+        lastWrong: { 2: [], 5: [], 7: [] },
+        practiceIdx: 0,
+        practiceOn: false,
+        raceOn: false,
+        raceLeft: 60,
+        raceScore: 0,
+        raceTimer: null,
+        raceTarget: null,
+      };
+
+      // Stars UI
+      const starsEl = document.getElementById("stars");
+      for (let i = 0; i < TOTAL; i++) {
+        const s = document.createElement("span");
+        s.className = "star";
+        s.dataset.i = String(i);
+        s.textContent = "⭐";
+        starsEl.appendChild(s);
+      }
+
+      function setStep(n) {
+        document.querySelectorAll(".step-pane").forEach((el) => el.classList.remove("active"));
+        document.getElementById("step" + n).classList.add("active");
+        document.getElementById("stepLabel").textContent = "Krok " + n + " / " + TOTAL;
+        state.practiceOn = false;
+        state.learnOn = n === 1;
+        if (n === 6) startPractice();
+      }
+
+      function awardStar() {
+        if (state.stars < TOTAL) {
+          state.stars++;
+          document.querySelectorAll("#stars .star").forEach((el) => {
+            el.classList.toggle("on", Number(el.dataset.i) < state.stars);
+          });
+        }
+      }
+
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
+      function fillQuiz(containerId, items, prefix) {
+        const root = document.getElementById(containerId);
+        items.forEach((item, i) => {
+          const opts = shuffle(item.options);
+          const wrap = document.createElement("div");
+          wrap.innerHTML =
+            `<div class="fw-semibold mb-1">${i + 1}) ${item.q}</div>` +
+            `<select class="form-select" id="${prefix}${i}"><option value="">Vyber…</option>` +
+            opts.map((o, j) => `<option value="${j}" data-ok="${o.ok}">${o.t}</option>`).join("") +
+            `</select>`;
+          root.appendChild(wrap);
+        });
+      }
+
+      /** Only error count – no per-answer colors. Returns { errors, wrongIndexes } */
+      function gradeSilent(items, prefix) {
+        const wrongIndexes = [];
+        items.forEach((item, i) => {
+          const sel = document.getElementById(prefix + i);
+          const opt = sel.options[sel.selectedIndex];
+          const ok = !!(opt && opt.dataset.ok === "true");
+          if (!ok) wrongIndexes.push(i);
+        });
+        return { errors: wrongIndexes.length, wrongIndexes };
+      }
+
+      function setupBlud(stepId, quizItems, prefix, tipBtnId, tipTextId) {
+        const btn = document.getElementById(tipBtnId);
+        const txt = document.getElementById(tipTextId);
+        btn.classList.add("disabled");
+        btn.classList.remove("used");
+        txt.textContent = "Bludišťák tip: nejdřív zkontroluj";
+
+        function ask() {
+          if (state.tips[stepId] || btn.classList.contains("disabled")) return;
+          const wrong = state.lastWrong[stepId] || [];
+          if (!wrong.length) {
+            txt.textContent = "Bludišťák: všechno sedí, tip nepotřebuješ!";
+            return;
+          }
+          const i = wrong[0];
+          const q = quizItems[i].q;
+          txt.innerHTML =
+            "Bludišťák tip – podívej se na tuhle otázku:" +
+            `<span class="blud-tip-q">${i + 1}) ${q}</span>`;
+          state.tips[stepId] = true;
+        }
+
+        btn.addEventListener("click", ask);
+        btn.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            ask();
+          }
+        });
+      }
+
+      function enableBlud(stepId, tipBtnId, tipTextId, hasErrors) {
+        const btn = document.getElementById(tipBtnId);
+        const txt = document.getElementById(tipTextId);
+        if (state.tips[stepId]) {
+          // Tip už byl použit – necháme text, nešedíme Bludišťáka
+          btn.classList.remove("disabled", "used");
+          return;
+        }
+        if (!hasErrors) {
+          btn.classList.add("disabled");
+          txt.textContent = "Bludišťák: bez chyb – tip není potřeba";
+          return;
+        }
+        btn.classList.remove("disabled", "used");
+        txt.textContent = "Klikni na Bludišťáka (1×) – řekne jednu špatnou otázku";
+      }
+
+      // —— Step 1 learn ——
+      const learnBox = document.getElementById("learnBox");
+      const learnDots = document.getElementById("learnDots");
+
+      LEARN.forEach((_, i) => {
+        const d = document.createElement("span");
+        d.className = "badge text-bg-light border";
+        d.id = "learnDot" + i;
+        d.textContent = String(i + 1);
+        learnDots.appendChild(d);
+      });
+
+      function showLearn() {
+        const item = LEARN[state.learnIdx];
+        if (!item) {
+          document.getElementById("learnHint").textContent = "Hotovo";
+          document.getElementById("learnMean").textContent = "Zkratky jsi vyzkoušel(a)!";
+          document.getElementById("learnKeysRow").classList.add("d-none");
+          document.getElementById("learnTip").textContent = "Teď si je zkus zapamatovat s tahákem.";
+          learnBox.classList.add("ok");
+          learnBox.textContent = "Můžeš jít dál.";
+          state.learnOn = false;
+          document.getElementById("toStep2").disabled = false;
+          awardStar();
+          return;
+        }
+        document.getElementById("learnKeysRow").classList.remove("d-none");
+        document.getElementById("learnHint").textContent =
+          "Zkratka " + (state.learnIdx + 1) + " / " + LEARN.length;
+        document.getElementById("learnMean").textContent = item.mean;
+        document.getElementById("learnKeys").textContent = item.keys;
+        document.getElementById("learnTip").textContent = item.tip;
+        learnBox.classList.remove("ok", "bad");
+        learnBox.textContent = "Stiskni teď: " + item.keys;
+        LEARN.forEach((_, i) => {
+          const d = document.getElementById("learnDot" + i);
+          d.className =
+            "badge border " +
+            (i < state.learnIdx ? "text-bg-success" : i === state.learnIdx ? "text-bg-primary" : "text-bg-light");
+        });
+      }
+      showLearn();
+      document.getElementById("toStep2").addEventListener("click", () => setStep(2));
+
+      // —— Step 2 quiz ——
+      fillQuiz("quiz2", QUIZ2, "q2_");
+      setupBlud(2, QUIZ2, "q2_", "blud2", "blud2Text");
+      document.getElementById("checkQuiz2").addEventListener("click", () => {
+        const { errors, wrongIndexes } = gradeSilent(QUIZ2, "q2_");
+        state.lastWrong[2] = wrongIndexes;
+        const el = document.getElementById("quiz2Result");
+        el.className = "fw-semibold " + (errors === 0 ? "text-success" : "text-danger");
+        el.textContent = errors === 0 ? "✔ Bez chyb!" : "Počet chyb: " + errors;
+        enableBlud(2, "blud2", "blud2Text", errors > 0);
+        document.getElementById("toStep3").disabled = errors > 0;
+        if (errors === 0) awardStar();
+      });
+      document.getElementById("toStep3").addEventListener("click", () => {
+        setStep(3);
+        buildPexeso("pex4", PAIRS_BASIC, "pex4Log", "toStep4", 8);
+      });
+
+      // —— Pexeso ——
+      function buildPexeso(gridId, pairs, logId, nextBtnId, pairCount) {
+        const grid = document.getElementById(gridId);
+        grid.innerHTML = "";
+        let cards = [];
+        pairs.forEach((p) => {
+          cards.push({ pair: p.id, text: p.a, free: false });
+          cards.push({ pair: p.id, text: p.b, free: false });
+        });
+        // 5×5: add free bludišťák card
+        const is5 = gridId === "pex5";
+        if (is5) {
+          cards.push({
+            pair: "__free__",
+            text:
+              '<svg class="pex-free-icon" viewBox="0 0 48 64" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="14" width="28" height="46" rx="12" fill="#7CB342"/><rect x="14" y="2" width="7" height="16" rx="3.5" fill="#7CB342"/><rect x="27" y="2" width="7" height="16" rx="3.5" fill="#7CB342"/><circle cx="19" cy="28" r="5" fill="#fff"/><circle cx="29" cy="28" r="5" fill="#fff"/><circle cx="19" cy="28" r="2.2" fill="#1a1a1a"/><circle cx="29" cy="28" r="2.2" fill="#1a1a1a"/><path d="M18 38 Q24 44 30 38" fill="none" stroke="#E53935" stroke-width="2.2" stroke-linecap="round"/></svg>Bonus!',
+            free: true,
+          });
+        }
+        cards = shuffle(cards);
+
+        let open = [];
+        let matched = 0;
+        let lock = false;
+        const need = pairCount;
+
+        function updateLog() {
+          document.getElementById(logId).textContent = "Nalezeno: " + matched + " / " + need;
+          if (matched >= need) {
+            document.getElementById(nextBtnId).disabled = false;
+            awardStar();
+          }
+        }
+
+        cards.forEach((card, idx) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "pex-card" + (card.free ? " free" : "");
+          btn.innerHTML =
+            `<div class="pex-inner">` +
+            `<div class="pex-face pex-front">?</div>` +
+            `<div class="pex-face pex-back">${card.text}</div>` +
+            `</div>`;
+          btn.dataset.pair = card.pair;
+          btn.dataset.idx = String(idx);
+
+          btn.addEventListener("click", () => {
+            if (lock || btn.classList.contains("flipped") || btn.classList.contains("matched")) return;
+
+            if (card.free) {
+              btn.classList.add("flipped", "matched");
+              btn.disabled = true;
+              // free doesn't increase matched pairs count toward need – but helps fill grid
+              // Actually user needs 12 pairs; free is bonus. Don't count toward matched pairs.
+              return;
+            }
+
+            btn.classList.add("flipped");
+            open.push(btn);
+            if (open.length < 2) return;
+
+            lock = true;
+            const [a, b] = open;
+            if (a.dataset.pair === b.dataset.pair) {
+              a.classList.add("matched");
+              b.classList.add("matched");
+              a.disabled = true;
+              b.disabled = true;
+              matched++;
+              open = [];
+              lock = false;
+              updateLog();
+            } else {
+              setTimeout(() => {
+                a.classList.remove("flipped");
+                b.classList.remove("flipped");
+                open = [];
+                lock = false;
+              }, 700);
+            }
+          });
+
+          grid.appendChild(btn);
+        });
+
+        updateLog();
+      }
+
+      document.getElementById("toStep4").addEventListener("click", () => {
+        setStep(4);
+        buildPexeso("pex5", PAIRS_BASIC.concat(PAIRS_EXTRA), "pex5Log", "toStep5", 12);
+      });
+      document.getElementById("toStep5").addEventListener("click", () => setStep(5));
+
+      // —— Step 5 ——
+      fillQuiz("quiz5", QUIZ5, "q5_");
+      setupBlud(5, QUIZ5, "q5_", "blud5", "blud5Text");
+      document.getElementById("checkQuiz5").addEventListener("click", () => {
+        const { errors, wrongIndexes } = gradeSilent(QUIZ5, "q5_");
+        state.lastWrong[5] = wrongIndexes;
+        const el = document.getElementById("quiz5Result");
+        el.className = "fw-semibold " + (errors === 0 ? "text-success" : "text-danger");
+        el.textContent = errors === 0 ? "✔ Bez chyb!" : "Počet chyb: " + errors;
+        enableBlud(5, "blud5", "blud5Text", errors > 0);
+        document.getElementById("toStep6").disabled = errors > 0;
+        if (errors === 0) awardStar();
+      });
+      document.getElementById("toStep6").addEventListener("click", () => setStep(6));
+
+      // —— Step 6 practice ——
+      const practiceBox = document.getElementById("practiceBox");
+      const practicePrompt = document.getElementById("practicePrompt");
+
+      function showPractice() {
+        const p = PRACTICE[state.practiceIdx];
+        if (!p) {
+          practicePrompt.textContent = "Trénink hotov!";
+          practiceBox.textContent = "Paráda!";
+          practiceBox.classList.add("ok");
+          state.practiceOn = false;
+          document.getElementById("toStep7").disabled = false;
+          document.getElementById("practiceProgress").textContent = "";
+          awardStar();
+          return;
+        }
+        practicePrompt.textContent =
+          "Úkol " + (state.practiceIdx + 1) + "/" + PRACTICE.length + ": " + p.label;
+        practiceBox.textContent = "Stiskni: " + p.label;
+        practiceBox.classList.remove("ok", "bad");
+        document.getElementById("practiceProgress").textContent =
+          "Hotovo: " + state.practiceIdx + " / " + PRACTICE.length;
+      }
+
+      function startPractice() {
+        state.practiceIdx = 0;
+        state.practiceOn = true;
+        document.getElementById("toStep7").disabled = true;
+        showPractice();
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (state.learnOn && document.getElementById("step1").classList.contains("active")) {
+          const item = LEARN[state.learnIdx];
+          if (!item) return;
+          if (e.ctrlKey || e.altKey || e.metaKey) e.preventDefault();
+          if (item.match(e)) {
+            e.preventDefault();
+            learnBox.classList.remove("bad");
+            learnBox.classList.add("ok");
+            learnBox.textContent = "Výborně – máš to!";
+            state.learnIdx++;
+            setTimeout(showLearn, 450);
+          } else if (e.key === "Control" || e.key === "Shift" || e.key === "Alt" || e.key === "Meta") {
+            // ignore
+          } else if (e.ctrlKey || e.key.length === 1) {
+            learnBox.classList.add("bad");
+            learnBox.textContent = "Ještě ne – zkus: " + item.keys;
+          }
+          return;
+        }
+
+        if (state.practiceOn && document.getElementById("step6").classList.contains("active")) {
+          const p = PRACTICE[state.practiceIdx];
+          if (!p) return;
+          if (e.ctrlKey || e.altKey || e.metaKey) e.preventDefault();
+          if (p.match(e)) {
+            e.preventDefault();
+            practiceBox.classList.remove("bad");
+            practiceBox.classList.add("ok");
+            practiceBox.textContent = "Správně!";
+            state.practiceIdx++;
+            setTimeout(showPractice, 400);
+          } else if (e.key === "Control" || e.key === "Shift" || e.key === "Alt" || e.key === "Meta") {
+            // ignore
+          } else if (e.ctrlKey || e.key.length === 1) {
+            practiceBox.classList.add("bad");
+            practiceBox.textContent = "Ještě ne: " + p.label;
+          }
+          return;
+        }
+
+        if (state.raceOn && document.getElementById("step8").classList.contains("active")) {
+          const p = state.raceTarget;
+          if (!p) return;
+          if (e.ctrlKey || e.altKey || e.metaKey) e.preventDefault();
+          if (p.match(e)) {
+            e.preventDefault();
+            state.raceScore++;
+            document.getElementById("raceScore").textContent = String(state.raceScore);
+            document.getElementById("raceBox").classList.remove("bad");
+            document.getElementById("raceBox").classList.add("ok");
+            nextRaceTarget();
+          } else if (e.key === "Control" || e.key === "Shift" || e.key === "Alt" || e.key === "Meta") {
+            // ignore
+          } else if (e.ctrlKey || e.key.length === 1) {
+            state.raceScore = Math.max(0, state.raceScore - 1);
+            document.getElementById("raceScore").textContent = String(state.raceScore);
+            document.getElementById("raceBox").classList.add("bad");
+          }
+        }
+      });
+
+      document.getElementById("toStep7").addEventListener("click", () => setStep(7));
+
+      // —— Step 7 finale quiz ——
+      fillQuiz("quiz8", QUIZ8, "q8_");
+      setupBlud(7, QUIZ8, "q8_", "blud8", "blud8Text");
+      document.getElementById("checkQuiz8").addEventListener("click", () => {
+        const { errors, wrongIndexes } = gradeSilent(QUIZ8, "q8_");
+        state.lastWrong[7] = wrongIndexes;
+        const el = document.getElementById("quiz8Result");
+        el.className = "fw-semibold " + (errors === 0 ? "text-success" : "text-danger");
+        el.textContent = errors === 0 ? "✔ Bez chyb!" : "Počet chyb: " + errors;
+        enableBlud(7, "blud8", "blud8Text", errors > 0);
+        document.getElementById("toStep8").disabled = errors > 0;
+        if (errors === 0) awardStar();
+      });
+
+      document.getElementById("toStep8").addEventListener("click", () => setStep(8));
+
+      // —— Step 8 race (last) ——
+      function nextRaceTarget() {
+        const prev = state.raceTarget ? state.raceTarget.label : null;
+        let next = RACE_POOL[Math.floor(Math.random() * RACE_POOL.length)];
+        let guard = 0;
+        while (RACE_POOL.length > 1 && next.label === prev && guard < 20) {
+          next = RACE_POOL[Math.floor(Math.random() * RACE_POOL.length)];
+          guard++;
+        }
+        state.raceTarget = next;
+        document.getElementById("racePrompt").textContent = "Stiskni: " + state.raceTarget.label;
+        document.getElementById("raceBox").textContent = state.raceTarget.label;
+        document.getElementById("raceBox").classList.remove("ok", "bad");
+      }
+
+      function endRace() {
+        state.raceOn = false;
+        clearInterval(state.raceTimer);
+        state.raceTimer = null;
+        document.getElementById("racePrompt").textContent = "Konec!";
+        document.getElementById("raceBox").textContent = "Tvůj výsledek: " + state.raceScore + " bodů";
+        document.getElementById("raceEnd").className = "fw-semibold text-success";
+        document.getElementById("raceEnd").textContent =
+          state.raceScore >= 8
+            ? "✔ Skvělý výkon!"
+            : "✔ Hotovo – příště zkus ještě víc správných zkratek.";
+        document.getElementById("raceStart").disabled = false;
+        document.getElementById("finishBox").classList.remove("d-none");
+        awardStar();
+      }
+
+      document.getElementById("raceStart").addEventListener("click", () => {
+        if (state.raceTimer) clearInterval(state.raceTimer);
+        state.raceOn = true;
+        state.raceLeft = 60;
+        state.raceScore = 0;
+        document.getElementById("raceTime").textContent = "60";
+        document.getElementById("raceScore").textContent = "0";
+        document.getElementById("raceEnd").textContent = "";
+        document.getElementById("finishBox").classList.add("d-none");
+        document.getElementById("raceStart").disabled = true;
+        nextRaceTarget();
+        state.raceTimer = setInterval(() => {
+          state.raceLeft--;
+          document.getElementById("raceTime").textContent = String(state.raceLeft);
+          if (state.raceLeft <= 0) endRace();
+        }, 1000);
+      });
+    </script>
+  </body>
+</html>
