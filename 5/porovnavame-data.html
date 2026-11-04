@@ -1,0 +1,1042 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Porovnáváme data – cvičení (5. třída)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <style>
+      body { background: radial-gradient(1200px 600px at 20% 0%, #e8f4ff 0%, rgba(232,244,255,0) 60%), radial-gradient(900px 500px at 90% 20%, #fff3e6 0%, rgba(255,243,230,0) 55%), linear-gradient(180deg,#f8fafc,#fff); }
+      .hero { border: 1px solid rgba(13,110,253,.15); background: rgba(255,255,255,.75); backdrop-filter: blur(6px); }
+      .step-pane { display: none; } .step-pane.active { display: block; }
+      .prog-box { border: 1px solid rgba(13,110,253,.18); background: linear-gradient(180deg,#f0f7ff,#fff); border-radius: 1rem; padding: .75rem; }
+      @media (min-width: 992px) { .prog-box { position: sticky; top: .75rem; } }
+      .stage { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
+      .stage-cell { border-radius: .7rem; text-align: center; padding: .4rem .2rem; font-size: .68rem; font-weight: 600; background: #e9ecef; opacity: .35; filter: grayscale(1); transition: .35s; }
+      .stage-cell .em { display: block; font-size: 1.7rem; line-height: 1.2; }
+      .stage-platno {
+        display: block;
+        width: 1.85rem;
+        height: 1.25rem;
+        margin: .15rem auto .2rem;
+        border: 2px solid #495057;
+        border-radius: .15rem;
+        background: linear-gradient(180deg, #f8fafc 0%, #e9ecef 100%);
+        box-shadow: 0 2px 0 #6c757d;
+        position: relative;
+      }
+      .stage-platno::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: -.45rem;
+        width: .18rem;
+        height: .4rem;
+        background: #6c757d;
+        transform: translateX(-50%);
+      }
+      .stage-cell.on { opacity: 1; filter: none; transform: scale(1.04); }
+      .stage-cell.c0 { background: #cfe2ff; } .stage-cell.c1 { background: #fff3cd; } .stage-cell.c2 { background: #d1e7dd; }
+      .stage-cell.c3 { background: #e2d9f3; } .stage-cell.c4 { background: #f8d7da; } .stage-cell.c5 { background: #ffe5b4; }
+      .stage-cell.c6 { background: #cff4fc; }
+      .fill-num { max-width: 4.5rem; display: inline-block; text-align: center; }
+      .stage-done { font-size: 2rem; text-align: center; display: none; }
+      .stage-done.on { display: block; animation: pop .5s; }
+      @keyframes pop { 0% { transform: scale(.3); } 70% { transform: scale(1.25); } 100% { transform: scale(1); } }
+      .rule-box { background: #eef6ff; border: 1px dashed rgba(13,110,253,.4); border-radius: .75rem; padding: .5rem .85rem; font-size: .9rem; }
+      .chart-card { border: 1px solid #dee2e6; border-radius: .75rem; padding: .5rem; background: #fff; }
+      .chart-card svg { width: 100%; height: auto; display: block; }
+      @media (min-width: 992px) {
+        .chart-card svg { min-height: 18rem; width: 100%; }
+        .fill-chart { width: 100%; max-width: none; }
+        .fill-chart svg { min-height: 11.5rem; width: 100%; }
+        .fill-chart.short svg { min-height: 8.5rem; }
+      }
+      .picto-icons { font-size: 2.1rem; letter-spacing: .1rem; line-height: 1.25; display: inline-flex; flex-wrap: wrap; gap: .12rem .18rem; }
+      .chart-pick {
+        border: 2px solid #ced4da;
+        border-radius: .75rem;
+        padding: .45rem;
+        background: #fff;
+        cursor: pointer;
+        user-select: none;
+        transition: .15s;
+      }
+      .chart-pick:hover { border-color: #0d6efd; }
+      .chart-pick.sel { border-color: #0d6efd; background: #e7f1ff; box-shadow: 0 0 0 2px rgba(13,110,253,.2); }
+      .chart-pick .chart-lab { font-size: .8rem; font-weight: 600; text-align: center; margin-bottom: .25rem; color: #495057; }
+      .chart-pick.lock { pointer-events: none; }
+      .qbox { margin-bottom: 1rem; }
+      .qbox .fb { font-weight: 700; margin-left: .4rem; }
+      .bat-cell { font-variant-numeric: tabular-nums; text-align: center; min-width: 3.4rem; }
+      .pair-col { display: flex; flex-direction: column; gap: .35rem; }
+      .pair-btn {
+        border: 1.5px solid #ced4da;
+        border-radius: .55rem;
+        background: #fff;
+        padding: 0 .5rem;
+        font-size: .95rem;
+        cursor: pointer;
+        text-align: center;
+        user-select: none;
+        transition: .15s;
+        height: 2.5rem;
+        min-height: 2.5rem;
+        max-height: 2.5rem;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+      }
+      .pair-btn.emo { font-size: 1.45rem; }
+      .pair-btn:hover { border-color: #0d6efd; }
+      .pair-btn.sel { border-color: #0d6efd; background: #e7f1ff; }
+      .pair-btn.ok { border-color: #198754; background: #d1e7dd; pointer-events: none; }
+      .pair-btn.no { border-color: #dc3545; background: #f8d7da; }
+      .memo { display: grid; grid-template-columns: repeat(4, 1fr); gap: .6rem; max-width: 28rem; }
+      .card-m { aspect-ratio: 1 / 1; border-radius: .8rem; border: 2px solid #adb5bd; background: linear-gradient(135deg,#cfe2ff,#e2d9f3); font-size: 2.75rem; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; transition: .2s; }
+      .card-m.up { background: #fff; border-color: #0d6efd; }
+      .card-m.found { background: #d1e7dd; border-color: #198754; pointer-events: none; }
+      .card-m .face { display: none; }
+      .card-m.up .face, .card-m.found .face { display: inline; }
+      .card-m .back { color: #6c757d; font-size: 1.5rem; }
+      .card-m.up .back, .card-m.found .back { display: none; }
+      table.sched th, table.sched td { text-align: center; vertical-align: middle; font-size: 1rem; padding: .65rem .75rem; min-width: 3.5rem; }
+      table.sched td .em { font-size: 2.05rem; }
+      .sched-legend { display: flex; flex-direction: column; gap: .55rem; padding: .5rem .25rem; line-height: 1.4; font-size: 1.05rem; }
+      .sched-legend div { font-size: 1.1rem; }
+      table.table th.num, table.table td.num { min-width: 3.25rem; width: 3.25rem; text-align: center; }
+      table.table th, table.table td { vertical-align: middle; padding: .55rem .75rem; }
+    </style>
+  </head>
+  <body>
+    <main class="container py-4 py-md-5">
+      <div class="hero rounded-4 p-3 p-md-4 shadow-sm mb-3">
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-2">
+          <a class="btn btn-outline-secondary btn-sm" href="../home.html">← Zpět</a>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-warning btn-sm" id="restartProgress">Začít znovu</button>
+            <span class="badge text-bg-success">5. třída</span>
+          </div>
+        </div>
+        <h1 class="h3 fw-bold mb-1">Porovnáváme data</h1>
+        <p class="mb-0 text-body-secondary small">Inspirace: <a href="https://pracesdaty.zcu.cz/index.php/porovnavame-a-dokazeme-prezentovat" target="_blank" rel="noopener">Práce s daty – Porovnáváme a dokážeme prezentovat</a> · Datík chystá jeviště pro svou prezentaci.</p>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-12 col-lg-9 order-2 order-lg-1">
+
+          <!-- KROK 1 -->
+          <section class="step-pane active" id="step1">
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+              <h2 class="h5 fw-bold">1) Ovoce a zelenina</h2>
+              <p class="text-body-secondary">Datík spočítal, kolik kusů přinesl z trhu. U každé tabulky označ <strong>jeden graf, který k ní sedí</strong>.</p>
+
+              <div class="mb-4">
+                <div class="small fw-semibold mb-1">Tabulka 1 – sobotní trh</div>
+                <table class="table table-bordered table-sm w-auto text-center mb-2">
+                  <thead class="table-light"><tr><th>🍎 Jablka</th><th>🍌 Banány</th><th>🥕 Mrkve</th><th>🥒 Okurky</th></tr></thead>
+                  <tbody><tr><td>5</td><td>3</td><td>4</td><td>2</td></tr></tbody>
+                </table>
+                <div class="row g-2" id="pickGroup1"></div>
+              </div>
+
+              <div class="mb-4">
+                <div class="small fw-semibold mb-1">Tabulka 2 – nedělní trh</div>
+                <table class="table table-bordered table-sm w-auto text-center mb-2">
+                  <thead class="table-light"><tr><th>🍎 Jablka</th><th>🍌 Banány</th><th>🥕 Mrkve</th><th>🥒 Okurky</th></tr></thead>
+                  <tbody><tr><td>3</td><td>6</td><td>2</td><td>4</td></tr></tbody>
+                </table>
+                <div class="row g-2" id="pickGroup2"></div>
+              </div>
+
+              <div class="mb-4">
+                <div class="small fw-semibold mb-1">Tabulka 3 – pondělní stánek</div>
+                <table class="table table-bordered table-sm w-auto text-center mb-2">
+                  <thead class="table-light"><tr><th>🍎 Jablka</th><th>🍌 Banány</th><th>🥕 Mrkve</th><th>🥒 Okurky</th></tr></thead>
+                  <tbody><tr><td>4</td><td>1</td><td>6</td><td>3</td></tr></tbody>
+                </table>
+                <div class="row g-2" id="pickGroup3"></div>
+              </div>
+
+              <div class="mb-2">
+                <div class="small fw-semibold mb-1">Tabulka 4 – farmářský trh</div>
+                <table class="table table-bordered table-sm w-auto text-center mb-2">
+                  <thead class="table-light"><tr><th>🍎 Jablka</th><th>🍌 Banány</th><th>🥕 Mrkve</th><th>🥒 Okurky</th></tr></thead>
+                  <tbody><tr><td>2</td><td>5</td><td>3</td><td>6</td></tr></tbody>
+                </table>
+                <div class="row g-2" id="pickGroup4"></div>
+              </div>
+
+              <hr />
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-info" id="hint1">🤖 Zeptat se Datíka</button>
+                <button type="button" class="btn btn-primary" id="check1">Zkontrolovat</button>
+                <button type="button" class="btn btn-outline-secondary" id="to2" disabled>Další →</button>
+                <div id="res1" class="fw-semibold"></div>
+              </div>
+              <div class="small text-primary mt-1" id="tip1"></div>
+            </div></div>
+          </section>
+
+          <!-- KROK 2 -->
+          <section class="step-pane" id="step2">
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+              <h2 class="h5 fw-bold">2) Počty z grafu</h2>
+              <p class="text-body-secondary">Datík připravil různé typy grafů. U každého <strong>doplň čísla</strong> do tabulky podle grafu.</p>
+              <div id="fillBlocks"></div>
+              <hr />
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-info" id="hint2">🤖 Zeptat se Datíka</button>
+                <button type="button" class="btn btn-primary" id="check2">Zkontrolovat</button>
+                <button type="button" class="btn btn-outline-secondary" id="to3" disabled>Další →</button>
+                <div id="res2" class="fw-semibold"></div>
+              </div>
+              <div class="small text-primary mt-1" id="tip2"></div>
+            </div></div>
+          </section>
+
+          <!-- KROK 3 -->
+          <section class="step-pane" id="step3">
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+              <h2 class="h5 fw-bold">3) Odhad prodejů</h2>
+              <p class="text-body-secondary">Graf ukazuje, kolik limonád se prodalo před školou. Hodnoty u sloupců nejsou napsané, <strong>odhadni je podle svislé osy</strong>.</p>
+              <div class="row g-3 align-items-start mb-3">
+                <div class="col-12 col-lg-6" id="quiz3a"></div>
+                <div class="col-12 col-lg-6">
+                  <div class="chart-card" id="chart3"></div>
+                </div>
+              </div>
+              <h3 class="h6 fw-bold mt-4 mb-3">🍦 Zmrzliny v bufetu (podle příchutě)</h3>
+              <div class="row g-3 align-items-start">
+                <div class="col-12 col-lg-6" id="quiz3b"></div>
+                <div class="col-12 col-lg-6">
+                  <div class="chart-card" id="chart3b"></div>
+                </div>
+              </div>
+              <hr />
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-info" id="hint3">🤖 Zeptat se Datíka</button>
+                <button type="button" class="btn btn-primary" id="check3">Zkontrolovat</button>
+                <button type="button" class="btn btn-outline-secondary" id="to4" disabled>Další →</button>
+                <div id="res3" class="fw-semibold"></div>
+              </div>
+              <div class="small text-primary mt-1" id="tip3"></div>
+            </div></div>
+          </section>
+
+          <!-- KROK 4 -->
+          <section class="step-pane" id="step4">
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+              <h2 class="h5 fw-bold">4) Datíkovy baterie</h2>
+              <p class="text-body-secondary">Dva roboti vyrazili s plně nabitou baterií. Tabulky ukazují, kolik procent jim zbývá po každé hodině.</p>
+              <div class="table-responsive">
+                <table class="table table-bordered table-sm align-middle mb-3" id="batTable"></table>
+              </div>
+              <div class="row g-3" id="quiz4"></div>
+              <hr />
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-info" id="hint4">🤖 Zeptat se Datíka</button>
+                <button type="button" class="btn btn-primary" id="check4">Zkontrolovat</button>
+                <button type="button" class="btn btn-outline-secondary" id="to5" disabled>Další →</button>
+                <div id="res4" class="fw-semibold"></div>
+              </div>
+              <div class="small text-primary mt-1" id="tip4"></div>
+            </div></div>
+          </section>
+
+          <!-- KROK 5 -->
+          <section class="step-pane" id="step5">
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+              <h2 class="h5 fw-bold">5) Páry</h2>
+              <p class="text-body-secondary">Přetáhni obrázek vlevo na správné slovo vpravo. Jsou tu dvě sady párů.</p>
+              <div class="row g-3">
+                <div class="col-12 col-lg-6">
+                  <div class="row g-2">
+                    <div class="col-5"><div class="pair-col" id="pairL1"></div></div>
+                    <div class="col-7"><div class="pair-col" id="pairR1"></div></div>
+                  </div>
+                </div>
+                <div class="col-12 col-lg-6">
+                  <div class="row g-2">
+                    <div class="col-5"><div class="pair-col" id="pairL2"></div></div>
+                    <div class="col-7"><div class="pair-col" id="pairR2"></div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="small text-body-secondary mt-2">Spárováno: <span id="pairCount">0</span> / 20 · chybných pokusů: <span id="pairErr">0</span></div>
+              <hr />
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-secondary" id="to6" disabled>Další →</button>
+                <div id="res5" class="fw-semibold"></div>
+              </div>
+            </div></div>
+          </section>
+
+          <!-- KROK 6 -->
+          <section class="step-pane" id="step6">
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+              <h2 class="h5 fw-bold">6) Pexeso</h2>
+              <p class="text-body-secondary">Otáčej karty po dvou a najdi všech osm dvojic.</p>
+              <div class="memo mb-2" id="memo"></div>
+              <div class="small text-body-secondary">Tahů: <span id="moves">0</span> · nalezeno párů: <span id="found">0</span> / 8</div>
+              <hr />
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-secondary" id="to7" disabled>Další →</button>
+                <div id="res6" class="fw-semibold"></div>
+              </div>
+            </div></div>
+          </section>
+
+          <!-- KROK 7 -->
+          <section class="step-pane" id="step7">
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+              <h2 class="h5 fw-bold">7) Práce s rozvrhy</h2>
+              <p class="text-body-secondary">Podívej se na Datíkův týdenní rozvrh a odpověz na otázky.</p>
+              <div class="row g-3 align-items-start mb-3">
+                <div class="col-12 col-lg-8">
+                  <div class="table-responsive">
+                    <table class="table table-bordered table-sm sched mb-0">
+                      <thead class="table-light"><tr><th></th><th>Po</th><th>Út</th><th>St</th><th>Čt</th><th>Pá</th></tr></thead>
+                      <tbody id="schedBody"></tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="col-12 col-lg-4">
+                  <div class="small text-body-secondary sched-legend">
+                    <div>🧮 matematika</div>
+                    <div>📖 čeština</div>
+                    <div>⚽ tělocvik</div>
+                    <div>💻 informatika</div>
+                    <div>🎨 výtvarka</div>
+                    <div>🎵 hudebka</div>
+                    <div>🌍 prvouka</div>
+                  </div>
+                </div>
+              </div>
+              <div id="quiz7"></div>
+              <hr />
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-info" id="hint7">🤖 Zeptat se Datíka</button>
+                <button type="button" class="btn btn-primary" id="check7">Dokončit</button>
+                <div id="res7" class="fw-semibold"></div>
+              </div>
+              <div class="small text-primary mt-1" id="tip7"></div>
+              <div id="finishBox" class="alert alert-success mt-3 d-none"><strong>✔ Splněno!</strong> Umíš číst sloupcové grafy a tabulky, porovnávat data i najít odpověď v rozvrhu. Jeviště pro prezentaci je připravené!</div>
+            </div></div>
+          </section>
+        </div>
+
+        <div class="col-12 col-lg-3 order-1 order-lg-2">
+          <div class="prog-box shadow-sm">
+            <div class="d-flex justify-content-between mb-1"><span class="fw-semibold small">🎬 Jeviště</span><span class="badge text-bg-light border" id="stepLabel">1 / 7</span></div>
+            <div class="progress mb-2" style="height:.45rem"><div class="progress-bar bg-success" id="pctBar" style="width:0%"></div></div>
+            <div class="stage" id="stage">
+              <div class="stage-cell c0" data-i="0"><span class="em">🎤</span>mikrofon</div>
+              <div class="stage-cell c1" data-i="1"><span class="em">💡</span>světla</div>
+              <div class="stage-cell c2" data-i="2"><span class="stage-platno" aria-hidden="true"></span>plátno</div>
+              <div class="stage-cell c3" data-i="3"><span class="em">🪑</span>židle</div>
+              <div class="stage-cell c4" data-i="4"><span class="em">🎈</span>balónky</div>
+              <div class="stage-cell c5" data-i="5"><span class="em">🎵</span>hudba</div>
+              <div class="stage-cell c6" data-i="6"><span class="em">🏆</span>pódium</div>
+            </div>
+            <div class="stage-done mt-2" id="stageDone">🎉🤖🎉</div>
+            <div class="small text-center text-body-secondary mt-1" id="pctLabel">0 %</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="../progress.js"></script>
+    <script>
+      const PROGRESS_ID = "5/porovnavame-data";
+      const TOTAL = 7;
+      const $ = (id) => document.getElementById(id);
+      const done = new Set();
+      const locked = {};
+
+      function shuffle(a) {
+        a = a.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+      function wireDatik(btnId, tipId, findWrong) {
+        let used = false;
+        $(btnId).onclick = () => {
+          if (used) {
+            $(tipId).textContent = "Datík už jednou poradil u tohoto cvičení. Teď to zkus sám/sama.";
+            return;
+          }
+          const label = findWrong();
+          if (!label) {
+            $(tipId).textContent = "🤖 Datík: zatím nevidím vyplněnou chybu — doplň odpovědi, nebo je vše OK.";
+            return;
+          }
+          used = true;
+          $(btnId).disabled = true;
+          $(tipId).textContent = "🤖 Datík šeptá: podívej se znovu na „" + label + "“ — tam je něco špatně.";
+        };
+      }
+
+      function setStep(n) {
+        document.querySelectorAll(".step-pane").forEach((el) => el.classList.remove("active"));
+        $("step" + n).classList.add("active");
+        $("stepLabel").textContent = n + " / " + TOTAL;
+      }
+      function updateProg() {
+        const pct = Math.round((done.size / TOTAL) * 100);
+        $("pctBar").style.width = pct + "%";
+        $("pctLabel").textContent = pct + " %";
+        document.querySelectorAll(".stage-cell").forEach((el) => el.classList.toggle("on", done.has(Number(el.dataset.i) + 1)));
+        $("stageDone").classList.toggle("on", done.size >= TOTAL);
+      }
+      function info(step, text, cls) {
+        const r = $("res" + step);
+        r.className = "fw-semibold " + (cls || "text-body-secondary");
+        r.textContent = text;
+      }
+      function pass(step, text) {
+        locked[step] = true;
+        info(step, text, "text-success");
+        const nb = $("to" + (step + 1));
+        if (nb) { nb.disabled = false; nb.className = "btn btn-primary"; }
+        if (!done.has(step)) {
+          done.add(step);
+          InfProgress.completeStep(PROGRESS_ID, step, TOTAL);
+          updateProg();
+        }
+        if (step === TOTAL) $("finishBox").classList.remove("d-none");
+      }
+      $("restartProgress").onclick = () => { if (confirm("Začít znovu?")) { InfProgress.reset(PROGRESS_ID); location.reload(); } };
+      [2, 3, 4, 5, 6, 7].forEach((n) => { $("to" + n).onclick = () => setStep(n); });
+
+      /* ---------- pomocník: kvíz s výběrem (radio), kontrola tlačítkem ---------- */
+      function quiz(step, rootId, qs, okText, colClass) {
+        const root = $(rootId);
+        const ans = {};
+        qs.forEach((q, qi) => {
+          const opts = shuffle(q.opts);
+          const d = document.createElement("div");
+          d.className = "qbox " + (colClass || "");
+          if (q.pre) {
+            const wrap = document.createElement("div");
+            wrap.innerHTML = q.pre;
+            while (wrap.firstChild) d.appendChild(wrap.firstChild);
+          }
+          const title = document.createElement("div");
+          title.className = "fw-semibold mb-1";
+          title.textContent = q.q;
+          d.appendChild(title);
+          opts.forEach((o, oi) => {
+            const fc = document.createElement("div");
+            fc.className = "form-check form-check-inline";
+            const inp = document.createElement("input");
+            inp.className = "form-check-input";
+            inp.type = "radio";
+            inp.name = rootId + "_" + qi;
+            inp.id = rootId + "_" + qi + "_" + oi;
+            inp.value = o;
+            const lab = document.createElement("label");
+            lab.className = "form-check-label";
+            lab.htmlFor = inp.id;
+            lab.textContent = o;
+            fc.appendChild(inp);
+            fc.appendChild(lab);
+            d.appendChild(fc);
+            inp.onchange = () => { if (locked[step]) return; ans[qi] = inp.value; };
+          });
+          root.appendChild(d);
+        });
+        function evaluate() {
+          if (locked[step]) return;
+          let ok = 0;
+          let n = 0;
+          qs.forEach((q, qi) => {
+            if (ans[qi] === undefined) return;
+            n++;
+            if (ans[qi] === q.ok) ok++;
+          });
+          if (n < qs.length) {
+            info(step, "Zodpovězeno " + n + " z " + qs.length + ".", "text-body-secondary");
+            return false;
+          }
+          if (ok === qs.length) {
+            root.querySelectorAll("input").forEach((x) => (x.disabled = true));
+            pass(step, okText || ("✔ Správně " + ok + " z " + qs.length + "!"));
+            return true;
+          }
+          info(step, "Správně " + ok + " z " + qs.length, "text-danger");
+          return false;
+        }
+        function score() {
+          let ok = 0, n = 0, wrong = [];
+          qs.forEach((q, qi) => {
+            if (ans[qi] === undefined) return;
+            n++;
+            if (ans[qi] === q.ok) ok++;
+            else wrong.push(qi);
+          });
+          return { ok, n, need: qs.length, wrong, ans };
+        }
+        function getWrongLabel() {
+          for (let qi = 0; qi < qs.length; qi++) {
+            if (ans[qi] !== undefined && ans[qi] !== qs[qi].ok) return "otázka " + (qi + 1);
+          }
+          return null;
+        }
+        function lockInputs() {
+          root.querySelectorAll("input").forEach((x) => (x.disabled = true));
+        }
+        return { evaluate, score, getWrongLabel, lockInputs, ans, qs };
+      }
+
+      /* ---------- pomocníci: typy grafů ---------- */
+      function barChart(data, max, stepY, showVals, height, padL) {
+        const W = 300, H = height || 280, L = padL || 30, R = 8, T = 14, B = 36;
+        const pw = W - L - R, ph = H - T - B;
+        const y = (v) => T + ph - (v / max) * ph;
+        let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="sloupcový graf">`;
+        for (let v = 0; v <= max; v += stepY) {
+          s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="${v === 0 ? "#6c757d" : "#dee2e6"}" stroke-width="1"/>`;
+          s += `<text x="${L - 6}" y="${y(v) + 3.5}" font-size="10" text-anchor="end" fill="#495057">${v}</text>`;
+        }
+        const bw = pw / data.length;
+        data.forEach((d, i) => {
+          const x = L + i * bw + bw * 0.18, w = bw * 0.64;
+          s += `<rect x="${x}" y="${y(d.v)}" width="${w}" height="${y(0) - y(d.v)}" rx="3" fill="${d.c || "#0d6efd"}"/>`;
+          if (showVals) s += `<text x="${x + w / 2}" y="${y(d.v) - 3}" font-size="10" text-anchor="middle" fill="#212529">${d.v}</text>`;
+          s += `<text x="${x + w / 2}" y="${H - 10}" font-size="${d.emoji ? 26 : 12}" text-anchor="middle" fill="#212529">${d.l}</text>`;
+        });
+        return s + "</svg>";
+      }
+      function hBarChart(data, max, stepX, rowHeight) {
+        const W = 320, rowH = rowHeight || 42, T = 10, B = 28, L = 44, R = 16;
+        const barH = Math.round(rowH * 0.58);
+        const H = T + data.length * rowH + B;
+        const pw = W - L - R;
+        const x = (v) => L + (v / max) * pw;
+        let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="pruhový graf">`;
+        for (let v = 0; v <= max; v += stepX) {
+          s += `<line x1="${x(v)}" x2="${x(v)}" y1="${T}" y2="${H - B}" stroke="${v === 0 ? "#6c757d" : "#dee2e6"}" stroke-width="1"/>`;
+          s += `<text x="${x(v)}" y="${H - 10}" font-size="10" text-anchor="middle" fill="#495057">${v}</text>`;
+        }
+        data.forEach((d, i) => {
+          const y = T + i * rowH + Math.round((rowH - barH) / 2);
+          s += `<text x="${L - 6}" y="${y + barH * 0.72}" font-size="${d.emoji ? 24 : 12}" text-anchor="end" fill="#212529">${d.l}</text>`;
+          s += `<rect x="${L}" y="${y}" width="${Math.max(0, x(d.v) - L)}" height="${barH}" rx="4" fill="${d.c || "#0d6efd"}"/>`;
+        });
+        return s + "</svg>";
+      }
+      function pieChart(data, size) {
+        const scale = size === "sm" ? 0.82 : 1;
+        const W = 300, H = Math.round(220 * scale), cx = 110, cy = Math.round(110 * scale), r = Math.round(78 * scale);
+        const total = data.reduce((s, d) => s + d.v, 0);
+        let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="koláčový graf">`;
+        let ang = -Math.PI / 2;
+        data.forEach((d) => {
+          const a0 = ang;
+          const a1 = ang + (d.v / total) * Math.PI * 2;
+          const x0 = cx + r * Math.cos(a0), y0 = cy + r * Math.sin(a0);
+          const x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
+          const large = a1 - a0 > Math.PI ? 1 : 0;
+          s += `<path d="M ${cx} ${cy} L ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1} Z" fill="${d.c || "#0d6efd"}" stroke="#fff" stroke-width="2"/>`;
+          const mid = (a0 + a1) / 2;
+          const lx = cx + r * 0.55 * Math.cos(mid), ly = cy + r * 0.55 * Math.sin(mid);
+          s += `<text x="${lx}" y="${ly + 5}" font-size="16" text-anchor="middle">${d.l}</text>`;
+          ang = a1;
+        });
+        data.forEach((d, i) => {
+          const y = 28 + i * 36;
+          s += `<rect x="210" y="${y}" width="14" height="14" rx="2" fill="${d.c}"/>`;
+          s += `<text x="232" y="${y + 12}" font-size="14" font-weight="700" fill="#212529">${d.v}</text>`;
+        });
+        return s + "</svg>";
+      }
+      function pictoChart(data) {
+        let rows = data.map((d) => {
+          const icons = Array.from({ length: d.v }, () => `<span>${d.l}</span>`).join("");
+          return `<div class="d-flex align-items-center gap-2 mb-3"><span class="fw-semibold" style="min-width:5.5rem">${d.name || ""}</span><span class="picto-icons">${icons}</span></div>`;
+        }).join("");
+        return `<div class="p-2 picto-wrap">${rows}</div>`;
+      }
+      function lineChart(data, max, stepY, height) {
+        const W = 300, H = height || 240, L = 36, R = 12, T = 16, B = 36;
+        const pw = W - L - R, ph = H - T - B;
+        const y = (v) => T + ph - (v / max) * ph;
+        const x = (i) => L + (data.length === 1 ? pw / 2 : (i / (data.length - 1)) * pw);
+        const col = "#0d6efd";
+        let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="lineární graf">`;
+        for (let v = 0; v <= max; v += stepY) {
+          s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="${v === 0 ? "#6c757d" : "#dee2e6"}" stroke-width="1"/>`;
+          s += `<text x="${L - 8}" y="${y(v) + 3.5}" font-size="10" text-anchor="end" fill="#495057">${v}</text>`;
+        }
+        const pts = data.map((d, i) => `${x(i)},${y(d.v)}`).join(" ");
+        s += `<polyline fill="none" stroke="${col}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points="${pts}"/>`;
+        data.forEach((d, i) => {
+          s += `<circle cx="${x(i)}" cy="${y(d.v)}" r="5" fill="${col}" stroke="#fff" stroke-width="2"/>`;
+          s += `<text x="${x(i)}" y="${H - 10}" font-size="${d.emoji ? 20 : 12}" text-anchor="middle" fill="#212529">${d.l}</text>`;
+        });
+        return s + "</svg>";
+      }
+
+      /* ---------- 1: Ovoce a zelenina ---------- */
+      (function () {
+        const C = { a: "#dc3545", b: "#ffc107", c: "#fd7e14", d: "#198754" };
+        const mk = (ja, ba, mr, ok) => barChart([
+          { l: "🍎", v: ja, c: C.a, emoji: 1 }, { l: "🍌", v: ba, c: C.b, emoji: 1 },
+          { l: "🥕", v: mr, c: C.c, emoji: 1 }, { l: "🥒", v: ok, c: C.d, emoji: 1 },
+        ], 6, 1, false);
+        const groups = [
+          {
+            root: "pickGroup1",
+            label: "tabulka 1",
+            ok: "A",
+            charts: [
+              { id: "A", html: mk(5, 3, 4, 2) },
+              { id: "B", html: mk(5, 3, 5, 2) },
+              { id: "C", html: mk(2, 3, 4, 5) },
+            ],
+          },
+          {
+            root: "pickGroup2",
+            label: "tabulka 2",
+            ok: "E",
+            charts: [
+              { id: "D", html: mk(3, 6, 4, 2) },
+              { id: "E", html: mk(3, 6, 2, 4) },
+              { id: "F", html: mk(6, 3, 2, 4) },
+            ],
+          },
+          {
+            root: "pickGroup3",
+            label: "tabulka 3",
+            ok: "H",
+            charts: [
+              { id: "G", html: mk(4, 1, 5, 3) },
+              { id: "H", html: mk(4, 1, 6, 3) },
+              { id: "I", html: mk(1, 4, 6, 3) },
+            ],
+          },
+          {
+            root: "pickGroup4",
+            label: "tabulka 4",
+            ok: "K",
+            charts: [
+              { id: "J", html: mk(2, 5, 6, 3) },
+              { id: "K", html: mk(2, 5, 3, 6) },
+              { id: "L", html: mk(5, 2, 3, 6) },
+            ],
+          },
+        ];
+        const picked = {};
+        groups.forEach((g) => {
+          const root = $(g.root);
+          const order = shuffle(g.charts.map((_, i) => i));
+          order.forEach((ci) => {
+            const ch = g.charts[ci];
+            const col = document.createElement("div");
+            col.className = "col-12 col-md-4";
+            const card = document.createElement("div");
+            card.className = "chart-pick";
+            card.dataset.id = ch.id;
+            card.innerHTML = `<div class="chart-lab">Graf ${ch.id}</div>${ch.html}`;
+            card.onclick = () => {
+              if (locked[1]) return;
+              picked[g.root] = ch.id;
+              [...root.querySelectorAll(".chart-pick")].forEach((el) => el.classList.toggle("sel", el.dataset.id === ch.id));
+            };
+            col.appendChild(card);
+            root.appendChild(col);
+          });
+        });
+        $("check1").onclick = () => {
+          if (locked[1]) return;
+          const answered = groups.filter((g) => picked[g.root]).length;
+          if (answered < groups.length) {
+            info(1, "Označ správný graf u všech tabulek. (" + answered + " / " + groups.length + ")", "text-body-secondary");
+            return;
+          }
+          const ok = groups.filter((g) => picked[g.root] === g.ok).length;
+          if (ok === groups.length) {
+            document.querySelectorAll("#step1 .chart-pick").forEach((el) => el.classList.add("lock"));
+            pass(1, "✔ Správně " + ok + " z " + groups.length + "!");
+          } else {
+            info(1, "Správně " + ok + " z " + groups.length, "text-danger");
+          }
+        };
+        wireDatik("hint1", "tip1", () => {
+          for (const g of groups) {
+            if (picked[g.root] && picked[g.root] !== g.ok) return g.label;
+          }
+          return null;
+        });
+      })();
+
+      /* ---------- 2: Počty z grafu (více typů) ---------- */
+      (function () {
+        const blocks = [
+          {
+            title: "1. Sloupcový graf – hračky ve třídě",
+            head: "Hračka",
+            items: [
+              { l: "🚗", name: "auta", v: 4, c: "#dc3545" },
+              { l: "🧸", name: "medvídci", v: 7, c: "#fd7e14" },
+              { l: "🎲", name: "kostky", v: 2, c: "#6f42c1" },
+              { l: "🪁", name: "draci", v: 5, c: "#0d6efd" },
+            ],
+            short: true,
+            chart: (items) => barChart(items.map((it) => ({ l: it.l, v: it.v, c: it.c, emoji: 1 })), 8, 1, false, 190),
+          },
+          {
+            title: "2. Pruhový graf – oblíbené sporty",
+            head: "Sport",
+            items: [
+              { l: "⚽", name: "fotbal", v: 6, c: "#198754" },
+              { l: "🏀", name: "basketbal", v: 3, c: "#fd7e14" },
+              { l: "🏐", name: "volejbal", v: 5, c: "#0d6efd" },
+              { l: "🎾", name: "tenis", v: 2, c: "#ffc107" },
+            ],
+            chart: (items) => hBarChart(items.map((it) => ({ l: it.l, v: it.v, c: it.c, emoji: 1 })), 8, 1),
+          },
+          {
+            title: "3. Koláčový graf – svačiny",
+            head: "Svačina",
+            items: [
+              { l: "🍎", name: "jablka", v: 4, c: "#dc3545" },
+              { l: "🥪", name: "chlebíčky", v: 6, c: "#fd7e14" },
+              { l: "🧀", name: "sýr", v: 3, c: "#ffc107" },
+              { l: "🥛", name: "mléko", v: 5, c: "#0d6efd" },
+            ],
+            chart: (items) => pieChart(items, "sm"),
+            short: true,
+          },
+          {
+            title: "4. Piktogram – zvířata na farmě",
+            head: "Zvíře",
+            items: [
+              { l: "🐄", name: "krávy", v: 5, c: "#6c757d" },
+              { l: "🐖", name: "prasata", v: 3, c: "#6c757d" },
+              { l: "🐑", name: "ovce", v: 6, c: "#6c757d" },
+              { l: "🐓", name: "slepice", v: 4, c: "#6c757d" },
+            ],
+            chart: (items) => pictoChart(items),
+          },
+          {
+            title: "5. Sloupcový graf – počasí v týdnu",
+            head: "Počasí",
+            items: [
+              { l: "☀️", name: "slunečno", v: 5, c: "#ffc107" },
+              { l: "☁️", name: "zataženo", v: 3, c: "#adb5bd" },
+              { l: "🌧️", name: "déšť", v: 4, c: "#0d6efd" },
+              { l: "❄️", name: "sníh", v: 1, c: "#66d9ef" },
+            ],
+            short: true,
+            chart: (items) => barChart(items.map((it) => ({ l: it.l, v: it.v, c: it.c, emoji: 1 })), 6, 1, false, 190),
+          },
+          {
+            title: "6. Lineární graf – teplota přes den",
+            head: "Čas",
+            short: true,
+            items: [
+              { l: "🌅", name: "ráno", v: 8, c: "#fd7e14" },
+              { l: "🕛", name: "poledne", v: 16, c: "#ffc107" },
+              { l: "🌇", name: "odpoledne", v: 14, c: "#20c997" },
+              { l: "🌙", name: "večer", v: 10, c: "#6f42c1" },
+            ],
+            chart: (items) => lineChart(items.map((it) => ({ l: it.l, v: it.v, c: it.c, emoji: 1 })), 20, 2, 180),
+          },
+        ];
+        const root = $("fillBlocks");
+        const inputs = [];
+        blocks.forEach((block, bi) => {
+          const wrap = document.createElement("div");
+          wrap.className = bi < blocks.length - 1 ? "mb-4 pb-3 border-bottom" : "mb-2";
+          const chartCls = "chart-card fill-chart h-100" + (block.short ? " short" : "");
+          wrap.innerHTML = `<div class="fw-semibold mb-2">${block.title}</div><div class="row g-3 align-items-stretch"><div class="col-12 col-lg-6"><div class="table-responsive h-100"><table class="table table-bordered table-sm align-middle text-center mb-0 h-100"><thead class="table-light"><tr><th>${block.head}</th><th>Počet</th></tr></thead><tbody></tbody></table></div></div><div class="col-12 col-lg-6"><div class="${chartCls}"></div></div></div>`;
+          const tbody = wrap.querySelector("tbody");
+          const chartBox = wrap.querySelector(".chart-card");
+          chartBox.innerHTML = block.chart(block.items);
+          block.items.forEach((it) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td class="fs-4">${it.l} <span class="fs-6">${it.name}</span></td><td></td>`;
+            const inp = document.createElement("input");
+            inp.type = "number";
+            inp.min = "0";
+            inp.max = "30";
+            inp.className = "form-control form-control-sm fill-num mx-auto";
+            inp.dataset.ok = String(it.v);
+            inp.dataset.label = block.title + " · " + it.name;
+            tr.children[1].appendChild(inp);
+            tbody.appendChild(tr);
+            inputs.push(inp);
+          });
+          root.appendChild(wrap);
+        });
+        $("check2").onclick = () => {
+          if (locked[2]) return;
+          let ok = 0, filled = 0;
+          inputs.forEach((inp) => {
+            if (inp.value === "") return;
+            filled++;
+            if (inp.value === inp.dataset.ok) ok++;
+          });
+          const need = inputs.length;
+          if (filled < need) {
+            info(2, "Doplň všechna čísla. (" + filled + " / " + need + ")", "text-body-secondary");
+            return;
+          }
+          if (ok === need) {
+            inputs.forEach((inp) => { inp.disabled = true; });
+            pass(2, "✔ Správně " + ok + " z " + need + "!");
+          } else {
+            info(2, "Správně " + ok + " z " + need, "text-danger");
+          }
+        };
+        wireDatik("hint2", "tip2", () => {
+          for (const inp of inputs) {
+            if (inp.value !== "" && inp.value !== inp.dataset.ok) return inp.dataset.label;
+          }
+          return null;
+        });
+      })();
+
+      /* ---------- 3: Odhad prodejů ---------- */
+      $("chart3").innerHTML = barChart([
+        { l: "Po", v: 20, c: "#0d6efd" }, { l: "Út", v: 35, c: "#6f42c1" }, { l: "St", v: 15, c: "#20c997" },
+        { l: "Čt", v: 45, c: "#fd7e14" }, { l: "Pá", v: 30, c: "#d63384" },
+      ], 50, 10, false);
+      $("chart3b").innerHTML = hBarChart([
+        { l: "🍓", v: 25, c: "#dc3545", emoji: 1 }, { l: "🍦", v: 45, c: "#ffc107", emoji: 1 },
+        { l: "🍫", v: 35, c: "#8d5524", emoji: 1 }, { l: "🍋", v: 15, c: "#20c997", emoji: 1 },
+      ], 50, 10, 56);
+      const api3a = quiz(3, "quiz3a", [
+        { q: "🍋 Kolik limonád se prodalo ve čtvrtek?", opts: ["35", "45", "55"], ok: "45" },
+        { q: "🍋 Přibližně kolik limonád se prodalo v úterý?", opts: ["25", "35", "45"], ok: "35" },
+        { q: "🍋 Který den se prodalo nejméně?", opts: ["pondělí", "středa", "pátek"], ok: "středa" },
+        { q: "🍋 Kolik limonád se prodalo v pondělí a ve středu dohromady?", opts: ["30", "35", "40"], ok: "35" },
+        { q: "🍋 Který den se prodalo nejvíc limonád?", opts: ["čtvrtek", "úterý", "pátek"], ok: "čtvrtek" },
+        { q: "🍋 Kolik limonád se prodalo za celý týden dohromady?", opts: ["125", "135", "145"], ok: "145" },
+      ], "");
+      const api3b = quiz(3, "quiz3b", [
+        { q: "🍦 Která příchuť se prodala nejvíc?", opts: ["jahodová", "vanilková", "čokoládová"], ok: "vanilková" },
+        { q: "🍦 Přibližně kolik čokoládových zmrzlin se prodalo?", opts: ["25", "30", "35"], ok: "35" },
+        { q: "🍦 Kolikrát víc se prodalo vanilkových než citronových?", opts: ["3krát", "2krát", "4krát"], ok: "3krát" },
+        { q: "🍦 Kolik zmrzlin se prodalo jahodových a citronových dohromady?", opts: ["30", "40", "50"], ok: "40" },
+        { q: "🍦 Která příchuť se prodala nejméně?", opts: ["jahodová", "čokoládová", "citronová"], ok: "citronová" },
+      ], "");
+      $("check3").onclick = () => {
+        if (locked[3]) return;
+        const a = api3a.score();
+        const b = api3b.score();
+        const need = a.need + b.need;
+        const n = a.n + b.n;
+        const ok = a.ok + b.ok;
+        if (n < need) {
+          info(3, "Zodpovězeno " + n + " z " + need + ".", "text-body-secondary");
+          return;
+        }
+        if (ok === need) {
+          api3a.lockInputs();
+          api3b.lockInputs();
+          pass(3, "✔ Správně " + ok + " z " + need + "!");
+        } else {
+          info(3, "Správně " + ok + " z " + need, "text-danger");
+        }
+      };
+      wireDatik("hint3", "tip3", () => api3a.getWrongLabel() || api3b.getWrongLabel());
+
+      /* ---------- 4: Datíkovy baterie ---------- */
+      (function () {
+        const A = [100, 75, 50, 25, 0];
+        const B = [100, 90, 80, 70, 60, 50, 40];
+        const cell = (v) => `<td class="bat-cell" style="background:linear-gradient(90deg,#b7e4c7 ${v}%,#fff ${v}%)">${v} %</td>`;
+        let h = `<thead class="table-light"><tr><th>Robot</th>` + B.map((_, i) => `<th class="text-center">${i} h</th>`).join("") + `</tr></thead><tbody>`;
+        h += `<tr><td><strong>⚡ Bleskoun</strong></td>` + B.map((_, i) => (A[i] !== undefined ? cell(A[i]) : `<td class="text-center text-body-secondary">—</td>`)).join("") + `</tr>`;
+        h += `<tr><td><strong>🐢 Pomalík</strong></td>` + B.map((v) => cell(v)).join("") + `</tr></tbody>`;
+        $("batTable").innerHTML = h;
+        const api4 = quiz(4, "quiz4", [
+          { q: "🔋 Kolik procent má Bleskoun po 2 hodinách?", opts: ["25 %", "50 %", "75 %"], ok: "50 %" },
+          { q: "🔋 Který robot vydrží se stejnou baterií déle?", opts: ["Bleskoun", "Pomalík", "oba stejně"], ok: "Pomalík" },
+          { q: "🔋 Po 3 hodinách má víc energie…", opts: ["Bleskoun", "Pomalík", "oba stejně"], ok: "Pomalík" },
+          { q: "🔋 O kolik procent ubyde Pomalíkovi každou hodinu?", opts: ["5 %", "10 %", "25 %"], ok: "10 %" },
+          { q: "🔋 Za kolik hodin se Bleskoun úplně vybije?", opts: ["3 hodiny", "4 hodiny", "5 hodin"], ok: "4 hodiny" },
+          { q: "🔋 Kolik procent má Pomalík po 6 hodinách?", opts: ["40 %", "50 %", "60 %"], ok: "40 %" },
+          { q: "🔋 O kolik procent ubyde Bleskounovi každou hodinu?", opts: ["10 %", "25 %", "50 %"], ok: "25 %" },
+          { q: "🔋 O kolik procent má po 2 hodinách víc energie Pomalík než Bleskoun?", opts: ["20 %", "30 %", "40 %"], ok: "30 %" },
+          { q: "🔋 Kolik procent by měl Pomalík po 7 hodinách, kdyby mu ubývalo stejně dál?", opts: ["30 %", "35 %", "40 %"], ok: "30 %" },
+        ], "✔ Správně 9 z 9!", "col-12 col-lg-6");
+        $("check4").onclick = () => api4.evaluate();
+        wireDatik("hint4", "tip4", () => api4.getWrongLabel());
+      })();
+
+      /* ---------- 5: Páry (drag emoji → text) ---------- */
+      (function () {
+        const sets = [
+          {
+            leftId: "pairL1", rightId: "pairR1", tag: "a",
+            pairs: [
+              ["🐝", "včela"], ["🌵", "kaktus"], ["🚲", "kolo"], ["🍞", "chléb"], ["☂️", "deštník"], ["🔑", "klíč"],
+              ["🍎", "jablko"], ["🐱", "kočka"], ["✈️", "letadlo"], ["🎸", "kytara"],
+            ],
+          },
+          {
+            leftId: "pairL2", rightId: "pairR2", tag: "b",
+            pairs: [
+              ["🐘", "slon"], ["🌻", "slunečnice"], ["🏠", "dům"], ["📚", "knihy"], ["⏰", "budík"], ["🎹", "klavír"],
+              ["🐶", "pes"], ["🌈", "duha"], ["🚢", "loď"], ["⚽", "míč"],
+            ],
+          },
+        ];
+        const TOTAL_PAIRS = sets.reduce((n, s) => n + s.pairs.length, 0);
+        let found = 0, err = 0;
+        function bump(ok) {
+          if (ok) {
+            found++;
+            $("pairCount").textContent = String(found);
+            if (found === TOTAL_PAIRS) pass(5, "✔ Všechny páry spojeny!");
+            else info(5, "Spárováno " + found + " z " + TOTAL_PAIRS, "text-body-secondary");
+          } else {
+            err++;
+            $("pairErr").textContent = String(err);
+            info(5, "Spárováno " + found + " z " + TOTAL_PAIRS + " · chybné pokusy: " + err, "text-danger");
+          }
+        }
+        sets.forEach((set) => {
+          const left = $(set.leftId), right = $(set.rightId);
+          const P = set.pairs;
+          P.forEach((p, i) => {
+            const b = document.createElement("div");
+            b.className = "pair-btn emo";
+            b.textContent = p[0];
+            b.dataset.i = String(i);
+            b.draggable = true;
+            b.addEventListener("dragstart", (e) => {
+              if (locked[5] || b.classList.contains("ok")) { e.preventDefault(); return; }
+              e.dataTransfer.setData("text/plain", set.tag + ":" + i);
+              b.classList.add("sel");
+            });
+            b.addEventListener("dragend", () => b.classList.remove("sel"));
+            left.appendChild(b);
+          });
+          shuffle(P.map((_, i) => i)).forEach((i) => {
+            const b = document.createElement("div");
+            b.className = "pair-btn";
+            b.textContent = P[i][1];
+            b.dataset.i = String(i);
+            b.addEventListener("dragover", (e) => { e.preventDefault(); if (!b.classList.contains("ok")) b.classList.add("sel"); });
+            b.addEventListener("dragleave", () => { if (!b.classList.contains("ok")) b.classList.remove("sel"); });
+            b.addEventListener("drop", (e) => {
+              e.preventDefault();
+              b.classList.remove("sel");
+              if (locked[5] || b.classList.contains("ok")) return;
+              const raw = e.dataTransfer.getData("text/plain");
+              const [tag, selStr] = raw.split(":");
+              if (tag !== set.tag) {
+                bump(false);
+                return;
+              }
+              const sel = Number(selStr);
+              if (sel === i) {
+                b.classList.add("ok");
+                const lb = left.querySelector(`[data-i="${i}"]`);
+                lb.classList.add("ok");
+                lb.draggable = false;
+                bump(true);
+              } else {
+                bump(false);
+              }
+            });
+            right.appendChild(b);
+          });
+        });
+      })();
+
+      /* ---------- 6: Pexeso ---------- */
+      (function () {
+        const E = ["🤖", "🔋", "📊", "🧩", "🌈", "🚀", "🎲", "🐙"];
+        const cards = E.concat(E);
+        for (let i = cards.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [cards[i], cards[j]] = [cards[j], cards[i]]; }
+        const memo = $("memo");
+        let open = [], busy = false, moves = 0, found = 0;
+        cards.forEach((e, i) => {
+          const c = document.createElement("div");
+          c.className = "card-m";
+          c.innerHTML = `<span class="back">❔</span><span class="face">${e}</span>`;
+          c.onclick = () => {
+            if (busy || locked[6] || c.classList.contains("up") || c.classList.contains("found")) return;
+            c.classList.add("up");
+            open.push(i);
+            if (open.length === 2) {
+              moves++; $("moves").textContent = String(moves);
+              const [a, b] = open;
+              if (cards[a] === cards[b]) {
+                memo.children[a].classList.replace("up", "found");
+                memo.children[b].classList.replace("up", "found");
+                open = []; found++;
+                $("found").textContent = String(found);
+                if (found === E.length) pass(6, "✔ Všechny dvojice nalezeny na " + moves + " tahů!");
+                else info(6, "Nalezeno " + found + " z " + E.length, "text-body-secondary");
+              } else {
+                busy = true;
+                info(6, "Nalezeno " + found + " z " + E.length, "text-body-secondary");
+                setTimeout(() => {
+                  memo.children[a].classList.remove("up");
+                  memo.children[b].classList.remove("up");
+                  open = []; busy = false;
+                }, 800);
+              }
+            }
+          };
+          memo.appendChild(c);
+        });
+      })();
+
+      /* ---------- 7: Rozvrh ---------- */
+      (function () {
+        const S = { M: "🧮", C: "📖", T: "⚽", I: "💻", V: "🎨", H: "🎵", P: "🌍" };
+        const sched = [
+          ["M", "C", "M", "C", "M"],
+          ["C", "M", "P", "P", "T"],
+          ["I", "T", "C", "I", "C"],
+          ["P", "H", "V", "H", "V"],
+          ["T", "V", "M", null, "P"],
+        ];
+        $("schedBody").innerHTML = sched.map((row, i) => `<tr><th class="table-light">${i + 1}.</th>` + row.map((c) => c ? `<td><span class="em">${S[c]}</span></td>` : `<td class="text-body-secondary bg-light">—</td>`).join("") + `</tr>`).join("");
+        const dn = ["pondělí", "úterý", "středa", "čtvrtek", "pátek"];
+        const count = (k) => sched.flat().filter((x) => x === k).length;
+        const daysOf = (k) => dn.filter((_, d) => sched.some((row) => row[d] === k));
+        const hoursInDay = dn.map((_, d) => sched.filter((row) => row[d]).length);
+        const shortDay = hoursInDay.indexOf(Math.min(...hoursInDay));
+        const peDay = sched[1].findIndex((x) => x === "T");
+        const mk = (q, right, wrong) => ({ q, opts: wrong.concat([right]), ok: right });
+        const both = (k) => { const d = daysOf(k); return d.join(" a "); };
+        const api7 = quiz(7, "quiz7", [
+          mk("⚽ Ve který den je 2. hodinu tělocvik?", dn[peDay], ["úterý", "čtvrtek"]),
+          mk("🧮 Kolik hodin matematiky je v rozvrhu celkem za týden?", String(count("M")), [String(count("M") - 1), String(count("M") + 1)]),
+          mk("🌍 Co mají děti ve čtvrtek jako 2. hodinu?", "🌍 prvouku", ["📖 češtinu", "🎨 výtvarku"]),
+          mk("💻 Ve kterých dnech je informatika?", both("I"), ["pondělí a středa", "úterý a pátek"]),
+          mk("⏱️ Který den mají děti nejméně hodin?", dn[shortDay], ["pondělí", "pátek"]),
+          mk("🎨 Kolik hodin výtvarky je v rozvrhu celkem?", String(count("V")), [String(count("V") - 1), String(count("V") + 1)]),
+          mk("🧮 Co mají děti ve středu jako 5. hodinu?", "🧮 matematiku", ["🎨 výtvarku", "⚽ tělocvik"]),
+          mk("🎵 Ve kterých dnech je hudebka?", both("H"), ["pondělí a středa", "středa a pátek"]),
+          mk("🌍 Kolik hodin prvouky je v rozvrhu celkem?", String(count("P")), [String(count("P") - 1), String(count("P") + 1)]),
+        ], "✔ Správně 9 z 9!");
+        $("check7").onclick = () => api7.evaluate();
+        wireDatik("hint7", "tip7", () => api7.getWrongLabel());
+      })();
+
+      /* ---------- obnovení postupu ---------- */
+      (function resume() {
+        InfProgress.get(PROGRESS_ID).steps.forEach((s) => { if (s <= TOTAL) done.add(s); });
+        updateProg();
+        const next = InfProgress.nextStep(PROGRESS_ID, TOTAL);
+        if (next > 1) setStep(next);
+        if (done.size >= TOTAL) $("finishBox").classList.remove("d-none");
+      })();
+    </script>
+  </body>
+</html>

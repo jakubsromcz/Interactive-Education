@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kontrolujeme data – cvičení (5. třída)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <style>
+      body { background: radial-gradient(1200px 600px at 20% 0%, #e8f4ff 0%, rgba(232,244,255,0) 60%), radial-gradient(900px 500px at 90% 20%, #fff3e6 0%, rgba(255,243,230,0) 55%), linear-gradient(180deg,#f8fafc,#fff); }
+      .hero { border: 1px solid rgba(13,110,253,.15); background: rgba(255,255,255,.75); backdrop-filter: blur(6px); }
+      .step-pane { display: none; } .step-pane.active { display: block; }
+      .prog-box { border: 1px solid rgba(13,110,253,.18); background: linear-gradient(180deg,#f0f7ff,#fff); border-radius: 1rem; padding: .75rem; }
+      @media (min-width: 992px) { .prog-box { position: sticky; top: .75rem; } }
+      .robot { display: flex; flex-direction: column; align-items: center; gap: .3rem; padding: .25rem 0; }
+      .part { width: 100%; max-width: 9rem; display: flex; align-items: center; gap: .5rem; border-radius: .6rem; padding: .3rem .6rem; font-size: .75rem; font-weight: 600; opacity: .3; filter: grayscale(1); transition: .35s; }
+      .part .em { font-size: 1.5rem; line-height: 1; }
+      .part.on { opacity: 1; filter: none; transform: scale(1.04); }
+      .part.p0 { background: #cfe2ff; } .part.p1 { background: #e2d9f3; } .part.p2 { background: #fff3cd; } .part.p3 { background: #d1e7dd; }
+      .part.p4 { background: #f8d7da; } .part.p5 { background: #cff4fc; }
+      .robot-done { font-size: 2.6rem; text-align: center; display: none; }
+      .robot-done.on { display: block; animation: pop .5s; }
+      @keyframes pop { 0% { transform: scale(.3); } 70% { transform: scale(1.25); } 100% { transform: scale(1); } }
+      .rule-box { background: #eef6ff; border: 1px dashed rgba(13,110,253,.4); border-radius: .75rem; padding: .5rem .85rem; font-size: .9rem; }
+      table.rob tbody tr { cursor: pointer; }
+      table.rob tbody tr.marked > * { background: #fff3cd !important; }
+      table.rob tbody tr.wrong > * { background: #f8d7da !important; }
+      table.rob tbody tr.good > * { background: #d1e7dd !important; }
+      .bad-cell { color: #dc3545; font-weight: 700; }
+      .seq-row { margin-bottom: .75rem; }
+      .seq-item { display: inline-flex; min-width: 3.5rem; height: 3.5rem; align-items: center; justify-content: center; border: 2px solid #ced4da; border-radius: .6rem; margin: .2rem; font-size: 2.1rem; cursor: pointer; background: #fff; user-select: none; }
+      .seq-item:hover { border-color: #0d6efd; }
+      .seq-item.sel { border-color: #0d6efd; background: #e7f1ff; }
+      .file-item { cursor: pointer; user-select: none; }
+      .file-item.sel { background: #e7f1ff; }
+      .file-item code { font-size: 1rem; }
+      .emo-cell { font-size: 2.2rem; letter-spacing: .08rem; line-height: 1.2; }
+      table.table th.num, table.table td.num { min-width: 3.25rem; width: 3.25rem; text-align: center; }
+      table.table th, table.table td { vertical-align: middle; padding: .55rem .75rem; }
+      .lock { pointer-events: none; }
+      .swap-table th, .swap-table td { text-align: center; vertical-align: middle; }
+      .swap-table td.emo { font-size: 1.85rem; width: 3.5rem; }
+      .swap-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 4.4rem;
+        min-height: 2.4rem;
+        border: 2px solid #86b7fe;
+        border-radius: .55rem;
+        padding: .3rem .65rem;
+        background: #fff;
+        cursor: grab;
+        user-select: none;
+        font-weight: 600;
+        font-size: .95rem;
+        box-shadow: 0 1px 2px rgba(0,0,0,.06);
+      }
+      .swap-chip:active { cursor: grabbing; }
+      .swap-chip.dragging { opacity: .4; }
+      .swap-chip.picked { outline: 3px solid #0d6efd; background: #e7f1ff; }
+      .swap-chip.drag-over { background: #e7f1ff; border-color: #0d6efd; }
+      .swap-chip.ok { border-color: #198754; background: #d1e7dd; }
+    </style>
+  </head>
+  <body>
+    <main class="container py-4 py-md-5">
+      <div class="hero rounded-4 p-3 p-md-4 shadow-sm mb-3">
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-2">
+          <a class="btn btn-outline-secondary btn-sm" href="../home.html">← Zpět</a>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-warning btn-sm" id="restartProgress">Začít znovu</button>
+            <span class="badge text-bg-success">5. třída</span>
+          </div>
+        </div>
+        <h1 class="h3 fw-bold mb-1">Kontrolujeme data</h1>
+        <p class="mb-0 text-body-secondary small">Inspirace: <a href="https://pracesdaty.zcu.cz/index.php/kontrolujeme-data" target="_blank" rel="noopener">Práce s daty – Kontrolujeme data</a> · Datík opravuje roboty a hledá chyby v datech.</p>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-12 col-lg-9 order-2 order-lg-1">
+
+          <!-- KROK 1 -->
+          <section class="step-pane active" id="step1">
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+              <h2 class="h5 fw-bold">1) Poruchy robotů</h2>
+              <p class="text-body-secondary">Datík dostal výpis z čidel šestnácti robotů. Klikni na <strong>řádky, kde je chyba</strong> (hodnota je mimo povolený rozsah nebo je nemožná). Pozor, některý robot může mít chyby i ve více sloupcích a hraniční hodnoty (např. 10 nebo 100) ještě <em>jsou</em> v pořádku.</p>
+              <div class="rule-box mb-3">
+                <strong>Pravidla:</strong> 🌡️ teplota motoru 10 až 90 °C · 🔋 baterie 0 až 100 % · 🚀 rychlost 0 až 12 km/h
+              </div>
+              <div class="table-responsive">
+                <table class="table table-bordered table-sm align-middle rob mb-2">
+                  <thead class="table-light"><tr><th>Robot</th><th>🌡️ Teplota (°C)</th><th>🔋 Baterie (%)</th><th>🚀 Rychlost (km/h)</th></tr></thead>
+                  <tbody id="robBody"></tbody>
+                </table>
+              </div>
+              <div class="small text-body-secondary">Označeno řádků: <span id="markCount">0</span></div>
+              <hr />
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-info btn-sm" id="hint1">🤖 Zeptat se Datíka</button>
+                <button type="button" class="btn btn-primary" id="check1">Zkontrolovat</button>
+                <button type="button" class="btn btn-outline-secondary" id="to2" disabled>Další →</button>
+                <div id="res1" class="fw-semibold"></div>
+              </div>
+              <div class="small text-primary mt-1" id="tip1"></div>
+            </div></div>
+          </section>
+
+          <!-- KROK 2 -->
+          <section class="step-pane" id="step2">
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+              <h2 class="h5 fw-bold">2) Škytavka</h2>
+              <p class="text-body-secondary">Datíkovi se při počítání zaškytlo. V každé řadě se opakuje vzor, ale <strong>jedna položka</strong> do něj nepatří. Klikni na ni.</p>
+              <div id="seqBox"></div>
+              <hr />
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-info btn-sm" id="hint2">🤖 Zeptat se Datíka</button>
+                <button type="button" class="btn btn-primary" id="check2">Zkontrolovat</button>
+                <button type="button" class="btn btn-outline-secondary" id="to3" disabled>Další →</button>
+                <div id="res2" class="fw-semibold"></div>
+              </div>
+              <div class="small text-primary mt-1" id="tip2"></div>
+            </div></div>
+          </section>
+
+          <!-- KROK 3 -->
+          <section class="step-pane" id="step3">
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+              <h2 class="h5 fw-bold">3) Odevzdání obrázků</h2>
+              <p class="text-body-secondary">Děti odevzdávají obrázky do složky. Klikni na všechny názvy souborů, které <strong>splňují pravidla</strong>.</p>
+              <div class="rule-box mb-3">
+                <strong>Pravidla pro název:</strong> ① jen malá písmena ② žádné mezery ③ musí mít příponu (např. <code>.png</code>)
+              </div>
+              <div class="list-group mb-2" id="fileList"></div>
+              <div class="small text-body-secondary">Označeno souborů: <span id="fileCount">0</span></div>
+              <hr />
+              <h3 class="h6 fw-bold">Otázky k pravidlům</h3>
+              <div id="quiz3"></div>
+              <hr />
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-info btn-sm" id="hint3">🤖 Zeptat se Datíka</button>
+                <button type="button" class="btn btn-primary" id="check3">Zkontrolovat</button>
+                <button type="button" class="btn btn-outline-secondary" id="to4" disabled>Další →</button>
+                <div id="res3" class="fw-semibold"></div>
+              </div>
+              <div class="small text-primary mt-1" id="tip3"></div>
+            </div></div>
+          </section>
+
+          <!-- KROK 4 -->
+          <section class="step-pane" id="step4">
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+              <h2 class="h5 fw-bold">4) Obrázkové tabulky</h2>
+              <p class="text-body-secondary">V každém řádku jsou obrázky a popis. Pozorně <strong>spočítej každý druh</strong> zvlášť a rozhodni, jestli popis <strong>sedí</strong>, nebo <strong>nesedí</strong>. Pozor na záměny (např. 2 a 3) a na to, že v jednom řádku může být víc druhů najednou.</p>
+              <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                  <thead class="table-light"><tr><th>Obrázky</th><th>Popis</th><th style="width:11rem">Souhlasí?</th></tr></thead>
+                  <tbody id="picBody"></tbody>
+                </table>
+              </div>
+              <hr />
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-info btn-sm" id="hint4">🤖 Zeptat se Datíka</button>
+                <button type="button" class="btn btn-primary" id="check4">Zkontrolovat</button>
+                <button type="button" class="btn btn-outline-secondary" id="to5" disabled>Další →</button>
+                <div id="res4" class="fw-semibold"></div>
+              </div>
+              <div class="small text-primary mt-1" id="tip4"></div>
+            </div></div>
+          </section>
+
+          <!-- KROK 5 -->
+          <section class="step-pane" id="step5">
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+              <h2 class="h5 fw-bold">5) Dvojité zápisy</h2>
+              <p class="text-body-secondary">Datík přepisoval půjčky z knihovny. Některé zápisy se omylem zopakovaly. Klikni na <strong>všechny řádky, které se v tabulce vyskytují víckrát</strong> (stejný žák + stejná kniha + stejné datum). Unikátní zápisy nech neoznačené.</p>
+              <div class="rule-box mb-3">
+                <strong>Pravidlo:</strong> každý zápis žák + kniha + datum smí být v evidenci jen jednou — duplicity označ všechny.
+              </div>
+              <div class="table-responsive">
+                <table class="table table-bordered table-sm align-middle rob mb-2">
+                  <thead class="table-light"><tr><th>#</th><th>Žák</th><th>Kniha</th><th>Datum</th></tr></thead>
+                  <tbody id="dupBody"></tbody>
+                </table>
+              </div>
+              <div class="small text-body-secondary">Označeno řádků: <span id="dupCount">0</span></div>
+              <hr />
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-info btn-sm" id="hint5">🤖 Zeptat se Datíka</button>
+                <button type="button" class="btn btn-primary" id="check5">Zkontrolovat</button>
+                <button type="button" class="btn btn-outline-secondary" id="to6" disabled>Další →</button>
+                <div id="res5" class="fw-semibold"></div>
+              </div>
+              <div class="small text-primary mt-1" id="tip5"></div>
+            </div></div>
+          </section>
+
+          <!-- KROK 6 -->
+          <section class="step-pane" id="step6">
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+              <h2 class="h5 fw-bold">6) Špatné sloupce</h2>
+              <p class="text-body-secondary">Datík zapsal údaje o mazlíčcích, ale v některých řádcích dal hodnoty <strong>do špatného sloupce</strong>. Přesuň je (nebo klikni na dvě hodnoty a prohoď je), aby v každém řádku seděly na správném místě.</p>
+              <div class="table-responsive">
+                <table class="table table-bordered table-sm align-middle swap-table mb-2">
+                  <thead class="table-light"><tr><th></th><th>Jméno</th><th>Druh</th><th>Věk</th></tr></thead>
+                  <tbody id="swapBody"></tbody>
+                </table>
+              </div>
+              <hr />
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-info btn-sm" id="hint6">🤖 Zeptat se Datíka</button>
+                <button type="button" class="btn btn-primary" id="check6">Dokončit</button>
+                <div id="res6" class="fw-semibold"></div>
+              </div>
+              <div class="small text-primary mt-1" id="tip6"></div>
+              <div id="finishBox" class="alert alert-success mt-3 d-none"><strong>✔ Splněno!</strong> Umíš hlídat rozsahy hodnot, najít vybočující položku, zkontrolovat názvy souborů, porovnat obrázky s popisem, odhalit duplicity i opravit údaje ve špatných sloupcích. Roboti jsou opraveni!</div>
+            </div></div>
+          </section>
+        </div>
+
+        <div class="col-12 col-lg-3 order-1 order-lg-2">
+          <div class="prog-box shadow-sm">
+            <div class="d-flex justify-content-between mb-1"><span class="fw-semibold small">🔧 Opravna robotů</span><span class="badge text-bg-light border" id="stepLabel">1 / 6</span></div>
+            <div class="progress mb-2" style="height:.45rem"><div class="progress-bar bg-success" id="pctBar" style="width:0%"></div></div>
+            <div class="robot">
+              <div class="part p0" data-i="0"><span class="em">📡</span>anténa</div>
+              <div class="part p1" data-i="1"><span class="em">🧠</span>hlava</div>
+              <div class="part p2" data-i="2"><span class="em">⚙️</span>tělo</div>
+              <div class="part p3" data-i="3"><span class="em">💪</span>ruce</div>
+              <div class="part p4" data-i="4"><span class="em">🦵</span>nohy</div>
+              <div class="part p5" data-i="5"><span class="em">🛞</span>kola</div>
+            </div>
+            <div class="robot-done mt-1" id="robotDone">🤖✨</div>
+            <div class="small text-center text-body-secondary mt-1" id="pctLabel">0 %</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="../progress.js"></script>
+    <script>
+      const PROGRESS_ID = "5/kontrolujeme-data";
+      const TOTAL = 6;
+      const $ = (id) => document.getElementById(id);
+      const done = new Set();
+      const locked = {};
+
+      function shuffle(a) {
+        a = a.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+      function wireDatik(btnId, tipId, findWrong) {
+        let used = false;
+        $(btnId).onclick = () => {
+          if (used) {
+            $(tipId).textContent = "Datík už jednou poradil u tohoto cvičení. Teď to zkus sám/sama.";
+            return;
+          }
+          const label = findWrong();
+          if (label == null) {
+            $(tipId).textContent = "🤖 Datík: zatím nevidím vyplněnou chybu — doplň odpovědi a zkus znovu, nebo je vše správně.";
+            return;
+          }
+          used = true;
+          $(btnId).disabled = true;
+          $(tipId).textContent = "🤖 Datík šeptá: podívej se znovu na „" + label + "“ — tam je něco špatně.";
+        };
+      }
+
+      function setStep(n) {
+        document.querySelectorAll(".step-pane").forEach((el) => el.classList.remove("active"));
+        $("step" + n).classList.add("active");
+        $("stepLabel").textContent = n + " / " + TOTAL;
+      }
+      function updateProg() {
+        const pct = Math.round((done.size / TOTAL) * 100);
+        $("pctBar").style.width = pct + "%";
+        $("pctLabel").textContent = pct + " %";
+        document.querySelectorAll(".part").forEach((el) => el.classList.toggle("on", done.has(Number(el.dataset.i) + 1)));
+        $("robotDone").classList.toggle("on", done.size >= TOTAL);
+      }
+      function info(step, text, cls) {
+        const r = $("res" + step);
+        r.className = "fw-semibold " + (cls || "text-body-secondary");
+        r.textContent = text;
+      }
+      function pass(step, text) {
+        locked[step] = true;
+        info(step, text, "text-success");
+        const nb = $("to" + (step + 1));
+        if (nb) { nb.disabled = false; nb.className = "btn btn-primary"; }
+        if (!done.has(step)) {
+          done.add(step);
+          InfProgress.completeStep(PROGRESS_ID, step, TOTAL);
+          updateProg();
+        }
+        if (step === TOTAL) $("finishBox").classList.remove("d-none");
+      }
+      $("restartProgress").onclick = () => { if (confirm("Začít znovu?")) { InfProgress.reset(PROGRESS_ID); location.reload(); } };
+      [2, 3, 4, 5, 6].forEach((n) => { $("to" + n).onclick = () => setStep(n); });
+
+      /* ---------- 1: Poruchy robotů ---------- */
+      const ROB = [
+        { id: "R-01", t: 45, b: 80, v: 3 },
+        { id: "R-02", t: 90, b: 100, v: 12 },
+        { id: "R-03", t: 38, b: 140, v: 4, why: "baterie 140 % – víc než 100 % být nemůže" },
+        { id: "R-04", t: 71, b: 55, v: 0 },
+        { id: "R-05", t: 55, b: 40, v: 87, why: "rychlost 87 km/h – robot je pomalejší než 12 km/h" },
+        { id: "R-06", t: 62, b: 0, v: 6 },
+        { id: "R-07", t: -20, b: 70, v: 5, why: "teplota −20 °C – motor je teplejší než 10 °C" },
+        { id: "R-08", t: 30, b: 15, v: 8 },
+        { id: "R-09", t: 125, b: 60, v: 7, why: "teplota 125 °C – motor se neohřeje nad 90 °C" },
+        { id: "R-10", t: 10, b: 35, v: 2 },
+        { id: "R-11", t: 48, b: -15, v: 5, why: "baterie −15 % – méně než 0 % být nemůže" },
+        { id: "R-12", t: 66, b: 92, v: -4, why: "rychlost −4 km/h – robot nemůže jet záporně" },
+        { id: "R-13", t: 5, b: 105, v: 6, why: "teplota 5 °C a baterie 105 % – dvě chyby najednou" },
+        { id: "R-14", t: 84, b: 22, v: 9 },
+        { id: "R-15", t: 52, b: 100, v: 13, why: "rychlost 13 km/h – robot nejede víc než 12 km/h" },
+        { id: "R-16", t: 40, b: 64, v: 11 },
+      ];
+      const marked = new Set();
+      const robBody = $("robBody");
+      const robOrder = shuffle(ROB.map((_, i) => i));
+      robOrder.forEach((i) => {
+        const r = ROB[i];
+        const tr = document.createElement("tr");
+        tr.dataset.i = String(i);
+        const bad = !!r.why;
+        const tBad = bad && (r.t < 10 || r.t > 90), bBad = bad && (r.b < 0 || r.b > 100), vBad = bad && (r.v < 0 || r.v > 12);
+        tr.innerHTML = `<td><strong>🤖 ${r.id}</strong></td><td class="${tBad ? "bad-cell-on" : ""}" data-c="t">${r.t}</td><td data-c="b">${r.b}</td><td data-c="v">${r.v}</td>`;
+        if (tBad) tr.children[1].dataset.bad = "1";
+        if (bBad) tr.children[2].dataset.bad = "1";
+        if (vBad) tr.children[3].dataset.bad = "1";
+        tr.onclick = () => {
+          if (locked[1]) return;
+          if (marked.has(i)) marked.delete(i); else marked.add(i);
+          refreshRobMarks();
+        };
+        robBody.appendChild(tr);
+      });
+      function refreshRobMarks() {
+        [...robBody.children].forEach((tr) => {
+          const i = Number(tr.dataset.i);
+          tr.classList.toggle("marked", marked.has(i));
+          tr.classList.remove("wrong");
+        });
+        $("markCount").textContent = String(marked.size);
+      }
+      function robStats() {
+        const good = [...marked].filter((i) => ROB[i].why).length;
+        const bad = [...marked].filter((i) => !ROB[i].why).length;
+        const left = ROB.filter((r, i) => r.why && !marked.has(i)).length;
+        return { good, bad, left };
+      }
+      const ROB_BAD = ROB.filter((r) => r.why).length;
+      $("check1").onclick = () => {
+        if (locked[1]) return;
+        const { good, bad, left } = robStats();
+        if (bad === 0 && left === 0) {
+          pass(1, "✔ Správně " + good + " z " + ROB_BAD + "!");
+          return;
+        }
+        info(1, "Správně " + good + " z " + ROB_BAD + (bad ? " · špatně označených: " + bad : ""), "text-danger");
+      };
+      wireDatik("hint1", "tip1", () => {
+        const falsePos = [...marked].find((i) => !ROB[i].why);
+        if (falsePos !== undefined) return ROB[falsePos].id;
+        const miss = ROB.findIndex((r, i) => r.why && !marked.has(i));
+        if (miss >= 0) return ROB[miss].id;
+        return null;
+      });
+
+      /* ---------- 2: Škytavka ---------- */
+      function makeSeq(pattern, len, badIdx, repl) {
+        const a = [];
+        for (let i = 0; i < len; i++) a.push(pattern[i % pattern.length]);
+        a[badIdx] = repl;
+        return { items: a, bad: badIdx };
+      }
+      const SEQS = [
+        { name: "Ovoce", ...makeSeq(["🍎", "🍌"], 9, 6, "🍌") },
+        { name: "Kuličky", ...makeSeq(["🔴", "🔴", "🔵"], 10, 7, "🔵") },
+        { name: "Čísla", ...makeSeq(["2", "4", "6", "8", "10", "12", "14"], 7, 4, "11") },
+        { name: "Roboti", ...makeSeq(["🤖", "👾", "👾"], 9, 4, "🤖") },
+        { name: "Počasí", ...makeSeq(["☀️", "☁️", "☁️"], 9, 5, "☀️") },
+        { name: "Zvířátka", ...makeSeq(["🐶", "🐱", "🐭"], 9, 7, "🐭") },
+        { name: "Barevné čtverce", ...makeSeq(["🟥", "🟦"], 10, 3, "🟥") },
+        { name: "Násobky pěti", ...makeSeq(["5", "10", "15", "20", "25", "30", "35", "40"], 8, 5, "32") },
+        { name: "Tvary", ...makeSeq(["🔺", "⭕", "⭕", "🟩"], 12, 6, "🔺") },
+        { name: "Lichá čísla", ...makeSeq(["1", "3", "5", "7", "9", "11", "13", "15"], 8, 5, "12") },
+      ];
+      const seqPick = {};
+      const seqOrder = shuffle(SEQS.map((_, i) => i));
+      seqOrder.forEach((si) => {
+        const s = SEQS[si];
+        const row = document.createElement("div");
+        row.className = "seq-row";
+        s.items.forEach((x, i) => {
+          const el = document.createElement("span");
+          el.className = "seq-item";
+          el.textContent = x;
+          el.onclick = () => {
+            if (locked[2]) return;
+            seqPick[si] = i;
+            row.querySelectorAll(".seq-item").forEach((e, k) => {
+              e.classList.toggle("sel", k === i);
+            });
+          };
+          row.appendChild(el);
+        });
+        $("seqBox").appendChild(row);
+      });
+      $("check2").onclick = () => {
+        if (locked[2]) return;
+        const okN = SEQS.filter((s, si) => seqPick[si] === s.bad).length;
+        const need = SEQS.length;
+        if (okN === need) pass(2, "✔ Správně " + okN + " z " + need + "!");
+        else info(2, "Správně " + okN + " z " + need, "text-danger");
+      };
+      wireDatik("hint2", "tip2", () => {
+        for (let d = 0; d < seqOrder.length; d++) {
+          const si = seqOrder[d];
+          if (seqPick[si] !== undefined && seqPick[si] !== SEQS[si].bad) {
+            return "řada " + (d + 1);
+          }
+        }
+        return null;
+      });
+
+      /* ---------- 3: Odevzdání obrázků ---------- */
+      const FILES = [
+        { n: "kocka.png", ok: true },
+        { n: "Pes Rex.jpg", ok: false, why: "obsahuje mezeru a velká písmena" },
+        { n: "obrazek1.jpg", ok: true },
+        { n: "Les.png", ok: false, why: "začíná velkým písmenem" },
+        { n: "hrad_na_kopci.png", ok: true },
+        { n: "slunce", ok: false, why: "chybí přípona" },
+        { n: "moje foto.jpg", ok: false, why: "obsahuje mezeru" },
+        { n: "auto.jpeg", ok: true },
+        { n: "RYBNIK.JPG", ok: false, why: "jsou tam velká písmena" },
+        { n: "dum-2.png", ok: true },
+        { n: "strom.png", ok: true },
+        { n: "Pejsek.png", ok: false, why: "začíná velkým písmenem" },
+        { n: "domecek_2.gif", ok: true },
+        { n: "muj obrazek.png", ok: false, why: "obsahuje mezeru" },
+        { n: "kvetina.", ok: false, why: "za tečkou chybí přípona" },
+        { n: "lod.jpg", ok: true },
+        { n: "SLUNCE.png", ok: false, why: "jsou tam velká písmena" },
+        { n: "zahrada.jpeg", ok: true },
+        { n: "ptak 1.png", ok: false, why: "obsahuje mezeru" },
+        { n: "vlak-a-nadrazi.png", ok: true },
+      ];
+      const filePick = new Set();
+      const FILES_OK = FILES.filter((f) => f.ok).length;
+      const fl = $("fileList");
+      const fileOrder = shuffle(FILES.map((_, i) => i));
+      fileOrder.forEach((i) => {
+        const f = FILES[i];
+        const el = document.createElement("div");
+        el.className = "list-group-item file-item d-flex justify-content-between align-items-center";
+        el.dataset.i = String(i);
+        el.innerHTML = `<span>🖼️ <code>${f.n}</code></span>`;
+        el.onclick = () => {
+          if (locked[3]) return;
+          if (filePick.has(i)) filePick.delete(i); else filePick.add(i);
+          el.classList.toggle("sel", filePick.has(i));
+          $("fileCount").textContent = String(filePick.size);
+        };
+        fl.appendChild(el);
+      });
+      const qs = [
+        { q: "Který název souboru je správně?", opts: ["Moje_Foto.png", "moje_foto.png", "moje foto.png"], ok: "moje_foto.png" },
+        { q: "Proč je název „slunce“ špatně?", opts: ["Má malá písmena.", "Chybí přípona (např. .png).", "Je příliš krátký."], ok: "Chybí přípona (např. .png)." },
+        { q: "Čím je dobré nahradit mezeru v názvu souboru?", opts: ["Podtržítkem nebo pomlčkou (_ nebo -).", "Druhou mezerou.", "Velkým písmenem."], ok: "Podtržítkem nebo pomlčkou (_ nebo -)." },
+      ];
+      const STEP3_NEED = FILES_OK + qs.length;
+      const ans = {};
+      (function () {
+        const root = $("quiz3");
+        qs.forEach((q, qi) => {
+          const d = document.createElement("div");
+          d.className = "mb-3";
+          const optsHtml = shuffle(q.opts).map((o, oi) =>
+            `<div class="form-check"><input class="form-check-input" type="radio" name="q3_${qi}" id="q3_${qi}_${oi}" value="${o.replace(/"/g, "&quot;")}"><label class="form-check-label" for="q3_${qi}_${oi}">${o}</label></div>`
+          ).join("");
+          d.innerHTML = `<div class="fw-semibold mb-1">${qi + 1}. ${q.q}</div>` + optsHtml;
+          d.querySelectorAll("input").forEach((inp) => {
+            inp.onchange = () => { if (locked[3]) return; ans[qi] = inp.value; };
+          });
+          root.appendChild(d);
+        });
+      })();
+      $("check3").onclick = () => {
+        if (locked[3]) return;
+        let ok = 0;
+        FILES.forEach((f, i) => {
+          if (f.ok && filePick.has(i)) ok++;
+        });
+        qs.forEach((q, qi) => { if (ans[qi] === q.ok) ok++; });
+        if (ok === STEP3_NEED && [...filePick].every((i) => FILES[i].ok)) {
+          $("quiz3").querySelectorAll("input").forEach((x) => (x.disabled = true));
+          pass(3, "✔ Správně " + ok + " z " + STEP3_NEED + "!");
+        } else {
+          const falseFiles = [...filePick].filter((i) => !FILES[i].ok).length;
+          info(3, "Správně " + ok + " z " + STEP3_NEED + (falseFiles ? " · špatně označených souborů: " + falseFiles : ""), "text-danger");
+        }
+      };
+      wireDatik("hint3", "tip3", () => {
+        for (const i of filePick) {
+          if (!FILES[i].ok) return FILES[i].n;
+        }
+        for (let qi = 0; qi < qs.length; qi++) {
+          if (ans[qi] !== undefined && ans[qi] !== qs[qi].ok) return "otázka " + (qi + 1);
+        }
+        return null;
+      });
+
+      /* ---------- 4: Obrázkové tabulky ---------- */
+      const PICS = [
+        { e: "🍎🍎🍌🍎🍌", t: "Jsou tu 3 jablka a 2 banány.", ok: true },
+        { e: "🐶🐱🐶🐱🐶", t: "Jsou tu 2 psi a 3 kočky.", ok: false },
+        { e: "🚗🚌🚗🚌🚌🚗", t: "Jsou tu 3 auta a 3 autobusy.", ok: true },
+        { e: "⭐⭐🌙⭐🌙🌙⭐", t: "Jsou tu 3 hvězdy a 4 měsíce.", ok: false },
+        { e: "🧁🍪🧁🍪🧁🍪🧁", t: "Jsou tu 4 cupcaky a 3 sušenky.", ok: true },
+        { e: "🐸🐸🐢🐸🐢🐢", t: "Jsou tu 3 žáby a 3 želvy.", ok: true },
+        { e: "✏️📏✏️✏️📏📏", t: "Jsou tu 2 tužky a 3 pravítka.", ok: false },
+        { e: "🚲🚲🛴🚲🛴🚲🛴🛴", t: "Jsou tu 4 kola a 4 koloběžky.", ok: true },
+        { e: "🍓🍇🍓🍇🍓🍇🍇", t: "Jsou tu 4 jahody a 3 hrozny.", ok: false },
+        { e: "🦊🐻🦊🐻🦊🐻🐻", t: "Jsou tu 3 lišky a 4 medvědi.", ok: true },
+        { e: "🟥🟦🟥🟦🟥🟦🟥", t: "Jsou tu 3 červené a 4 modré čtverce.", ok: false },
+        { e: "🐠🐟🐠🐟🐠🐟🐠🐟", t: "Jsou tu 4 tropické rybky a 4 obyčejné.", ok: true },
+      ];
+      const picAns = {};
+      const pb = $("picBody");
+      const picOrder = shuffle(PICS.map((_, i) => i));
+      picOrder.forEach((pi) => {
+        const p = PICS[pi];
+        const tr = document.createElement("tr");
+        tr.dataset.pi = String(pi);
+        const radios = shuffle([
+          { v: "1", lab: "sedí", suf: "a" },
+          { v: "0", lab: "nesedí", suf: "b" },
+        ]);
+        const radiosHtml = radios.map((r) =>
+          `<div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="pic${pi}" id="pic${pi}${r.suf}" value="${r.v}"><label class="form-check-label" for="pic${pi}${r.suf}">${r.lab}</label></div>`
+        ).join("");
+        tr.innerHTML = `<td class="emo-cell">${p.e}</td><td>${p.t}</td><td>${radiosHtml}</td>`;
+        tr.querySelectorAll("input").forEach((inp) => {
+          inp.onchange = () => { if (locked[4]) return; picAns[pi] = inp.value === "1"; };
+        });
+        pb.appendChild(tr);
+      });
+      $("check4").onclick = () => {
+        if (locked[4]) return;
+        let ok = 0;
+        PICS.forEach((p, i) => { if (picAns[i] === p.ok) ok++; });
+        const need = PICS.length;
+        if (ok === need) {
+          document.querySelectorAll("#picBody input").forEach((x) => (x.disabled = true));
+          pass(4, "✔ Správně " + ok + " z " + need + "!");
+        } else {
+          info(4, "Správně " + ok + " z " + need, "text-danger");
+        }
+      };
+      wireDatik("hint4", "tip4", () => {
+        for (let d = 0; d < picOrder.length; d++) {
+          const pi = picOrder[d];
+          if (picAns[pi] !== undefined && picAns[pi] !== PICS[pi].ok) return "řádek " + (d + 1);
+        }
+        return null;
+      });
+
+      /* ---------- 5: Dvojité zápisy ---------- */
+      const DUPS = [
+        { pupil: "Anna Nováková", book: "Malý princ", date: "12. 3." },
+        { pupil: "Adam Horák", book: "Robinson Crusoe", date: "14. 3." },
+        { pupil: "Anna Nováková", book: "Malý princ", date: "12. 3." },
+        { pupil: "Eliška Králová", book: "Harry Potter", date: "15. 3." },
+        { pupil: "Tomáš Beneš", book: "Pippi Dlouhá punčocha", date: "16. 3." },
+        { pupil: "Adam Horák", book: "Robinson Crusoe", date: "14. 3." },
+        { pupil: "Sofie Malá", book: "Alenka v říši divů", date: "17. 3." },
+        { pupil: "Jakub Veselý", book: "Deník malého poseroutky", date: "18. 3." },
+        { pupil: "Eliška Králová", book: "Harry Potter", date: "15. 3." },
+        { pupil: "Nina Šťastná", book: "Karlsson z střechy", date: "19. 3." },
+        { pupil: "Jakub Veselý", book: "Deník malého poseroutky", date: "18. 3." },
+        { pupil: "Matěj Černý", book: "Gulliverovy cesty", date: "20. 3." },
+        { pupil: "Sofie Malá", book: "Alenka v říši divů", date: "17. 3." },
+        { pupil: "Laura Dvořáková", book: "Popelka", date: "21. 3." },
+      ].map((d) => ({ ...d, key: d.pupil + "|" + d.book + "|" + d.date }));
+      (function markDupKeys() {
+        const counts = {};
+        DUPS.forEach((d) => { counts[d.key] = (counts[d.key] || 0) + 1; });
+        DUPS.forEach((d) => { d.dup = counts[d.key] > 1; });
+      })();
+      const dupPick = new Set();
+      const DUP_NEED = DUPS.filter((d) => d.dup).length;
+      const dupBody = $("dupBody");
+      const dupOrder = shuffle(DUPS.map((_, i) => i));
+      dupOrder.forEach((i, ord) => {
+        const d = DUPS[i];
+        const tr = document.createElement("tr");
+        tr.dataset.i = String(i);
+        tr.innerHTML = `<td>${ord + 1}</td><td>${d.pupil}</td><td>${d.book}</td><td>${d.date}</td>`;
+        tr.onclick = () => {
+          if (locked[5]) return;
+          if (dupPick.has(i)) dupPick.delete(i); else dupPick.add(i);
+          [...dupBody.children].forEach((row) => {
+            row.classList.toggle("marked", dupPick.has(Number(row.dataset.i)));
+            row.classList.remove("wrong");
+          });
+          $("dupCount").textContent = String(dupPick.size);
+        };
+        dupBody.appendChild(tr);
+      });
+      $("check5").onclick = () => {
+        if (locked[5]) return;
+        const good = [...dupPick].filter((i) => DUPS[i].dup).length;
+        const bad = [...dupPick].filter((i) => !DUPS[i].dup).length;
+        const left = DUPS.filter((d, i) => d.dup && !dupPick.has(i)).length;
+        if (bad === 0 && left === 0) pass(5, "✔ Správně " + good + " z " + DUP_NEED + "!");
+        else info(5, "Správně " + good + " z " + DUP_NEED + (bad ? " · špatně označených: " + bad : ""), "text-danger");
+      };
+      wireDatik("hint5", "tip5", () => {
+        const falsePos = [...dupPick].find((i) => !DUPS[i].dup);
+        if (falsePos !== undefined) return DUPS[falsePos].pupil + " – " + DUPS[falsePos].book;
+        const miss = DUPS.findIndex((d, i) => d.dup && !dupPick.has(i));
+        if (miss >= 0) return DUPS[miss].pupil + " – " + DUPS[miss].book;
+        return null;
+      });
+
+      /* ---------- 6: Špatné sloupce ---------- */
+      const SWAP_ROWS = [
+        { emo: "🐱", name: "Micka", kind: "kočka", age: "3" },
+        { emo: "🐶", name: "Bobík", kind: "pes", age: "5" },
+        { emo: "🐰", name: "Žofka", kind: "králík", age: "2" },
+        { emo: "🐹", name: "Fousek", kind: "křeček", age: "1" },
+        { emo: "🦜", name: "Ríša", kind: "papoušek", age: "7" },
+        { emo: "🐢", name: "Teri", kind: "želva", age: "10" },
+        { emo: "🐱", name: "Bára", kind: "kočka", age: "4" },
+        { emo: "🐶", name: "Max", kind: "pes", age: "6" },
+      ];
+      const SWAP_COLS = ["name", "kind", "age"];
+      const SWAP_COL_LABEL = { name: "jméno", kind: "druh", age: "věk" };
+      const SWAP_NEED = SWAP_ROWS.length * SWAP_COLS.length;
+      const swapBody = $("swapBody");
+      const swapChips = [];
+      let swapPick = null;
+
+      function clearSwapPick() {
+        swapPick = null;
+        swapChips.forEach((c) => c.classList.remove("picked"));
+      }
+      function setChipVal(chip, val) {
+        chip.dataset.val = val;
+        chip.textContent = val;
+        chip.classList.remove("ok");
+      }
+      function swapChipsVals(a, b) {
+        if (a === b) return;
+        const va = a.dataset.val;
+        setChipVal(a, b.dataset.val);
+        setChipVal(b, va);
+      }
+      function isCorrectOrder(placed, row) {
+        return SWAP_COLS.every((col, i) => placed[i] === row[col]);
+      }
+
+      SWAP_ROWS.forEach((row, ri) => {
+        let placed = shuffle(SWAP_COLS.map((c) => row[c]));
+        // nikdy nenech správné pořadí hned na začátku
+        if (isCorrectOrder(placed, row)) {
+          placed = [row.age, row.name, row.kind];
+        }
+        const tr = document.createElement("tr");
+        const emoTd = document.createElement("td");
+        emoTd.className = "emo";
+        emoTd.textContent = row.emo;
+        tr.appendChild(emoTd);
+
+        SWAP_COLS.forEach((col, ci) => {
+          const td = document.createElement("td");
+          const chip = document.createElement("span");
+          chip.className = "swap-chip";
+          chip.draggable = true;
+          chip.dataset.row = String(ri);
+          chip.dataset.col = col;
+          chip.dataset.ok = row[col];
+          chip.dataset.label = (ri + 1) + ". " + SWAP_COL_LABEL[col];
+          setChipVal(chip, placed[ci]);
+
+          chip.addEventListener("dragstart", (e) => {
+            if (locked[6]) { e.preventDefault(); return; }
+            e.dataTransfer.setData("text/plain", ri + ":" + col);
+            e.dataTransfer.effectAllowed = "move";
+            chip.classList.add("dragging");
+            clearSwapPick();
+          });
+          chip.addEventListener("dragend", () => chip.classList.remove("dragging"));
+          chip.addEventListener("dragover", (e) => {
+            if (locked[6]) return;
+            const from = e.dataTransfer.types.includes("text/plain");
+            if (!from) return;
+            e.preventDefault();
+            if (chip.dataset.row === String(ri)) chip.classList.add("drag-over");
+          });
+          chip.addEventListener("dragleave", () => chip.classList.remove("drag-over"));
+          chip.addEventListener("drop", (e) => {
+            e.preventDefault();
+            chip.classList.remove("drag-over");
+            if (locked[6]) return;
+            const raw = e.dataTransfer.getData("text/plain");
+            const [fromRow, fromCol] = raw.split(":");
+            if (fromRow !== String(ri)) return;
+            const other = swapChips.find((c) => c.dataset.row === fromRow && c.dataset.col === fromCol);
+            if (other) swapChipsVals(chip, other);
+          });
+          chip.onclick = () => {
+            if (locked[6]) return;
+            if (!swapPick) {
+              swapPick = chip;
+              chip.classList.add("picked");
+              return;
+            }
+            if (swapPick === chip) { clearSwapPick(); return; }
+            if (swapPick.dataset.row !== chip.dataset.row) {
+              clearSwapPick();
+              swapPick = chip;
+              chip.classList.add("picked");
+              return;
+            }
+            swapChipsVals(swapPick, chip);
+            clearSwapPick();
+          };
+          td.appendChild(chip);
+          tr.appendChild(td);
+          swapChips.push(chip);
+        });
+        swapBody.appendChild(tr);
+      });
+
+      $("check6").onclick = () => {
+        if (locked[6]) return;
+        let ok = 0;
+        swapChips.forEach((c) => {
+          if (c.dataset.val === c.dataset.ok) {
+            ok++;
+            c.classList.add("ok");
+          } else {
+            c.classList.remove("ok");
+          }
+        });
+        if (ok === SWAP_NEED) {
+          swapChips.forEach((c) => { c.draggable = false; c.style.pointerEvents = "none"; });
+          pass(6, "✔ Správně " + ok + " z " + SWAP_NEED + "!");
+        } else {
+          info(6, "Správně " + ok + " z " + SWAP_NEED, "text-danger");
+        }
+      };
+      wireDatik("hint6", "tip6", () => {
+        const wrong = swapChips.find((c) => c.dataset.val !== c.dataset.ok);
+        return wrong ? wrong.dataset.label : null;
+      });
+
+      /* ---------- obnovení postupu ---------- */
+      (function resume() {
+        InfProgress.get(PROGRESS_ID).steps.forEach((s) => { if (s <= TOTAL) done.add(s); });
+        updateProg();
+        const next = InfProgress.nextStep(PROGRESS_ID, TOTAL);
+        if (next > 1) setStep(next);
+        if (done.size >= TOTAL) $("finishBox").classList.remove("d-none");
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,987 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Víme, co jsou data – cvičení (5. třída)</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <style>
+      body {
+        background: radial-gradient(1200px 600px at 20% 0%, #e8f4ff 0%, rgba(232, 244, 255, 0) 60%),
+          radial-gradient(900px 500px at 90% 20%, #fff3e6 0%, rgba(255, 243, 230, 0) 55%),
+          linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      }
+      .hero {
+        border: 1px solid rgba(13, 110, 253, 0.15);
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(6px);
+      }
+      .step-pane { display: none; }
+      .step-pane.active { display: block; }
+      .prog-box {
+        border: 1px solid rgba(13, 110, 253, 0.18);
+        background: linear-gradient(180deg, #f0f7ff, #fff);
+        border-radius: 1rem;
+        padding: 0.75rem;
+        position: sticky;
+        top: 0.75rem;
+      }
+      .prog-tower {
+        display: flex;
+        flex-direction: column-reverse;
+        align-items: center;
+        gap: 0.25rem;
+        min-height: 11rem;
+        justify-content: flex-start;
+      }
+      .prog-block {
+        border-radius: 0.45rem;
+        padding: 0.4rem 0.4rem;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-align: center;
+        opacity: 0.28;
+        filter: grayscale(1);
+        transition: 0.3s;
+        background: #cfe2ff;
+        box-sizing: border-box;
+      }
+      .prog-block.on { opacity: 1; filter: none; }
+      /* column-reverse: b1 dole (nejširší), b5 nahoře (nejužší) */
+      .prog-block.b1 { background: #cfe2ff; width: 100%; }
+      .prog-block.b2 { background: #d1e7dd; width: 86%; }
+      .prog-block.b3 { background: #fff3cd; width: 72%; }
+      .prog-block.b4 { background: #f8d7da; width: 58%; }
+      .prog-block.b5 { background: #e2d9f3; width: 44%; }
+      .prog-box.done {
+        border-color: rgba(25, 135, 84, 0.45);
+        background: linear-gradient(180deg, #e8fff0, #fff);
+        box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.12);
+      }
+      .prog-box.done .prog-block.on {
+        animation: towerPop 0.55s ease both;
+      }
+      .prog-box.done .prog-block.b1 { background: #7dd3fc; }
+      .prog-box.done .prog-block.b2 { background: #86efac; }
+      .prog-box.done .prog-block.b3 { background: #fde047; }
+      .prog-box.done .prog-block.b4 { background: #fda4af; }
+      .prog-box.done .prog-block.b5 { background: #c4b5fd; }
+      .prog-box.done .prog-block:nth-child(1) { animation-delay: 0.2s; }
+      .prog-box.done .prog-block:nth-child(2) { animation-delay: 0.15s; }
+      .prog-box.done .prog-block:nth-child(3) { animation-delay: 0.1s; }
+      .prog-box.done .prog-block:nth-child(4) { animation-delay: 0.05s; }
+      .prog-box.done .prog-block:nth-child(5) { animation-delay: 0s; }
+      @keyframes towerPop {
+        0% { transform: scale(0.85); }
+        60% { transform: scale(1.08); }
+        100% { transform: scale(1); }
+      }
+      .tower-done {
+        display: none;
+        text-align: center;
+        margin-top: 0.65rem;
+        padding: 0.45rem 0.5rem;
+        border-radius: 0.65rem;
+        background: #d1e7dd;
+        color: #0f5132;
+        font-weight: 700;
+        font-size: 0.85rem;
+        line-height: 1.3;
+      }
+      .tower-done.on { display: block; animation: towerPop 0.5s ease; }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #adb5bd;
+        border-radius: 0.75rem;
+        padding: 0.35rem 0.55rem;
+        background: #fff;
+        cursor: grab;
+        user-select: none;
+        margin: 0.2rem;
+        font-size: 1.75rem;
+        line-height: 1;
+        min-width: 2.9rem;
+        min-height: 2.9rem;
+        box-shadow: 0 1px 2px rgba(0,0,0,.06);
+      }
+      .chip.text-chip { font-size: 1rem; font-weight: 600; min-width: 3.5rem; }
+      .chip:active { cursor: grabbing; }
+      .chip.dragging { opacity: 0.45; }
+      .emoji-pool {
+        border: 1px dashed rgba(13, 110, 253, 0.35);
+        border-radius: 0.85rem;
+        padding: 0.55rem;
+        background: rgba(13, 110, 253, 0.04);
+        position: sticky;
+        top: 0.75rem;
+        width: max-content;
+        max-width: 100%;
+      }
+      #emojiPool {
+        display: grid;
+        grid-template-columns: repeat(2, 3.2rem);
+        gap: 0.3rem;
+        justify-items: center;
+      }
+      #emojiPool .chip { margin: 0; }
+      .drop {
+        min-height: 3.2rem;
+        border: 2px dashed rgba(13, 110, 253, 0.45);
+        border-radius: 0.65rem;
+        padding: 0.35rem 0.55rem;
+        background: rgba(13, 110, 253, 0.05);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 3.5rem;
+        font-size: 1.75rem;
+        vertical-align: middle;
+      }
+      .drop.drag-over { background: rgba(13, 110, 253, 0.18); border-color: #0d6efd; }
+      .drop.filled { border-style: solid; background: #fff; }
+      .pic-card {
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 0.75rem;
+        padding: 0.85rem;
+        text-align: center;
+        background: #fff;
+        min-height: 8.5rem;
+      }
+      .pic-card .emo-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.35rem;
+        margin-bottom: 0.65rem;
+      }
+      .pic-card .emo-row span { font-size: 2.75rem; line-height: 1; }
+      .is-data-row {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        flex-wrap: wrap;
+      }
+      .is-data-row .qtxt { flex: 0 1 auto; font-size: 0.92rem; max-width: calc(100% - 8.5rem); }
+      .is-data-row select { width: auto; min-width: 7.5rem; max-width: 9rem; flex: 0 0 auto; }
+      .bar-row {
+        display: grid;
+        grid-template-columns: 5.5rem 1fr 3rem;
+        gap: 0.5rem;
+        align-items: center;
+        margin-bottom: 0.5rem;
+      }
+      @media (max-width: 767.98px) {
+        .bar-row {
+          grid-template-columns: 2.6rem 1fr 2.4rem;
+          gap: 0.2rem;
+          margin-bottom: 0.35rem;
+        }
+      }
+      .bar-track {
+        height: 1.85rem;
+        background: #e9ecef;
+        border-radius: 0.35rem;
+        overflow: hidden;
+        cursor: pointer;
+        position: relative;
+      }
+      .bar-fill { height: 100%; background: #0d6efd; width: 0%; transition: width 80ms; }
+      .q-pair .fw-semibold { font-size: 0.95rem; }
+      .table-data th, .table-data td {
+        vertical-align: middle;
+        text-align: center;
+        padding: 0.65rem 0.85rem;
+      }
+      .table-data th.team, .table-data td.team {
+        text-align: left;
+        min-width: 8rem;
+        white-space: nowrap;
+      }
+      .table-data th.num, .table-data td.num {
+        min-width: 3.25rem;
+        width: 3.25rem;
+        font-size: 1.05rem;
+      }
+      .table-data th.score, .table-data td.score { min-width: 4.5rem; }
+      .table-data .team-emo { font-size: 1.75rem; margin-right: 0.25rem; }
+      .cell-slot {
+        min-width: 4rem;
+        min-height: 2.75rem;
+        border: 2px dashed #adb5bd;
+        border-radius: 0.45rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        font-weight: 600;
+        font-size: 1rem;
+      }
+      .cell-slot.drag-over { border-color: #0d6efd; background: #e7f1ff; }
+      .cell-slot.ok { border-color: #198754; background: #d1e7dd; border-style: solid; }
+      .datik-tip {
+        font-size: 0.9rem;
+        color: #0b5ed7;
+        min-height: 1.4rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container py-4 py-md-5">
+      <div class="hero rounded-4 p-3 p-md-4 shadow-sm mb-3">
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-2">
+          <a class="btn btn-outline-secondary btn-sm" href="../home.html">← Zpět</a>
+          <div class="d-flex gap-2 align-items-center">
+            <button type="button" class="btn btn-outline-warning btn-sm" id="restartProgress">Začít znovu</button>
+            <span class="badge text-bg-success">5. třída</span>
+          </div>
+        </div>
+        <h1 class="h3 fw-bold mb-1">Víme, co jsou data</h1>
+        <p class="mb-0 text-body-secondary small">
+          Inspirace: <a href="https://pracesdaty.zcu.cz/index.php/co-jsou-data" target="_blank" rel="noopener">Práce s daty – Víme</a>
+          · Pomoz robotovi <strong>Datíkovi</strong> skládat věžičku z dat.
+        </p>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-12 col-lg-9 order-2 order-lg-1">
+          <!-- 1 -->
+          <section class="step-pane active" id="step1">
+            <div class="card border-0 shadow-sm rounded-4">
+              <div class="card-body p-4">
+                <h2 class="h5 fw-bold">1) Hledání dat</h2>
+                <p class="text-body-secondary">A) Přiřaď ke každé skupině obrázků správný název – jaká data to jsou?</p>
+                <div class="row g-3" id="groupMatch"></div>
+                <p class="text-body-secondary mt-3 mb-2">B) Co z toho jsou data? Vyber ano/ne.</p>
+                <div class="vstack gap-2" id="isDataQuiz"></div>
+                <hr />
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                  <button type="button" class="btn btn-outline-info" id="hint1">🤖 Zeptat se Datíka</button>
+                  <button type="button" class="btn btn-primary" id="check1">Zkontrolovat</button>
+                  <button type="button" class="btn btn-outline-secondary" id="to2" disabled>Další →</button>
+                  <div id="res1" class="fw-semibold"></div>
+                </div>
+                <div class="datik-tip mt-1" id="tip1"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2 -->
+          <section class="step-pane" id="step2">
+            <div class="card border-0 shadow-sm rounded-4">
+              <div class="card-body p-4">
+                <h2 class="h5 fw-bold">2) Doplňování vět</h2>
+                <p class="text-body-secondary">Přetáhni emoji z pravého sloupce do prázdného místa ve větě.</p>
+                <div class="row g-3 align-items-start">
+                  <div class="col">
+                    <div class="vstack gap-3" id="sentences"></div>
+                  </div>
+                  <div class="col-auto">
+                    <div class="emoji-pool">
+                      <div class="small fw-semibold mb-2">Emoji na výběr (16)</div>
+                      <div id="emojiPool"></div>
+                    </div>
+                  </div>
+                </div>
+                <hr />
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                  <button type="button" class="btn btn-outline-info" id="hint2">🤖 Zeptat se Datíka</button>
+                  <button type="button" class="btn btn-primary" id="check2">Zkontrolovat</button>
+                  <button type="button" class="btn btn-outline-secondary" id="to3" disabled>Další →</button>
+                  <div id="res2" class="fw-semibold"></div>
+                </div>
+                <div class="datik-tip mt-1" id="tip2"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 3 -->
+          <section class="step-pane" id="step3">
+            <div class="card border-0 shadow-sm rounded-4">
+              <div class="card-body p-4">
+                <h2 class="h5 fw-bold">3) Grafování</h2>
+                <p class="text-body-secondary mb-2">A) Víčka – klikáním do pruhu nastav výšku (krok 10). Plná šířka = 80.</p>
+                <div class="row g-1 g-md-3 align-items-end mb-2">
+                  <div class="col-12 col-md-auto">
+                    <table class="table table-bordered table-data w-auto mb-0">
+                      <thead><tr><th>Třída</th><th class="num">Víčka</th></tr></thead>
+                      <tbody>
+                        <tr><td>5.A</td><td class="num">40</td></tr>
+                        <tr><td>5.B</td><td class="num">70</td></tr>
+                        <tr><td>5.C</td><td class="num">50</td></tr>
+                        <tr><td>5.D</td><td class="num">20</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="col-12 col-md"><div id="bars"></div></div>
+                </div>
+                <p class="text-body-secondary mt-3 mb-2">Otázky k víčkům:</p>
+                <div class="row g-2 q-pair" id="graphQuizA"></div>
+
+                <p class="text-body-secondary mt-4 mb-2">B) Knížky – stejný postup. Plná šířka = 100.</p>
+                <div class="row g-1 g-md-3 align-items-end mb-2">
+                  <div class="col-12 col-md-auto">
+                    <table class="table table-bordered table-data w-auto mb-0">
+                      <thead><tr><th>Měsíc</th><th class="num">Knížky</th></tr></thead>
+                      <tbody>
+                        <tr><td>září</td><td class="num">30</td></tr>
+                        <tr><td>říjen</td><td class="num">60</td></tr>
+                        <tr><td>listopad</td><td class="num">90</td></tr>
+                        <tr><td>prosinec</td><td class="num">40</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="col-12 col-md"><div id="bars2"></div></div>
+                </div>
+                <p class="text-body-secondary mt-3 mb-2">Otázky ke knížkám:</p>
+                <div class="row g-2 q-pair" id="graphQuizB"></div>
+                <hr />
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                  <button type="button" class="btn btn-outline-info" id="hint3">🤖 Zeptat se Datíka</button>
+                  <button type="button" class="btn btn-primary" id="check3">Zkontrolovat</button>
+                  <button type="button" class="btn btn-outline-secondary" id="to4" disabled>Další →</button>
+                  <div id="res3" class="fw-semibold"></div>
+                </div>
+                <div class="datik-tip mt-1" id="tip3"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 4 -->
+          <section class="step-pane" id="step4">
+            <div class="card border-0 shadow-sm rounded-4">
+              <div class="card-body p-4">
+                <h2 class="h5 fw-bold">4) Doplňujeme sportovní tabulku</h2>
+                <p class="text-body-secondary">
+                  Mini turnaj: každý s každým. Přetáhni žetony dole do prázdných buněk.
+                </p>
+                <div class="table-responsive">
+                  <table class="table table-bordered table-data mb-2" id="sportFill">
+                    <thead>
+                      <tr>
+                        <th class="team"></th>
+                        <th class="score"><span class="team-emo">🐺</span> VLK</th>
+                        <th class="score"><span class="team-emo">🦊</span> LIŠ</th>
+                        <th class="score" id="headC"><span class="cell-slot" data-slot="head" data-ok="JEL">?</span></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <th class="team"><span class="team-emo">🐺</span> VLK</th>
+                        <td class="num bg-light">X</td>
+                        <td class="num"><span class="cell-slot" data-slot="a" data-ok="2:1">?</span></td>
+                        <td class="num"><span class="cell-slot" data-slot="b" data-ok="0:3">?</span></td>
+                      </tr>
+                      <tr>
+                        <th class="team"><span class="team-emo">🦊</span> LIŠ</th>
+                        <td class="num text-body-secondary">1:2</td>
+                        <td class="num bg-light">X</td>
+                        <td class="num"><span class="cell-slot" data-slot="c" data-ok="4:4">?</span></td>
+                      </tr>
+                      <tr>
+                        <th class="team"><span class="team-emo">🦌</span> JEL</th>
+                        <td class="num text-body-secondary">3:0</td>
+                        <td class="num text-body-secondary">4:4</td>
+                        <td class="num bg-light">X</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div id="sportChips"></div>
+                <p class="small text-body-secondary mt-2">Tip: výsledek „domácí:hosté“ podle řádku × sloupce.</p>
+                <p class="text-body-secondary mt-3 mb-2">B) Druhá tabulka – doplň zbývající výsledky:</p>
+                <div class="table-responsive">
+                  <table class="table table-bordered table-data mb-2" id="sportFill2">
+                    <thead>
+                      <tr>
+                        <th class="team"></th>
+                        <th class="score"><span class="team-emo">🐻</span> MED</th>
+                        <th class="score"><span class="team-emo">🦅</span> ORL</th>
+                        <th class="score"><span class="team-emo">🐯</span> TYG</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <th class="team"><span class="team-emo">🐻</span> MED</th>
+                        <td class="num bg-light">X</td>
+                        <td class="num"><span class="cell-slot" data-ok="3:2">?</span></td>
+                        <td class="num text-body-secondary">1:1</td>
+                      </tr>
+                      <tr>
+                        <th class="team"><span class="team-emo">🦅</span> ORL</th>
+                        <td class="num text-body-secondary">2:3</td>
+                        <td class="num bg-light">X</td>
+                        <td class="num"><span class="cell-slot" data-ok="0:5">?</span></td>
+                      </tr>
+                      <tr>
+                        <th class="team"><span class="team-emo">🐯</span> TYG</th>
+                        <td class="num"><span class="cell-slot" data-ok="1:1">?</span></td>
+                        <td class="num text-body-secondary">5:0</td>
+                        <td class="num bg-light">X</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div id="sportChips2"></div>
+                <hr />
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                  <button type="button" class="btn btn-outline-info" id="hint4">🤖 Zeptat se Datíka</button>
+                  <button type="button" class="btn btn-primary" id="check4">Zkontrolovat</button>
+                  <button type="button" class="btn btn-outline-secondary" id="to5" disabled>Další →</button>
+                  <div id="res4" class="fw-semibold"></div>
+                </div>
+                <div class="datik-tip mt-1" id="tip4"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 5 -->
+          <section class="step-pane" id="step5">
+            <div class="card border-0 shadow-sm rounded-4">
+              <div class="card-body p-4">
+                <h2 class="h5 fw-bold">5) Čteme ze sportovní tabulky</h2>
+                <p class="text-body-secondary">A) Fotbalový mini-turnaj. (Výhra = 3 body, remíza = 1, prohra = 0.)</p>
+                <div class="table-responsive mb-3">
+                  <table class="table table-bordered table-data w-auto">
+                    <thead>
+                      <tr>
+                        <th class="team">Tým</th>
+                        <th class="num">Z</th>
+                        <th class="num">V</th>
+                        <th class="num">R</th>
+                        <th class="num">P</th>
+                        <th class="score">Skóre</th>
+                        <th class="num">B</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="team"><span class="team-emo">🦌</span> Jeleni</td>
+                        <td class="num">2</td><td class="num">1</td><td class="num">1</td><td class="num">0</td>
+                        <td class="score">7:4</td><td class="num">4</td>
+                      </tr>
+                      <tr>
+                        <td class="team"><span class="team-emo">🦊</span> Lišky</td>
+                        <td class="num">2</td><td class="num">0</td><td class="num">1</td><td class="num">1</td>
+                        <td class="score">5:6</td><td class="num">1</td>
+                      </tr>
+                      <tr>
+                        <td class="team"><span class="team-emo">🐺</span> Vlci</td>
+                        <td class="num">2</td><td class="num">1</td><td class="num">0</td><td class="num">1</td>
+                        <td class="score">3:5</td><td class="num">3</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="row g-3" id="readQuizA"></div>
+
+                <p class="text-body-secondary mt-4">B) Atletické závody – jiná tabulka, jiné otázky.</p>
+                <div class="table-responsive mb-3">
+                  <table class="table table-bordered table-data w-auto">
+                    <thead>
+                      <tr>
+                        <th class="team">Závodník</th>
+                        <th class="num">Běh (s)</th>
+                        <th class="num">Skok (cm)</th>
+                        <th class="num">Hod (m)</th>
+                        <th class="num">Body</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="team"><span class="team-emo">🐰</span> Žaneta</td>
+                        <td class="num">12</td><td class="num">145</td><td class="num">18</td><td class="num">26</td>
+                      </tr>
+                      <tr>
+                        <td class="team"><span class="team-emo">🐢</span> Tomáš</td>
+                        <td class="num">15</td><td class="num">120</td><td class="num">22</td><td class="num">20</td>
+                      </tr>
+                      <tr>
+                        <td class="team"><span class="team-emo">🐆</span> Lenka</td>
+                        <td class="num">11</td><td class="num">160</td><td class="num">16</td><td class="num">28</td>
+                      </tr>
+                      <tr>
+                        <td class="team"><span class="team-emo">🐻</span> Marek</td>
+                        <td class="num">14</td><td class="num">135</td><td class="num">25</td><td class="num">24</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p class="small text-body-secondary mb-2">Tip: u běhu je lepší nižší čas, u skoku a hodu vyšší číslo.</p>
+                <div class="row g-3" id="readQuizB"></div>
+                <hr />
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                  <button type="button" class="btn btn-outline-info" id="hint5">🤖 Zeptat se Datíka</button>
+                  <button type="button" class="btn btn-primary" id="check5">Dokončit</button>
+                  <div id="res5" class="fw-semibold"></div>
+                </div>
+                <div class="datik-tip mt-1" id="tip5"></div>
+                <div id="finishBox" class="alert alert-success mt-3 d-none">
+                  <strong>✔ Splněno!</strong> Datík má věžičku dat hotovou. Umíš hledat data, doplňovat věty, skládat graf i číst tabulku.
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="col-12 col-lg-3 order-1 order-lg-2">
+          <div class="prog-box shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="fw-semibold small">🤖 Datík</span>
+              <span class="badge text-bg-light border" id="stepLabel">1 / 5</span>
+            </div>
+            <div class="progress mb-2" style="height: 0.45rem">
+              <div class="progress-bar bg-success" id="pctBar" style="width: 0%"></div>
+            </div>
+            <div class="prog-tower" id="tower">
+              <div class="prog-block b1" data-i="0">🔍 hledání</div>
+              <div class="prog-block b2" data-i="1">📝 věty</div>
+              <div class="prog-block b3" data-i="2">📊 graf</div>
+              <div class="prog-block b4" data-i="3">🏆 tabulka</div>
+              <div class="prog-block b5" data-i="4">📖 čtení</div>
+            </div>
+            <div class="small text-center text-body-secondary mt-2" id="pctLabel">0 %</div>
+            <div class="tower-done" id="towerDone">🎉 Úspěšně dokončeno!<br /><span class="fw-normal">Datík má věžičku hotovou.</span></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="../progress.js"></script>
+    <script>
+      const PROGRESS_ID = "5/vime-co-jsou-data";
+      const TOTAL = 5;
+      const state = { stars: 0, awarded: new Set() };
+
+      function $(id) { return document.getElementById(id); }
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+      function fillSelect(sel, opts, placeholder, randomize) {
+        sel.innerHTML = "";
+        const ph = document.createElement("option");
+        ph.value = "";
+        ph.textContent = placeholder || "Vyber…";
+        sel.appendChild(ph);
+        const list = randomize === false ? opts.slice() : shuffle(opts);
+        list.forEach((o) => {
+          const opt = document.createElement("option");
+          opt.value = o;
+          opt.textContent = o;
+          sel.appendChild(opt);
+        });
+      }
+      function wireDatik(btnId, tipId, findWrong) {
+        let used = false;
+        $(btnId).onclick = () => {
+          if (used) {
+            $(tipId).textContent = "Datík už jednou poradil u tohoto cvičení. Teď to zkus sám/sama.";
+            return;
+          }
+          const label = findWrong();
+          if (label === null) {
+            $(tipId).textContent = "🤖 Datík: zatím nevidím vyplněnou chybu — doplň odpovědi a zkus znovu, nebo je vše správně.";
+            return;
+          }
+          used = true;
+          $(btnId).disabled = true;
+          $(tipId).textContent = "🤖 Datík šeptá: podívej se znovu na „" + label + "“ — tam je něco špatně.";
+        };
+      }
+      function enableDrag(el, payload) {
+        el.draggable = true;
+        el.addEventListener("dragstart", (e) => {
+          e.dataTransfer.setData("text/plain", payload);
+          e.dataTransfer.effectAllowed = "copy";
+          el.classList.add("dragging");
+        });
+        el.addEventListener("dragend", () => el.classList.remove("dragging"));
+      }
+      function enableDrop(el, onDrop) {
+        el.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "copy";
+          el.classList.add("drag-over");
+        });
+        el.addEventListener("dragleave", () => el.classList.remove("drag-over"));
+        el.addEventListener("drop", (e) => {
+          e.preventDefault();
+          el.classList.remove("drag-over");
+          onDrop(e.dataTransfer.getData("text/plain"), e);
+        });
+      }
+      function setStep(n) {
+        document.querySelectorAll(".step-pane").forEach((el) => el.classList.remove("active"));
+        $("step" + n).classList.add("active");
+        $("stepLabel").textContent = n + " / " + TOTAL;
+      }
+      function updateProg() {
+        const pct = Math.round((state.stars / TOTAL) * 100);
+        $("pctBar").style.width = pct + "%";
+        $("pctLabel").textContent = pct + " %";
+        document.querySelectorAll("#tower .prog-block").forEach((el) => {
+          el.classList.toggle("on", Number(el.dataset.i) < state.stars);
+        });
+        const allDone = state.stars >= TOTAL;
+        document.querySelector(".prog-box").classList.toggle("done", allDone);
+        $("towerDone").classList.toggle("on", allDone);
+        if (allDone) $("pctLabel").textContent = "100 % · hotovo";
+      }
+      function award(step) {
+        if (state.awarded.has(step)) return;
+        state.awarded.add(step);
+        if (state.stars < TOTAL) state.stars++;
+        updateProg();
+        InfProgress.completeStep(PROGRESS_ID, step, TOTAL);
+      }
+      $("restartProgress").onclick = () => {
+        if (confirm("Začít znovu? Postup se smaže.")) {
+          InfProgress.reset(PROGRESS_ID);
+          location.reload();
+        }
+      };
+
+      /* ===== 1 groups ===== */
+      const GROUPS = [
+        { emos: ["🍎", "🍌", "🍇"], ok: "ovoce", opts: ["ovoce", "nářadí", "doprava"] },
+        { emos: ["🚗", "🚌", "🚲"], ok: "doprava", opts: ["zvířata", "doprava", "počasí"] },
+        { emos: ["🐶", "🐱", "🐰"], ok: "zvířata", opts: ["nábytek", "zvířata", "jídlo"] },
+        { emos: ["☀️", "🌧️", "❄️"], ok: "počasí", opts: ["počasí", "hudba", "barvy"] },
+        { emos: ["🎸", "🥁", "🎺"], ok: "hudba", opts: ["sport", "hudba", "ovoce"] },
+        { emos: ["⚽", "🏀", "🎾"], ok: "sport", opts: ["sport", "počasí", "nářadí"] },
+        { emos: ["🪑", "🛋️", "🛏️"], ok: "nábytek", opts: ["doprava", "nábytek", "zvířata"] },
+        { emos: ["🟥", "🟦", "🟩"], ok: "barvy", opts: ["barvy", "číslo", "město"] },
+      ];
+      const IS_DATA = [
+        { t: "Počet žáků ve třídě: 24", ok: "ano, data" },
+        { t: "Krásný západ slunce (jen obdivovat)", ok: "ne" },
+        { t: "Teplota venku 12 °C", ok: "ano, data" },
+        { t: "Melodie písničky, kterou si jen posloucháš", ok: "ne" },
+        { t: "Délka přestávky: 10 minut", ok: "ano, data" },
+        { t: "Jméno autora knížky", ok: "ano, data" },
+      ];
+      const gm = $("groupMatch");
+      GROUPS.forEach((g, i) => {
+        const col = document.createElement("div");
+        col.className = "col-6 col-md-3";
+        col.innerHTML =
+          `<div class="pic-card h-100"><div class="emo-row">${g.emos.map((e) => `<span>${e}</span>`).join("")}</div>` +
+          `<select class="form-select" id="g${i}"></select></div>`;
+        gm.appendChild(col);
+        fillSelect($("g" + i), g.opts);
+      });
+      const idq = $("isDataQuiz");
+      IS_DATA.forEach((item, i) => {
+        const row = document.createElement("div");
+        row.className = "is-data-row";
+        row.innerHTML =
+          `<div class="qtxt">${i + 1}) ${item.t}</div>` +
+          `<select class="form-select form-select-sm" id="d${i}"></select>`;
+        idq.appendChild(row);
+        fillSelect($("d" + i), ["ano, data", "ne"], "?", false);
+      });
+      function wrongsStep1() {
+        const w = [];
+        GROUPS.forEach((g, i) => {
+          const v = $("g" + i).value;
+          if (v && v !== g.ok) w.push("skupina " + g.emos.join(""));
+        });
+        IS_DATA.forEach((item, i) => {
+          const v = $("d" + i).value;
+          if (v && v !== item.ok) w.push("B" + (i + 1) + ": " + item.t.slice(0, 28) + "…");
+        });
+        return w;
+      }
+      $("check1").onclick = () => {
+        let ok = 0;
+        GROUPS.forEach((g, i) => { if ($("g" + i).value === g.ok) ok++; });
+        IS_DATA.forEach((item, i) => { if ($("d" + i).value === item.ok) ok++; });
+        const need = GROUPS.length + IS_DATA.length;
+        const pass = ok === need;
+        $("res1").className = "fw-semibold " + (pass ? "text-success" : "text-danger");
+        $("res1").textContent = pass ? "✔ Správně!" : "✘ Zatím " + ok + "/" + need;
+        $("to2").disabled = !pass;
+        if (pass) award(1);
+      };
+      wireDatik("hint1", "tip1", () => {
+        const w = wrongsStep1();
+        return w.length ? w[Math.floor(Math.random() * w.length)] : null;
+      });
+      $("to2").onclick = () => setStep(2);
+
+      /* ===== 2 sentences ===== */
+      const SENTS = [
+        { before: "Na stromě sedí ", after: ".", ok: "🐦" },
+        { before: "Do školy jedeme ", after: ".", ok: "🚌" },
+        { before: "K snídani mám ", after: " a mléko.", ok: "🍞" },
+        { before: "Venku prší, vezmu si ", after: ".", ok: "☂️" },
+        { before: "Večer čtu ", after: ".", ok: "📖" },
+        { before: "Na hřišti kopeme do ", after: ".", ok: "⚽" },
+        { before: "V zoo jsme viděli ", after: ".", ok: "🦒" },
+        { before: "Na narozeniny sfoukávám ", after: ".", ok: "🎂" },
+      ];
+      const POOL16 = shuffle([
+        "🐦", "🚌", "🍞", "☂️", "📖", "⚽", "🦒", "🎂",
+        "🐟", "🍎", "🎸", "🐱", "🚲", "❄️", "🍌", "🎺",
+      ]);
+      const sentRoot = $("sentences");
+      const pool = $("emojiPool");
+      SENTS.forEach((s, i) => {
+        const row = document.createElement("div");
+        row.className = "fs-5";
+        row.innerHTML = `${i + 1}) ${s.before}<span class="drop" id="drop${i}" data-i="${i}"></span>${s.after}`;
+        sentRoot.appendChild(row);
+      });
+      POOL16.forEach((e) => {
+        const c = document.createElement("span");
+        c.className = "chip";
+        c.textContent = e;
+        c.dataset.emo = e;
+        enableDrag(c, e);
+        pool.appendChild(c);
+      });
+      SENTS.forEach((_, i) => {
+        const d = $("drop" + i);
+        enableDrop(d, (val) => {
+          d.textContent = val;
+          d.dataset.val = val;
+          d.classList.add("filled");
+        });
+      });
+      $("check2").onclick = () => {
+        let ok = 0;
+        SENTS.forEach((s, i) => {
+          if ($("drop" + i).dataset.val === s.ok) ok++;
+        });
+        const pass = ok === SENTS.length;
+        $("res2").className = "fw-semibold " + (pass ? "text-success" : "text-danger");
+        $("res2").textContent = pass ? "✔ Paráda!" : "✘ Zatím " + ok + "/" + SENTS.length;
+        $("to3").disabled = !pass;
+        if (pass) award(2);
+      };
+      wireDatik("hint2", "tip2", () => {
+        const w = [];
+        SENTS.forEach((s, i) => {
+          const v = $("drop" + i).dataset.val;
+          if (v && v !== s.ok) w.push("věta " + (i + 1));
+        });
+        return w.length ? w[Math.floor(Math.random() * w.length)] : null;
+      });
+      $("to3").onclick = () => setStep(3);
+
+      /* ===== 3 bars ===== */
+      function makeBars(rootId, data, max, prefix) {
+        const root = $(rootId);
+        const vals = data.map(() => 0);
+        data.forEach((b, i) => {
+          const row = document.createElement("div");
+          row.className = "bar-row";
+          row.innerHTML =
+            `<div class="fw-semibold small">${b.name}</div>` +
+            `<div class="bar-track" data-i="${i}" data-p="${prefix}"><div class="bar-fill" id="${prefix}f${i}"></div></div>` +
+            `<div class="small" id="${prefix}v${i}">0</div>`;
+          root.appendChild(row);
+        });
+        root.addEventListener("click", (ev) => {
+          const track = ev.target.closest(".bar-track");
+          if (!track || track.dataset.p !== prefix) return;
+          const i = Number(track.dataset.i);
+          const rect = track.getBoundingClientRect();
+          const ratio = Math.min(1, Math.max(0, (ev.clientX - rect.left) / rect.width));
+          const val = Math.round((ratio * max) / 10) * 10;
+          vals[i] = val;
+          $(prefix + "f" + i).style.width = (val / max) * 100 + "%";
+          $(prefix + "v" + i).textContent = String(val);
+        });
+        return vals;
+      }
+      const BAR_DATA = [
+        { name: "5.A", need: 40 }, { name: "5.B", need: 70 }, { name: "5.C", need: 50 }, { name: "5.D", need: 20 },
+      ];
+      const BAR2 = [
+        { name: "září", need: 30 }, { name: "říjen", need: 60 }, { name: "listopad", need: 90 }, { name: "prosinec", need: 40 },
+      ];
+      const barVals = makeBars("bars", BAR_DATA, 80, "bf");
+      const barVals2 = makeBars("bars2", BAR2, 100, "bg");
+      const GQA = [
+        { q: "Která třída nasbírala nejvíc víček?", opts: ["5.A", "5.B", "5.C", "5.D"], ok: "5.B", fixed: true },
+        { q: "Kolik víček mají dohromady 5.A a 5.D?", opts: ["50", "60", "70"], ok: "60" },
+        { q: "Která třída nasbírala nejméně víček?", opts: ["5.A", "5.B", "5.C", "5.D"], ok: "5.D", fixed: true },
+        { q: "O kolik víc víček má 5.B než 5.C?", opts: ["10", "20", "30"], ok: "20" },
+        { q: "Kolik víček mají všechny čtyři třídy dohromady?", opts: ["160", "180", "200"], ok: "180" },
+        { q: "Která třída je druhá v pořadí podle víček?", opts: ["5.A", "5.B", "5.C", "5.D"], ok: "5.C", fixed: true },
+      ];
+      const GQB = [
+        { q: "Ve kterém měsíci bylo nejvíc knížek?", opts: ["září", "říjen", "listopad", "prosinec"], ok: "listopad" },
+        { q: "O kolik víc knížek bylo v listopadu než v září?", opts: ["30", "60", "90"], ok: "60" },
+        { q: "Ve kterém měsíci bylo nejméně knížek?", opts: ["září", "říjen", "listopad", "prosinec"], ok: "září" },
+        { q: "Kolik knížek bylo v říjnu a prosinci dohromady?", opts: ["90", "100", "110"], ok: "100" },
+        { q: "Je v prosinci víc knížek než v říjnu?", opts: ["ano", "ne", "stejně"], ok: "ne" },
+        { q: "O kolik méně knížek bylo v prosinci než v listopadu?", opts: ["40", "50", "60"], ok: "50" },
+      ];
+      function renderQuiz(rootId, items, idPrefix) {
+        const root = $(rootId);
+        items.forEach((item, i) => {
+          const col = document.createElement("div");
+          col.className = "col-12 col-lg-6";
+          col.innerHTML =
+            `<div class="fw-semibold mb-1">${i + 1}) ${item.q}</div>` +
+            `<select class="form-select" id="${idPrefix}${i}"></select>`;
+          root.appendChild(col);
+          fillSelect($(idPrefix + i), item.opts, "Vyber…", item.fixed ? false : true);
+        });
+      }
+      renderQuiz("graphQuizA", GQA, "gqa");
+      renderQuiz("graphQuizB", GQB, "gqb");
+      $("check3").onclick = () => {
+        let ok = 0;
+        BAR_DATA.forEach((b, i) => { if (barVals[i] === b.need) ok++; });
+        BAR2.forEach((b, i) => { if (barVals2[i] === b.need) ok++; });
+        GQA.forEach((item, i) => { if ($("gqa" + i).value === item.ok) ok++; });
+        GQB.forEach((item, i) => { if ($("gqb" + i).value === item.ok) ok++; });
+        const need = BAR_DATA.length + BAR2.length + GQA.length + GQB.length;
+        const pass = ok === need;
+        $("res3").className = "fw-semibold " + (pass ? "text-success" : "text-danger");
+        $("res3").textContent = pass ? "✔ Grafy i odpovědi sedí!" : "✘ Zatím " + ok + "/" + need;
+        $("to4").disabled = !pass;
+        if (pass) award(3);
+      };
+      wireDatik("hint3", "tip3", () => {
+        const w = [];
+        BAR_DATA.forEach((b, i) => { if (barVals[i] && barVals[i] !== b.need) w.push("pruh víček " + b.name); });
+        BAR2.forEach((b, i) => { if (barVals2[i] && barVals2[i] !== b.need) w.push("pruh knížek " + b.name); });
+        GQA.forEach((item, i) => {
+          const v = $("gqa" + i).value;
+          if (v && v !== item.ok) w.push("víčka otázka " + (i + 1));
+        });
+        GQB.forEach((item, i) => {
+          const v = $("gqb" + i).value;
+          if (v && v !== item.ok) w.push("knížky otázka " + (i + 1));
+        });
+        return w.length ? w[Math.floor(Math.random() * w.length)] : null;
+      });
+      $("to4").onclick = () => setStep(4);
+
+      /* ===== 4 sport fill ===== */
+      function wireSport(tableId, chipsId, chips) {
+        const root = $(chipsId);
+        shuffle(chips).forEach((t) => {
+          const c = document.createElement("span");
+          c.className = "chip text-chip";
+          c.textContent = t;
+          enableDrag(c, t);
+          root.appendChild(c);
+        });
+        document.querySelectorAll("#" + tableId + " .cell-slot").forEach((slot) => {
+          enableDrop(slot, (val) => {
+            slot.textContent = val;
+            slot.dataset.val = val;
+          });
+        });
+      }
+      wireSport("sportFill", "sportChips", ["JEL", "2:1", "0:3", "4:4"]);
+      wireSport("sportFill2", "sportChips2", ["3:2", "0:5", "1:1"]);
+      $("check4").onclick = () => {
+        const slots = [...document.querySelectorAll("#sportFill .cell-slot, #sportFill2 .cell-slot")];
+        let ok = 0;
+        slots.forEach((s) => {
+          const good = s.dataset.val === s.dataset.ok;
+          s.classList.toggle("ok", good);
+          if (good) ok++;
+        });
+        const pass = ok === slots.length;
+        $("res4").className = "fw-semibold " + (pass ? "text-success" : "text-danger");
+        $("res4").textContent = pass ? "✔ Obě tabulky jsou úplné!" : "✘ Zatím " + ok + "/" + slots.length;
+        $("to5").disabled = !pass;
+        if (pass) award(4);
+      };
+      wireDatik("hint4", "tip4", () => {
+        const slots = [...document.querySelectorAll("#sportFill .cell-slot, #sportFill2 .cell-slot")];
+        const w = slots
+          .map((s, i) => ({ s, i }))
+          .filter(({ s }) => s.dataset.val && s.dataset.val !== s.dataset.ok)
+          .map(({ i }) => "buňka " + (i + 1));
+        return w.length ? w[Math.floor(Math.random() * w.length)] : null;
+      });
+      $("to5").onclick = () => setStep(5);
+
+      /* ===== 5 read ===== */
+      const READ_A = [
+        { q: "Který tým má nejvíc bodů?", opts: ["🦌 Jeleni", "🦊 Lišky", "🐺 Vlci"], ok: "🦌 Jeleni" },
+        { q: "Kdo vstřelil nejvíc branek?", opts: ["🦌 Jeleni", "🦊 Lišky", "🐺 Vlci"], ok: "🦌 Jeleni" },
+        { q: "Kolik bodů dostaneš za výhru?", opts: ["1", "2", "3"], ok: "3" },
+        { q: "Lišky mají 1 bod. Jak k němu mohly přijít?", opts: ["jednou remizovaly", "dvakrát vyhrály", "nic nehrály"], ok: "jednou remizovaly" },
+        { q: "Kolik zápasů odehráli Vlci?", opts: ["1", "2", "3"], ok: "2" },
+        { q: "Kdo je druhý v pořadí podle bodů?", opts: ["Jeleni", "Lišky", "Vlci"], ok: "Vlci" },
+      ];
+      const READ_B = [
+        { q: "Kdo doběhl běh nejrychleji (nejnižší čas)?", opts: ["Žaneta", "Tomáš", "Lenka", "Marek"], ok: "Lenka" },
+        { q: "Kdo skočil nejdál?", opts: ["Žaneta", "Tomáš", "Lenka", "Marek"], ok: "Lenka" },
+        { q: "Kdo hodil nejdál?", opts: ["Žaneta", "Tomáš", "Lenka", "Marek"], ok: "Marek" },
+        { q: "Kdo má celkově nejvíc bodů?", opts: ["Žaneta", "Tomáš", "Lenka", "Marek"], ok: "Lenka" },
+        { q: "O kolik cm skočila Lenka víc než Tomáš?", opts: ["30", "40", "45"], ok: "40" },
+        { q: "Kdo má nejméně bodů?", opts: ["Žaneta", "Tomáš", "Lenka", "Marek"], ok: "Tomáš" },
+      ];
+      function renderRead(rootId, items, idPrefix, startNum) {
+        const root = $(rootId);
+        items.forEach((item, i) => {
+          const col = document.createElement("div");
+          col.className = "col-12 col-lg-6";
+          col.innerHTML =
+            `<div class="fw-semibold mb-1">${startNum + i}) ${item.q}</div>` +
+            `<select class="form-select" id="${idPrefix}${i}"></select>`;
+          root.appendChild(col);
+          fillSelect($(idPrefix + i), item.opts);
+        });
+      }
+      renderRead("readQuizA", READ_A, "ra", 1);
+      renderRead("readQuizB", READ_B, "rb", 1);
+      $("check5").onclick = () => {
+        let ok = 0;
+        READ_A.forEach((item, i) => { if ($("ra" + i).value === item.ok) ok++; });
+        READ_B.forEach((item, i) => { if ($("rb" + i).value === item.ok) ok++; });
+        const need = READ_A.length + READ_B.length;
+        const pass = ok === need;
+        $("res5").className = "fw-semibold " + (pass ? "text-success" : "text-danger");
+        $("res5").textContent = pass ? "✔ Hotovo!" : "✘ Zatím " + ok + "/" + need;
+        if (pass) {
+          award(5);
+          $("finishBox").classList.remove("d-none");
+        }
+      };
+      wireDatik("hint5", "tip5", () => {
+        const w = [];
+        READ_A.forEach((item, i) => {
+          const v = $("ra" + i).value;
+          if (v && v !== item.ok) w.push("fotbal otázka " + (i + 1));
+        });
+        READ_B.forEach((item, i) => {
+          const v = $("rb" + i).value;
+          if (v && v !== item.ok) w.push("atletika otázka " + (i + 1));
+        });
+        return w.length ? w[Math.floor(Math.random() * w.length)] : null;
+      });
+
+      (function resume() {
+        const done = InfProgress.completedCount(PROGRESS_ID);
+        state.stars = Math.min(done, TOTAL);
+        for (let i = 1; i <= done; i++) state.awarded.add(i);
+        updateProg();
+        const next = InfProgress.nextStep(PROGRESS_ID, TOTAL);
+        if (next > 1) setStep(next);
+        if (done >= TOTAL) $("finishBox").classList.remove("d-none");
+      })();
+    </script>
+  </body>
+</html>

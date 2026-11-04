@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Evidujeme data – cvičení (5. třída)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <style>
+      body { background: radial-gradient(1200px 600px at 20% 0%, #e8f4ff 0%, rgba(232,244,255,0) 60%), radial-gradient(900px 500px at 90% 20%, #fff3e6 0%, rgba(255,243,230,0) 55%), linear-gradient(180deg,#f8fafc,#fff); }
+      .hero { border: 1px solid rgba(13,110,253,.15); background: rgba(255,255,255,.75); backdrop-filter: blur(6px); }
+      .step-pane { display: none; } .step-pane.active { display: block; }
+      .prog-box {
+        border: 1px solid rgba(120, 72, 32, 0.28);
+        background:
+          linear-gradient(180deg, rgba(255,248,240,.95), rgba(255,255,255,.92)),
+          repeating-linear-gradient(90deg, rgba(139,90,43,.04) 0 2px, transparent 2px 7px);
+        border-radius: 1rem;
+        padding: .75rem;
+        position: sticky;
+        top: .75rem;
+      }
+      .prog-box.done {
+        border-color: rgba(25, 135, 84, 0.45);
+        background: linear-gradient(180deg, #e8fff0, #fffaf3);
+        box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.12);
+      }
+      .shelf-wrap {
+        margin-top: .35rem;
+        padding: .5rem .35rem 0;
+        border-radius: .65rem;
+        background: linear-gradient(180deg, #d4b896 0%, #c4a574 55%, #a67c52 100%);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
+      }
+      .shelf {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+        justify-content: center;
+        gap: .28rem;
+        min-height: 8.5rem;
+        padding: 0 .2rem;
+      }
+      .shelf-board {
+        height: .55rem;
+        margin-top: .15rem;
+        border-radius: 0 0 .35rem .35rem;
+        background: linear-gradient(180deg, #8b5a2b, #6b4423);
+        box-shadow: 0 3px 6px rgba(0,0,0,.18);
+      }
+      .book {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.9rem;
+        height: 7.2rem;
+        padding: .45rem .12rem;
+        border-radius: .2rem .45rem .2rem .15rem;
+        font-size: .68rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-align: center;
+        color: rgba(33,37,41,.55);
+        opacity: .35;
+        filter: grayscale(1);
+        transition: .35s;
+        box-shadow:
+          inset -3px 0 0 rgba(0,0,0,.14),
+          inset 2px 0 0 rgba(255,255,255,.25),
+          1px 2px 4px rgba(0,0,0,.18);
+        user-select: none;
+      }
+      .book.on {
+        opacity: 1;
+        filter: none;
+        color: #212529;
+        transform: translateY(-2px);
+      }
+      .prog-box.done .book.on {
+        animation: bookPop .5s ease both;
+      }
+      .prog-box.done .book.b0 { animation-delay: 0s; }
+      .prog-box.done .book.b1 { animation-delay: .05s; }
+      .prog-box.done .book.b2 { animation-delay: .1s; }
+      .prog-box.done .book.b3 { animation-delay: .15s; }
+      .prog-box.done .book.b4 { animation-delay: .2s; }
+      @keyframes bookPop {
+        0% { transform: translateY(4px) scale(.96); }
+        60% { transform: translateY(-6px) scale(1.04); }
+        100% { transform: translateY(-2px) scale(1); }
+      }
+      .book.b0 { background: linear-gradient(90deg, #6ea8fe, #9ec5fe); height: 7rem; }
+      .book.b1 { background: linear-gradient(90deg, #75b798, #a3cfbb); height: 7.8rem; }
+      .book.b2 { background: linear-gradient(90deg, #ffda6a, #ffe69c); height: 6.8rem; }
+      .book.b3 { background: linear-gradient(90deg, #ea868f, #f1aeb5); height: 7.5rem; }
+      .book.b4 { background: linear-gradient(90deg, #a98eda, #c5b3e6); height: 7.2rem; }
+      .shelf-done {
+        display: none;
+        text-align: center;
+        margin-top: .65rem;
+        padding: .45rem .5rem;
+        border-radius: .65rem;
+        background: #d1e7dd;
+        color: #0f5132;
+        font-weight: 700;
+        font-size: .85rem;
+        line-height: 1.3;
+      }
+      .shelf-done.on { display: block; animation: bookPop .5s ease; }
+      .chip { display: inline-flex; align-items: center; justify-content: center; border: 1px solid #adb5bd; border-radius: .75rem; padding: .35rem .7rem; background: #fff; cursor: grab; margin: .2rem; user-select: none; font-size: 2rem; line-height: 1; min-width: 3.2rem; min-height: 3.2rem; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+      .chip:active { cursor: grabbing; }
+      .chip.dragging { opacity: .4; }
+      .emoji-pool {
+        border: 1px dashed rgba(13,110,253,.35);
+        border-radius: .85rem;
+        padding: .65rem;
+        background: rgba(13,110,253,.04);
+        position: sticky;
+        top: .75rem;
+      }
+      #seqPool {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(3.2rem, 1fr));
+        gap: .35rem;
+        justify-items: center;
+      }
+      #seqPool .chip { margin: 0; }
+      .seq-slot { display: inline-flex; width: 3.4rem; height: 3.4rem; align-items: center; justify-content: center; border: 2px dashed #adb5bd; border-radius: .65rem; margin: .2rem; font-size: 2rem; background: #fff; }
+      .seq-slot.filled { border-style: solid; }
+      .seq-slot.drag-over { border-color: #0d6efd; background: #e7f1ff; }
+      .hdr-pick { cursor: pointer; }
+      .hdr-pick.picked { outline: 3px solid #0d6efd; background: #e7f1ff; }
+      .sort-bin { min-height: 6.5rem; border: 2px dashed rgba(13,110,253,.4); border-radius: .75rem; padding: .6rem; background: rgba(13,110,253,.04); }
+      .sort-bin.drag-over { background: rgba(13,110,253,.16); border-color: #0d6efd; }
+      .fruit-item { display: inline-flex; align-items: center; justify-content: center; margin: .25rem; padding: .4rem .55rem; border: 1px solid #dee2e6; border-radius: .65rem; background: #fff; cursor: grab; font-size: 2.1rem; line-height: 1; min-width: 3.2rem; min-height: 3.2rem; user-select: none; }
+      .fruit-item:active { cursor: grabbing; }
+      .fruit-item.dragging { opacity: .4; }
+      .fruit-item.in { opacity: .35; pointer-events: none; }
+      .table-data th, .table-data td { vertical-align: middle; text-align: center; padding: .65rem .85rem; }
+      .table-data td.emo { font-size: 2.2rem; min-width: 4rem; }
+      .table-data td.emo .emo-svg { width: 2.35rem; height: 2.35rem; vertical-align: middle; display: inline-block; }
+      .table-data th.num, .table-data td.num { min-width: 6.5rem; width: 6.5rem; }
+      .table-data td.num select.form-select { min-width: 5.5rem; }
+    </style>
+  </head>
+  <body>
+    <main class="container py-4 py-md-5">
+      <div class="hero rounded-4 p-3 p-md-4 shadow-sm mb-3">
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-2">
+          <a class="btn btn-outline-secondary btn-sm" href="../home.html">← Zpět</a>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-warning btn-sm" id="restartProgress">Začít znovu</button>
+            <span class="badge text-bg-success">5. třída</span>
+          </div>
+        </div>
+        <h1 class="h3 fw-bold mb-1">Evidujeme data</h1>
+        <p class="mb-0 text-body-secondary small">Inspirace: <a href="https://pracesdaty.zcu.cz/index.php/evidujeme-data" target="_blank" rel="noopener">Práce s daty – Evidujeme</a> · Datík skládá knihovničku tabulek.</p>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-12 col-lg-9 order-2 order-lg-1">
+          <section class="step-pane active" id="step1">
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+              <h2 class="h5 fw-bold">1) Vytvoření tabulky</h2>
+              <p class="text-body-secondary">Čekají tě <strong>tři evidence</strong>. U každé vyber <strong>3 vhodné nadpisy sloupců</strong> (klikni na ně).</p>
+              <div class="p-3 mb-3 border rounded-3 bg-white">
+                <div class="fw-semibold mb-2">📋 A) Evidujeme žáky ve sportovním kroužku</div>
+                <div id="headers0" class="d-flex flex-wrap gap-2 mb-2"></div>
+                <div class="small">Vybráno: <span id="hdrCount0">0</span> / 3</div>
+              </div>
+              <div class="p-3 mb-3 border rounded-3 bg-white">
+                <div class="fw-semibold mb-2">📚 B) Evidujeme knihy ve školní knihovně</div>
+                <div id="headers1" class="d-flex flex-wrap gap-2 mb-2"></div>
+                <div class="small">Vybráno: <span id="hdrCount1">0</span> / 3</div>
+              </div>
+              <div class="p-3 mb-3 border rounded-3 bg-white">
+                <div class="fw-semibold mb-2">🚌 C) Evidujeme školní výlety</div>
+                <div id="headers2" class="d-flex flex-wrap gap-2 mb-2"></div>
+                <div class="small">Vybráno: <span id="hdrCount2">0</span> / 3</div>
+              </div>
+              <hr />
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-info" id="hint1">🤖 Zeptat se Datíka</button>
+                <button type="button" class="btn btn-primary" id="check1">Zkontrolovat</button>
+                <button type="button" class="btn btn-outline-secondary" id="to2" disabled>Další →</button>
+                <div id="res1" class="fw-semibold"></div>
+              </div>
+              <div class="small text-primary mt-1" id="tip1"></div>
+            </div></div>
+          </section>
+
+          <section class="step-pane" id="step2">
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+              <h2 class="h5 fw-bold">2) Datíkova nespavost</h2>
+              <p class="text-body-secondary">Doplň, co má v řadě následovat. Přetáhni emoji z pravého sloupce na otazník.</p>
+              <div class="row g-3 align-items-start">
+                <div class="col">
+                  <div class="fw-semibold small mb-1">Řada A (hospodářská zvířata se střídají):</div>
+                  <div id="seqA" class="mb-2"></div>
+                  <div class="fw-semibold small mb-1">Řada B (dva stejné, pak jiný):</div>
+                  <div id="seqB" class="mb-2"></div>
+                  <div class="fw-semibold small mb-1">Řada C (tři zvířata dokola – těžší):</div>
+                  <div id="seqC" class="mb-2"></div>
+                  <div class="fw-semibold small mb-1">Řada D (tvary):</div>
+                  <div id="seqD" class="mb-2"></div>
+                  <div class="fw-semibold small mb-1">Řada E (dopravní prostředky – tři druhy, těžší):</div>
+                  <div id="seqE" class="mb-2"></div>
+                  <div class="fw-semibold small mb-1">Řada F (ovoce po dvou):</div>
+                  <div id="seqF"></div>
+                </div>
+                <div class="col-auto">
+                  <div class="emoji-pool">
+                    <div class="small fw-semibold mb-2">Emoji na výběr</div>
+                    <div id="seqPool"></div>
+                  </div>
+                </div>
+              </div>
+              <hr />
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-info" id="hint2">🤖 Zeptat se Datíka</button>
+                <button type="button" class="btn btn-primary" id="check2">Zkontrolovat</button>
+                <button type="button" class="btn btn-outline-secondary" id="to3" disabled>Další →</button>
+                <div id="res2" class="fw-semibold"></div>
+              </div>
+              <div class="small text-primary mt-1" id="tip2"></div>
+            </div></div>
+          </section>
+
+          <section class="step-pane" id="step3">
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+              <h2 class="h5 fw-bold">3) Hudební nástroje</h2>
+              <p class="text-body-secondary">Roztřiď nástroje: přetáhni je do správné skupiny.</p>
+              <div class="row g-2 mb-3">
+                <div class="col-4"><div class="fw-semibold small mb-1">💨 Dechové</div><div class="sort-bin" data-bin="dech"></div></div>
+                <div class="col-4"><div class="fw-semibold small mb-1">🥁 Bicí</div><div class="sort-bin" data-bin="bici"></div></div>
+                <div class="col-4"><div class="fw-semibold small mb-1">🎸 Strunné</div><div class="sort-bin" data-bin="strun"></div></div>
+              </div>
+              <div id="instrPool"></div>
+              <hr />
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-info" id="hint3">🤖 Zeptat se Datíka</button>
+                <button type="button" class="btn btn-primary" id="check3">Zkontrolovat</button>
+                <button type="button" class="btn btn-outline-secondary" id="to4" disabled>Další →</button>
+                <div id="res3" class="fw-semibold"></div>
+              </div>
+              <div class="small text-primary mt-1" id="tip3"></div>
+            </div></div>
+          </section>
+
+          <section class="step-pane" id="step4">
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+              <h2 class="h5 fw-bold">4) Tabulka s ovocem</h2>
+              <p class="text-body-secondary">Doplň barvu ovoce a zeleniny výběrem ze seznamu.</p>
+              <div class="row g-3">
+                <div class="col-6 col-lg-3">
+                  <table class="table table-bordered table-data w-100 mb-0">
+                    <thead><tr><th>Ovoce</th><th>Barva</th></tr></thead>
+                    <tbody id="fruitBody0"></tbody>
+                  </table>
+                </div>
+                <div class="col-6 col-lg-3">
+                  <table class="table table-bordered table-data w-100 mb-0">
+                    <thead><tr><th>Ovoce</th><th>Barva</th></tr></thead>
+                    <tbody id="fruitBody1"></tbody>
+                  </table>
+                </div>
+                <div class="col-6 col-lg-3">
+                  <table class="table table-bordered table-data w-100 mb-0">
+                    <thead><tr><th>Zelenina</th><th>Barva</th></tr></thead>
+                    <tbody id="vegBody0"></tbody>
+                  </table>
+                </div>
+                <div class="col-6 col-lg-3">
+                  <table class="table table-bordered table-data w-100 mb-0">
+                    <thead><tr><th>Zelenina</th><th>Barva</th></tr></thead>
+                    <tbody id="vegBody1"></tbody>
+                  </table>
+                </div>
+              </div>
+              <hr />
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-info" id="hint4">🤖 Zeptat se Datíka</button>
+                <button type="button" class="btn btn-primary" id="check4">Zkontrolovat</button>
+                <button type="button" class="btn btn-outline-secondary" id="to5" disabled>Další →</button>
+                <div id="res4" class="fw-semibold"></div>
+              </div>
+              <div class="small text-primary mt-1" id="tip4"></div>
+            </div></div>
+          </section>
+
+          <section class="step-pane" id="step5">
+            <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+              <h2 class="h5 fw-bold">5) Doplňování tabulky</h2>
+              <p class="text-body-secondary">Evidence výletů: doplň chybějící údaje (vyber správnou možnost).</p>
+              <div class="table-responsive">
+                <table class="table table-bordered table-data">
+                  <thead><tr><th>Žák</th><th>Cíl</th><th class="num">km</th><th>Do 10 km</th></tr></thead>
+                  <tbody>
+                    <tr><td>Anna</td><td>hrad</td><td class="num">12</td><td>
+                      <select class="form-select form-select-sm" id="f0"><option value="">?</option><option value="ano">ano</option><option value="ne">ne</option></select>
+                    </td></tr>
+                    <tr><td>Ben</td><td>
+                      <select class="form-select form-select-sm" id="f1"><option value="">?</option><option value="zoo">zoo</option><option value="koupaliště">koupaliště</option></select>
+                    </td><td class="num">8</td><td>ano</td></tr>
+                    <tr><td>Cyril</td><td>muzeum</td><td class="num">
+                      <select class="form-select form-select-sm" id="f2"><option value="">?</option><option value="5">5</option><option value="50">50</option></select>
+                    </td><td>ano</td></tr>
+                    <tr><td>
+                      <select class="form-select form-select-sm" id="f3"><option value="">?</option><option value="Dana">Dana</option><option value="Robot">Robot</option></select>
+                    </td><td>les</td><td class="num">3</td><td>ano</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="text-body-secondary mt-3 mb-2">Evidence třídních mazlíčků: doplň i tuto tabulku.</p>
+              <div class="table-responsive">
+                <table class="table table-bordered table-data">
+                  <thead><tr><th>Mazlíček</th><th>Druh</th><th class="num">Nohy</th><th>Umí létat</th></tr></thead>
+                  <tbody>
+                    <tr><td>Rex</td><td class="emo">🐕</td><td class="num">
+                      <select class="form-select form-select-sm" id="f4"><option value="">?</option><option value="4">4</option><option value="2">2</option><option value="6">6</option></select>
+                    </td><td>ne</td></tr>
+                    <tr><td>Mourek</td><td>
+                      <select class="form-select form-select-sm" id="f5"><option value="">?</option><option value="kočka">kočka</option><option value="ryba">ryba</option></select>
+                    </td><td class="num">4</td><td>ne</td></tr>
+                    <tr><td>Kiki</td><td class="emo">🦜</td><td class="num">2</td><td>
+                      <select class="form-select form-select-sm" id="f6"><option value="">?</option><option value="ano">ano</option><option value="ne">ne</option></select>
+                    </td></tr>
+                    <tr><td>
+                      <select class="form-select form-select-sm" id="f7"><option value="">?</option><option value="Nemo">Nemo</option><option value="Bobík">Bobík</option></select>
+                    </td><td class="emo">🐠</td><td class="num">0</td><td>ne</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="text-body-secondary mt-3 mb-2">Evidence školních pomůcek: doplň ještě třetí tabulku.</p>
+              <div class="table-responsive">
+                <table class="table table-bordered table-data">
+                  <thead><tr><th>Pomůcka</th><th>Předmět</th><th class="num">Počet</th><th>V batohu</th></tr></thead>
+                  <tbody>
+                    <tr><td class="emo">📐</td><td>
+                      <select class="form-select form-select-sm" id="f8"><option value="">?</option><option value="matematika">matematika</option><option value="tělocvik">tělocvik</option></select>
+                    </td><td class="num">1</td><td>ano</td></tr>
+                    <tr><td class="emo">🎨</td><td>výtvarka</td><td class="num">
+                      <select class="form-select form-select-sm" id="f9"><option value="">?</option><option value="1">1</option><option value="12">12</option></select>
+                    </td><td>ano</td></tr>
+                    <tr><td class="emo">⚽</td><td>tělocvik</td><td class="num">1</td><td>
+                      <select class="form-select form-select-sm" id="f10"><option value="">?</option><option value="ne">ne</option><option value="ano">ano</option></select>
+                    </td></tr>
+                    <tr><td>
+                      <select class="form-select form-select-sm" id="f11"><option value="">?</option><option value="pravítko">pravítko</option><option value="míč">míč</option></select>
+                    </td><td>matematika</td><td class="num">1</td><td>ano</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <hr />
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <button type="button" class="btn btn-outline-info" id="hint5">🤖 Zeptat se Datíka</button>
+                <button type="button" class="btn btn-primary" id="check5">Dokončit</button>
+                <div id="res5" class="fw-semibold"></div>
+              </div>
+              <div class="small text-primary mt-1" id="tip5"></div>
+              <div id="finishBox" class="alert alert-success mt-3 d-none"><strong>✔ Splněno!</strong> Umíš navrhnout sloupce, doplnit řadu i evidenci v tabulce.</div>
+            </div></div>
+          </section>
+        </div>
+
+        <div class="col-12 col-lg-3 order-1 order-lg-2">
+          <div class="prog-box shadow-sm">
+            <div class="d-flex justify-content-between mb-1"><span class="fw-semibold small">📚 Knihovna</span><span class="badge text-bg-light border" id="stepLabel">1 / 5</span></div>
+            <div class="progress mb-2" style="height:.45rem"><div class="progress-bar bg-success" id="pctBar" style="width:0%"></div></div>
+            <div class="shelf-wrap">
+              <div class="shelf" id="shelf">
+                <div class="book b0" data-i="0">nadpisy</div>
+                <div class="book b1" data-i="1">řady</div>
+                <div class="book b2" data-i="2">nástroje</div>
+                <div class="book b3" data-i="3">ovoce</div>
+                <div class="book b4" data-i="4">doplnění</div>
+              </div>
+              <div class="shelf-board"></div>
+            </div>
+            <div class="small text-center text-body-secondary mt-2" id="pctLabel">0 %</div>
+            <div class="shelf-done" id="shelfDone">🎉 Úspěšně dokončeno!<br /><span class="fw-normal">Knihovna je plná knížek.</span></div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="../progress.js"></script>
+    <script>
+      const PROGRESS_ID = "5/evidujeme-data";
+      const TOTAL = 5;
+      const state = { stars: 0, awarded: new Set(), placed: {} };
+      const $ = (id) => document.getElementById(id);
+      function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+      function wireDatik(btnId, tipId, findWrong){
+        let used=false;
+        $(btnId).onclick=()=>{
+          if(used){ $(tipId).textContent="Datík už jednou poradil u tohoto cvičení. Teď to zkus sám/sama."; return; }
+          const label=findWrong();
+          if(!label){ $(tipId).textContent="🤖 Datík: zatím nevidím vyplněnou chybu — doplň odpovědi, nebo je vše OK."; return; }
+          used=true; $(btnId).disabled=true;
+          $(tipId).textContent="🤖 Datík šeptá: podívej se znovu na „"+label+"“ — tam je něco špatně.";
+        };
+      }
+      function enableDrag(el, payload) {
+        el.draggable = true;
+        el.addEventListener("dragstart", (e) => {
+          e.dataTransfer.setData("text/plain", payload);
+          e.dataTransfer.effectAllowed = "copyMove";
+          el.classList.add("dragging");
+        });
+        el.addEventListener("dragend", () => el.classList.remove("dragging"));
+      }
+      function enableDrop(el, onDrop) {
+        el.addEventListener("dragover", (e) => { e.preventDefault(); el.classList.add("drag-over"); });
+        el.addEventListener("dragleave", () => el.classList.remove("drag-over"));
+        el.addEventListener("drop", (e) => {
+          e.preventDefault();
+          el.classList.remove("drag-over");
+          onDrop(e.dataTransfer.getData("text/plain"), e);
+        });
+      }
+      function setStep(n) {
+        document.querySelectorAll(".step-pane").forEach((el) => el.classList.remove("active"));
+        $("step" + n).classList.add("active");
+        $("stepLabel").textContent = n + " / " + TOTAL;
+      }
+      function updateProg() {
+        const pct = Math.round((state.stars / TOTAL) * 100);
+        $("pctBar").style.width = pct + "%";
+        $("pctLabel").textContent = pct + " %";
+        document.querySelectorAll("#shelf .book").forEach((el) => el.classList.toggle("on", Number(el.dataset.i) < state.stars));
+        const allDone = state.stars >= TOTAL;
+        document.querySelector(".prog-box").classList.toggle("done", allDone);
+        $("shelfDone").classList.toggle("on", allDone);
+        if (allDone) $("pctLabel").textContent = "100 % · hotovo";
+      }
+      function award(step) {
+        if (state.awarded.has(step)) return;
+        state.awarded.add(step);
+        if (state.stars < TOTAL) state.stars++;
+        updateProg();
+        InfProgress.completeStep(PROGRESS_ID, step, TOTAL);
+      }
+      $("restartProgress").onclick = () => { if (confirm("Začít znovu?")) { InfProgress.reset(PROGRESS_ID); location.reload(); } };
+
+      /* 1 headers */
+      const SCEN = [
+        [
+          { t: "Jméno", ok: true }, { t: "Oblíbená barva vesmíru", ok: false }, { t: "Sport", ok: true },
+          { t: "Heslo k Wi‑Fi", ok: false }, { t: "Věk", ok: true }, { t: "Barva ponožek učitele", ok: false },
+        ],
+        [
+          { t: "Název knihy", ok: true }, { t: "Oblíbené jídlo knihovnice", ok: false }, { t: "Autor", ok: true },
+          { t: "Počasí při půjčení", ok: false }, { t: "Půjčeno (ano/ne)", ok: true }, { t: "Číslo bot čtenáře", ok: false },
+        ],
+        [
+          { t: "Cíl výletu", ok: true }, { t: "Barva autobusu", ok: false }, { t: "Datum", ok: true },
+          { t: "Oblíbená písnička řidiče", ok: false }, { t: "Počet žáků", ok: true }, { t: "Heslo k jídelně", ok: false },
+        ],
+      ];
+      const pickedSets = SCEN.map(() => new Set());
+      const SCEN_LETTERS = ["A", "B", "C"];
+      function mixHeaders(hdrs) {
+        const ok = shuffle(hdrs.map((h, i) => ({ h, i })).filter((x) => x.h.ok));
+        const bad = shuffle(hdrs.map((h, i) => ({ h, i })).filter((x) => !x.h.ok));
+        const out = [];
+        const n = Math.max(ok.length, bad.length);
+        for (let k = 0; k < n; k++) {
+          if (k < bad.length) out.push(bad[k]);
+          if (k < ok.length) out.push(ok[k]);
+        }
+        // občas začít správnou možností, ať to není vždy stejný vzor
+        if (Math.random() < 0.5 && out.length > 1) out.push(out.shift());
+        return out;
+      }
+      SCEN.forEach((hdrs, si) => {
+        const box = $("headers" + si);
+        const picked = pickedSets[si];
+        mixHeaders(hdrs).forEach(({ h, i }) => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "btn btn-outline-secondary btn-sm hdr-pick";
+          b.textContent = h.t;
+          b.onclick = () => {
+            if (picked.has(i)) { picked.delete(i); b.classList.remove("picked"); }
+            else if (picked.size < 3) { picked.add(i); b.classList.add("picked"); }
+            $("hdrCount" + si).textContent = String(picked.size);
+          };
+          box.appendChild(b);
+        });
+      });
+      $("check1").onclick = () => {
+        const good = SCEN.every((hdrs, si) => {
+          const picked = pickedSets[si];
+          return picked.size === 3 && [...picked].every((i) => hdrs[i].ok);
+        });
+        $("res1").className = "fw-semibold " + (good ? "text-success" : "text-danger");
+        $("res1").textContent = good ? "✔ Dobré nadpisy ve všech třech tabulkách!" : "✘ V každé evidenci vyber právě 3 užitečné sloupce.";
+        $("to2").disabled = !good;
+        if (good) award(1);
+      };
+      wireDatik("hint1", "tip1", () => {
+        for (let si = 0; si < SCEN.length; si++) {
+          const picked = pickedSets[si];
+          if (picked.size === 0) continue;
+          const allOk = picked.size === 3 && [...picked].every((i) => SCEN[si][i].ok);
+          if (!allOk) return "evidence " + SCEN_LETTERS[si];
+        }
+        return null;
+      });
+      $("to2").onclick = () => setStep(2);
+
+      /* 2 sequences – nabídka jen z ikon, které v řadách opravdu jsou */
+      const SEQ = [
+        { root: "seqA", show: ["🐄", "🐷", "🐄", "🐷", "🐄", "?"], ok: "🐷" },
+        { root: "seqB", show: ["🦒", "🦒", "🦁", "🦒", "🦒", "🦁", "🦒", "?"], ok: "🦒" },
+        // těžší: tři ikony v cyklu A–B–C
+        { root: "seqC", show: ["🐘", "🦓", "🦒", "🐘", "🦓", "🦒", "🐘", "?"], ok: "🦓" },
+        { root: "seqD", show: ["🔺", "🟦", "🟦", "🔺", "🟦", "🟦", "🔺", "?"], ok: "🟦" },
+        // těžší: tři dopravní prostředky v cyklu
+        { root: "seqE", show: ["🚲", "🚌", "✈️", "🚲", "🚌", "✈️", "🚲", "?"], ok: "🚌" },
+        { root: "seqF", show: ["🍎", "🍎", "🍌", "🍎", "🍎", "🍌", "🍎", "?"], ok: "🍎" },
+      ];
+      SEQ.forEach((s, si) => {
+        const root = $(s.root);
+        s.show.forEach((x) => {
+          if (x === "?") {
+            const slot = document.createElement("span");
+            slot.className = "seq-slot";
+            slot.dataset.si = String(si);
+            slot.textContent = "?";
+            enableDrop(slot, (val) => {
+              slot.textContent = val;
+              slot.dataset.val = val;
+              slot.classList.add("filled");
+            });
+            root.appendChild(slot);
+          } else {
+            const span = document.createElement("span");
+            span.className = "seq-slot filled";
+            span.textContent = x;
+            root.appendChild(span);
+          }
+        });
+      });
+      const usedEmo = [...new Set(SEQ.flatMap((s) => s.show.filter((x) => x !== "?").concat([s.ok])))];
+      shuffle(usedEmo).forEach((e) => {
+        const c = document.createElement("span");
+        c.className = "chip";
+        c.textContent = e;
+        enableDrag(c, e);
+        $("seqPool").appendChild(c);
+      });
+      $("check2").onclick = () => {
+        const slots = [...document.querySelectorAll(".seq-slot[data-si]")];
+        let ok = 0;
+        slots.forEach((sl) => {
+          const si = Number(sl.dataset.si);
+          if (sl.dataset.val === SEQ[si].ok) ok++;
+        });
+        const pass = ok === slots.length;
+        $("res2").className = "fw-semibold " + (pass ? "text-success" : "text-danger");
+        $("res2").textContent = pass ? "✔ Datík může spát!" : "✘ Ještě doladit řady.";
+        $("to3").disabled = !pass;
+        if (pass) award(2);
+      };
+      const SEQ_LETTERS = ["A", "B", "C", "D", "E", "F"];
+      wireDatik("hint2", "tip2", () => {
+        const slots = [...document.querySelectorAll(".seq-slot[data-si]")];
+        for (const sl of slots) {
+          const si = Number(sl.dataset.si);
+          const val = sl.dataset.val;
+          if (val && val !== SEQ[si].ok) return "řada " + SEQ_LETTERS[si];
+        }
+        return null;
+      });
+      $("to3").onclick = () => setStep(3);
+
+      /* 3 instruments */
+      /* Každý nástroj má vlastní ikonu (emoji pro pozoun/violoncello/bubínek chybí). */
+      const INSTR = [
+        { e: "🎺", n: "trubka", bin: "dech" }, { e: "🥁", n: "bubny", bin: "bici" }, { e: "🎸", n: "kytara", bin: "strun" },
+        { e: "🎷", n: "saxofon", bin: "dech" }, { e: "🪘", n: "konga", bin: "bici" }, { e: "🎻", n: "housle", bin: "strun" },
+        { e: "🪗", n: "akordeon", bin: "dech" }, { e: "🪕", n: "banjo", bin: "strun" },
+        { e: "📯", n: "lesní roh", bin: "dech" }, { e: "🎹", n: "klavír", bin: "strun" },
+      ];
+      const instrPool = $("instrPool");
+      function placeInstr(i, bin) {
+        const it = INSTR[i];
+        const item = instrPool.querySelector(`[data-i="${i}"]`);
+        if (!item || item.classList.contains("in")) return;
+        item.classList.add("in");
+        state.placed[i] = bin.dataset.bin;
+        const tag = document.createElement("span");
+        tag.className = "fruit-item";
+        tag.textContent = it.e;
+        tag.title = it.n + " – kliknutím vrátíš zpět";
+        tag.style.cursor = "pointer";
+        tag.onclick = () => {
+          delete state.placed[i];
+          item.classList.remove("in");
+          tag.remove();
+        };
+        bin.appendChild(tag);
+      }
+      shuffle(INSTR.map((it, i) => ({ it, i }))).forEach(({ it, i }) => {
+        const c = document.createElement("span");
+        c.className = "fruit-item";
+        c.textContent = it.e;
+        c.dataset.i = String(i);
+        c.title = it.n;
+        enableDrag(c, String(i));
+        instrPool.appendChild(c);
+      });
+      document.querySelectorAll(".sort-bin").forEach((bin) => {
+        enableDrop(bin, (payload) => {
+          const i = Number(payload);
+          if (Number.isNaN(i) || !INSTR[i]) return;
+          placeInstr(i, bin);
+        });
+      });
+      $("check3").onclick = () => {
+        let ok = 0;
+        INSTR.forEach((it, i) => { if (state.placed[i] === it.bin) ok++; });
+        const pass = ok === INSTR.length;
+        $("res3").className = "fw-semibold " + (pass ? "text-success" : "text-danger");
+        $("res3").textContent = pass ? "✔ Tabulka nástrojů sedí!" : "✘ Správně " + ok + "/" + INSTR.length;
+        $("to4").disabled = !pass;
+        if (pass) award(3);
+      };
+      wireDatik("hint3", "tip3", () => {
+        for (let i = 0; i < INSTR.length; i++) {
+          if (state.placed[i] != null && state.placed[i] !== INSTR[i].bin) return INSTR[i].n;
+        }
+        return null;
+      });
+      $("to4").onclick = () => setStep(4);
+
+      /* 4 fruit – stejné pořadí barev ve všech selectech */
+      const COLORS = ["červená", "žlutá", "fialová", "oranžová", "zelená", "modrá", "hnědá"];
+      const COLOR_OPTS = COLORS.map((c) => `<option value="${c}">${c}</option>`).join("");
+      const FRUIT = [
+        { e: "🍎", ok: "červená" }, { e: "🍌", ok: "žlutá" }, { e: "🍇", ok: "fialová" }, { e: "🍊", ok: "oranžová" },
+        { e: "🍏", ok: "zelená" }, { e: "🍓", ok: "červená" }, { e: "🍋", ok: "žlutá" }, { e: "🫐", ok: "modrá" },
+      ];
+      const SVG_PUMPKIN = `<svg class="emo-svg" viewBox="0 0 64 64" aria-label="dýně" role="img"><ellipse cx="22" cy="36" rx="12" ry="16" fill="#ff8c00"/><ellipse cx="32" cy="38" rx="14" ry="18" fill="#ff9f1a"/><ellipse cx="42" cy="36" rx="12" ry="16" fill="#ff7a00"/><rect x="29" y="12" width="6" height="12" rx="2" fill="#2f9e44"/><ellipse cx="36" cy="14" rx="8" ry="4" fill="#3cb371" transform="rotate(25 36 14)"/></svg>`;
+      const SVG_EGGPLANT = `<svg class="emo-svg" viewBox="0 0 64 64" aria-label="lilek" role="img"><ellipse cx="34" cy="38" rx="14" ry="20" fill="#7b2cbf" transform="rotate(-18 34 38)"/><ellipse cx="30" cy="34" rx="9" ry="14" fill="#9b5de5" transform="rotate(-18 30 34)"/><circle cx="28" cy="16" r="5" fill="#2f9e44"/><path d="M24 14 Q18 8 22 6 Q28 10 30 14" fill="none" stroke="#2f9e44" stroke-width="3" stroke-linecap="round"/></svg>`;
+      const VEG = [
+        { e: "🥕", ok: "oranžová" }, { e: "🥒", ok: "zelená" }, { e: "🍅", ok: "červená" },
+        { e: "🍆", ok: "fialová", html: SVG_EGGPLANT }, { e: "🌽", ok: "žlutá" }, { e: "🥔", ok: "hnědá" },
+        { e: "🥦", ok: "zelená" }, { e: "🎃", ok: "oranžová", html: SVG_PUMPKIN },
+      ];
+      function buildColorRows(list, bodyId, prefix, indexOffset) {
+        const body = $(bodyId);
+        list.forEach((f, i) => {
+          const id = prefix + (indexOffset + i);
+          const tr = document.createElement("tr");
+          const emo = f.html || f.e;
+          tr.innerHTML = `<td class="emo">${emo}</td><td><select class="form-select form-select-sm" id="${id}"><option value="">Vyber…</option>${COLOR_OPTS}</select></td>`;
+          body.appendChild(tr);
+        });
+      }
+      const fruitMid = Math.ceil(FRUIT.length / 2);
+      const vegMid = Math.ceil(VEG.length / 2);
+      buildColorRows(FRUIT.slice(0, fruitMid), "fruitBody0", "fr", 0);
+      buildColorRows(FRUIT.slice(fruitMid), "fruitBody1", "fr", fruitMid);
+      buildColorRows(VEG.slice(0, vegMid), "vegBody0", "ve", 0);
+      buildColorRows(VEG.slice(vegMid), "vegBody1", "ve", vegMid);
+      $("check4").onclick = () => {
+        let ok = 0;
+        FRUIT.forEach((f, i) => { if ($("fr" + i).value === f.ok) ok++; });
+        VEG.forEach((f, i) => { if ($("ve" + i).value === f.ok) ok++; });
+        const total = FRUIT.length + VEG.length;
+        const pass = ok === total;
+        $("res4").className = "fw-semibold " + (pass ? "text-success" : "text-danger");
+        $("res4").textContent = pass ? "✔ Evidence ovoce a zeleniny OK!" : "✘ " + ok + "/" + total;
+        $("to5").disabled = !pass;
+        if (pass) award(4);
+      };
+      wireDatik("hint4", "tip4", () => {
+        for (let i = 0; i < FRUIT.length; i++) {
+          const v = $("fr" + i).value;
+          if (v && v !== FRUIT[i].ok) return FRUIT[i].e;
+        }
+        for (let i = 0; i < VEG.length; i++) {
+          const v = $("ve" + i).value;
+          if (v && v !== VEG[i].ok) return VEG[i].e;
+        }
+        return null;
+      });
+      $("to5").onclick = () => setStep(5);
+
+      /* 5 fill table */
+      const FILL_OK = ["ne", "zoo", "5", "Dana", "4", "kočka", "ano", "Nemo", "matematika", "1", "ne", "pravítko"];
+      FILL_OK.forEach((_, i) => {
+        const sel = $("f" + i);
+        const opts = [...sel.querySelectorAll("option")].filter((o) => o.value !== "");
+        const vals = shuffle(opts.map((o) => ({ value: o.value, text: o.textContent })));
+        sel.innerHTML = "";
+        const ph = document.createElement("option");
+        ph.value = "";
+        ph.textContent = "?";
+        sel.appendChild(ph);
+        vals.forEach((o) => {
+          const opt = document.createElement("option");
+          opt.value = o.value;
+          opt.textContent = o.text;
+          sel.appendChild(opt);
+        });
+      });
+      $("check5").onclick = () => {
+        let ok = 0;
+        FILL_OK.forEach((v, i) => { if ($("f" + i).value === v) ok++; });
+        const pass = ok === FILL_OK.length;
+        $("res5").className = "fw-semibold " + (pass ? "text-success" : "text-danger");
+        $("res5").textContent = pass ? "✔ Hotovo!" : "✘ " + ok + "/" + FILL_OK.length;
+        if (pass) { award(5); $("finishBox").classList.remove("d-none"); }
+      };
+      wireDatik("hint5", "tip5", () => {
+        for (let i = 0; i < FILL_OK.length; i++) {
+          const v = $("f" + i).value;
+          if (v && v !== FILL_OK[i]) return "buňka " + (i + 1);
+        }
+        return null;
+      });
+
+      (function resume() {
+        const done = InfProgress.completedCount(PROGRESS_ID);
+        state.stars = Math.min(done, TOTAL);
+        for (let i = 1; i <= done; i++) state.awarded.add(i);
+        updateProg();
+        const next = InfProgress.nextStep(PROGRESS_ID, TOTAL);
+        if (next > 1) setStep(next);
+        if (done >= TOTAL) $("finishBox").classList.remove("d-none");
+      })();
+    </script>
+  </body>
+</html>
