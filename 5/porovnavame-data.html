@@ -131,7 +131,7 @@
           <section class="step-pane active" id="step1">
             <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
               <h2 class="h5 fw-bold">1) Ovoce a zelenina</h2>
-              <p class="text-body-secondary">Datík spočítal, kolik kusů přinesl z trhu. U každé tabulky označ <strong>jeden graf, který k ní sedí</strong>.</p>
+              <p class="text-body-secondary">Datík spočítal, kolik kusů přinesl z trhu. U každé tabulky označ <strong>jeden graf, který k ní sedí</strong>. U poslední tabulky jsou grafy koláčové.</p>
 
               <div class="mb-4">
                 <div class="small fw-semibold mb-1">Tabulka 1 – sobotní trh</div>
@@ -161,7 +161,7 @@
               </div>
 
               <div class="mb-2">
-                <div class="small fw-semibold mb-1">Tabulka 4 – farmářský trh</div>
+                <div class="small fw-semibold mb-1">Tabulka 4 – farmářský trh (koláčové grafy)</div>
                 <table class="table table-bordered table-sm w-auto text-center mb-2">
                   <thead class="table-light"><tr><th>🍎 Jablka</th><th>🍌 Banány</th><th>🥕 Mrkve</th><th>🥒 Okurky</th></tr></thead>
                   <tbody><tr><td>2</td><td>5</td><td>3</td><td>6</td></tr></tbody>
@@ -532,8 +532,11 @@
         return s + "</svg>";
       }
       function pieChart(data, size) {
+        const pick = size === "pick";
         const scale = size === "sm" ? 0.82 : 1;
-        const W = 300, H = Math.round(220 * scale), cx = 110, cy = Math.round(110 * scale), r = Math.round(78 * scale);
+        const W = pick ? 220 : 300;
+        const H = Math.round((pick ? 210 : 220) * scale);
+        const cx = 110, cy = Math.round((pick ? 105 : 110) * scale), r = Math.round((pick ? 90 : 78) * scale);
         const total = data.reduce((s, d) => s + d.v, 0);
         let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="koláčový graf">`;
         let ang = -Math.PI / 2;
@@ -545,15 +548,17 @@
           const large = a1 - a0 > Math.PI ? 1 : 0;
           s += `<path d="M ${cx} ${cy} L ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1} Z" fill="${d.c || "#0d6efd"}" stroke="#fff" stroke-width="2"/>`;
           const mid = (a0 + a1) / 2;
-          const lx = cx + r * 0.55 * Math.cos(mid), ly = cy + r * 0.55 * Math.sin(mid);
-          s += `<text x="${lx}" y="${ly + 5}" font-size="16" text-anchor="middle">${d.l}</text>`;
+          const lx = cx + r * 0.58 * Math.cos(mid), ly = cy + r * 0.58 * Math.sin(mid);
+          s += `<text x="${lx}" y="${ly + 6}" font-size="18" text-anchor="middle">${d.l}</text>`;
           ang = a1;
         });
-        data.forEach((d, i) => {
-          const y = 28 + i * 36;
-          s += `<rect x="210" y="${y}" width="14" height="14" rx="2" fill="${d.c}"/>`;
-          s += `<text x="232" y="${y + 12}" font-size="14" font-weight="700" fill="#212529">${d.v}</text>`;
-        });
+        if (!pick) {
+          data.forEach((d, i) => {
+            const y = 28 + i * 36;
+            s += `<rect x="210" y="${y}" width="14" height="14" rx="2" fill="${d.c}"/>`;
+            s += `<text x="232" y="${y + 12}" font-size="14" font-weight="700" fill="#212529">${d.v}</text>`;
+          });
+        }
         return s + "</svg>";
       }
       function pictoChart(data) {
@@ -590,6 +595,10 @@
           { l: "🍎", v: ja, c: C.a, emoji: 1 }, { l: "🍌", v: ba, c: C.b, emoji: 1 },
           { l: "🥕", v: mr, c: C.c, emoji: 1 }, { l: "🥒", v: ok, c: C.d, emoji: 1 },
         ], 6, 1, false);
+        const mkPie = (ja, ba, mr, ok) => pieChart([
+          { l: "🍎", v: ja, c: C.a }, { l: "🍌", v: ba, c: C.b },
+          { l: "🥕", v: mr, c: C.c }, { l: "🥒", v: ok, c: C.d },
+        ], "pick");
         const groups = [
           {
             root: "pickGroup1",
@@ -626,9 +635,9 @@
             label: "tabulka 4",
             ok: "K",
             charts: [
-              { id: "J", html: mk(2, 5, 6, 3) },
-              { id: "K", html: mk(2, 5, 3, 6) },
-              { id: "L", html: mk(5, 2, 3, 6) },
+              { id: "J", html: mkPie(2, 5, 6, 3) },
+              { id: "K", html: mkPie(2, 5, 3, 6) },
+              { id: "L", html: mkPie(5, 2, 3, 6) },
             ],
           },
         ];

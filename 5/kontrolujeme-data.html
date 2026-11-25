@@ -505,7 +505,7 @@
           pass(3, "✔ Správně " + ok + " z " + STEP3_NEED + "!");
         } else {
           const falseFiles = [...filePick].filter((i) => !FILES[i].ok).length;
-          info(3, "Správně " + ok + " z " + STEP3_NEED + (falseFiles ? " · špatně označených souborů: " + falseFiles : ""), "text-danger");
+          info(3, "Správně " + ok + " z " + STEP3_NEED + (falseFiles ? " · špatně označených souborů: " + falseFiles + " v tabulce" : ""), "text-danger");
         }
       };
       wireDatik("hint3", "tip3", () => {
